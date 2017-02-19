@@ -41,7 +41,7 @@ import openpyxl
 import json
 from ftplib import FTP
 from ftplib import FTP_TLS
- 
+
 # for selenium to work properly, geckodriver is needed to be downloaded,
 # placed in some directory and in next line starting with 
 # os.environ that directory should be inserted
@@ -211,6 +211,10 @@ def extract_and_rename():
     lloc = glob.glob(dir_downloads + '*.zip')
     lloc.sort()
     
+    if len(lloc) == 0:
+        print('no zip file(s). quiting')
+        logging.info('no zip file(s). quiting')
+    
     # placing shortnames in dictionary
     wbShort = openpyxl.load_workbook(dir_in + fileshortnames.strip())
     sheetShort = wbShort.get_sheet_by_name(sheetShortName.strip())
@@ -256,7 +260,11 @@ def extract_and_rename():
             #lname = lname.replace('(', '')
             #lname = lname.replace(')', '')
             
-            os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
+            try:
+                os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
+            except Exception as e:
+                print(str(e))
+                logging.debug(str(e))
             
             # print(lfilename)
             # print(lauditeename)
