@@ -40,6 +40,7 @@ import glob
 import openpyxl
 import json
 from ftplib import FTP
+from ftplib import FTP_TLS
 
 # for selenium to work properly, geckodriver is needed to be downloaded,
 # placed in some directory and in next line starting with 
@@ -165,8 +166,9 @@ def ftp_upload_pdfs():
     FTP_parameters.txt file should be json like
     don't forget to put ftp. as prefix for server
     {
-        "username": "",
         "server"  : "",
+        "port"    : "",
+        "username": "",
         "password": ""
     }
     '''
@@ -182,8 +184,11 @@ def ftp_upload_pdfs():
     
     # connect to FTP server and upload files
     try:
-        ftp = FTP(dparameters["server"])
-        ftp.login(user = dparameters["username"], passwd = dparameters["password"])
+        ftp = FTP()
+        # ftp = FTP_TLS()
+        ftp.connect(dparameters["server"].strip(), dparameters["port"].strip())
+        ftp.login(user = dparameters["username"].strip(), passwd = dparameters["password"].strip())
+        # ftp.prot_p() if using FTP_TLS uncomment this line
         print("Connection to ftp successfully established...")
         #ftp.cwd('path_to_destination_directory_if_needed_on_server')
         for pdffile in lpdfs:
