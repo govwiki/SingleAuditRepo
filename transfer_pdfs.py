@@ -41,7 +41,7 @@ import openpyxl
 import json
 from ftplib import FTP
 from ftplib import FTP_TLS
-
+ 
 # for selenium to work properly, geckodriver is needed to be downloaded,
 # placed in some directory and in next line starting with 
 # os.environ that directory should be inserted
