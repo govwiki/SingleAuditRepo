@@ -1,5 +1,5 @@
 #! /usr/bin/env python3.5
-# Script for scraping pdf files by
+# Script for downloading zip files from specific url, extracting pdfs from, then renaming files and uploading via FTP
 # Marc Joffe https://github.com/joffemd
 # Aleksandar Josifoski https://github.com/josifoski
 # Script is dependend on selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl
