@@ -32,9 +32,7 @@ import ntpath
 
 with open('parameters.txt', 'r') as fp:
     dparameters = json.load(fp)
-    
-print(dparameters)
-sys.exit()
+
 url = dparameters["url"]
 rangefrom = dparameters["rangefrom"]
 rangeto = dparameters["rangeto"]
