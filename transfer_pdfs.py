@@ -165,9 +165,10 @@ def ftp_upload_pdfs():
     connect to server via parameters file
     FTP_parameters.txt file should be json like
     don't forget to put ftp. as prefix for server
+    for port put integer value, recommended 21
     {
         "server"  : "",
-        "port"    : "",
+        "port"    : ,
         "username": "",
         "password": ""
     }
@@ -186,7 +187,7 @@ def ftp_upload_pdfs():
     try:
         ftp = FTP()
         # ftp = FTP_TLS()
-        ftp.connect(dparameters["server"].strip(), dparameters["port"].strip())
+        ftp.connect(dparameters["server"].strip(), dparameters["port"])
         ftp.login(user = dparameters["username"].strip(), passwd = dparameters["password"].strip())
         # ftp.prot_p() if using FTP_TLS uncomment this line
         print("Connection to ftp successfully established...")
@@ -276,7 +277,7 @@ def extract_and_rename():
             #littlestop = input('press enter')
         
         # small sleep for system to affect rename command for all files
-        time.sleep(5)
+        time.sleep(10)
         ftp_upload_pdfs()
         # current zip file completed
         # you can delete it with uncommenting next line
