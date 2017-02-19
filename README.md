@@ -1,4 +1,4 @@
 # SingleAuditRepo
-Script for downloading pdf files from specific url, renaming them and uploading via FTP  
+Script for downloading zip files from specific url, extracting pdfs from, then renaming files and uploading via FTP  
   
 Explanations are inserted in python program
