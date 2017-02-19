@@ -9,5 +9,9 @@ pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl
 Also is dependend on geckodriver.  
 geckodriver can be downloaded from  
 https://github.com/mozilla/geckodriver/releases  
+  
+Don't forget to fill parameters.txt file with correct values
+  
+# Licence  
+GPL  
 
-Explanations are inserted in python program  
