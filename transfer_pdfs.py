@@ -233,7 +233,7 @@ def extract_and_rename():
             lname = dshort.get(sheetCross['F' + str(row)].value.strip(), sheetCross['C' + str(row)].value.strip())
             
             # filterling lname from special characters
-            lname = lname.replace('/', '_') # this line is must. You can change _slash_ to some other string
+            lname = lname.replace('/', '_')
             lname = lname.replace(':', '_')
             lname = lname.replace('\\', '')
             lname = lname.replace("'", "_")
@@ -259,6 +259,7 @@ def extract_and_rename():
             
             try:
                 os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
+                time.sleep(0.3)
             except Exception as e:
                 print(str(e))
                 logging.debug(str(e))
