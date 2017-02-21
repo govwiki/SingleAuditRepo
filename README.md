@@ -10,7 +10,14 @@ Also is dependend on geckodriver.
 geckodriver can be downloaded from  
 https://github.com/mozilla/geckodriver/releases  
   
-Don't forget to fill parameters.txt file with correct values
+Don't forget to fill parameters.txt file with correct values  
+
+Note. You can use combination of download.py and commented out download() function (at the end) in transfer_pdfs.py  
+or only transfer_pdfs.py with download() function uncommented.  
+  
+If by any case some of pdf file(s) are not renamed, you can use rename_upload.py  
+placing previusly in dir_pdfs unrenamed files, also previously preparing FileNameCrossReferenceList.xlsx  
+as merged document from all FileNameCrossReferenceList.xlsx partials in zip files  
   
 # Licence  
 GPL  
