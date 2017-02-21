@@ -17,7 +17,8 @@ or only transfer_pdfs.py with download() function uncommented.
   
 If by any case some of pdf file(s) are not renamed, you can use rename_upload.py  
 placing previusly in dir_pdfs unrenamed files, also previously preparing FileNameCrossReferenceList.xlsx  
-as merged document from all FileNameCrossReferenceList.xlsx partials in zip files  
+as merged document from all FileNameCrossReferenceList.xlsx partials in zip files.  
+Merged FileNameCrossReferenceList.xlsx should be placed in dir_pdfs directory.
   
 # Licence  
 GPL  
