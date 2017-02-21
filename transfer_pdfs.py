@@ -264,7 +264,7 @@ def extract_and_rename():
             
             try:
                 os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
-                time.sleep(0.3)
+                time.sleep(0.2)
             except Exception as e:
                 print(str(e))
                 logging.debug(str(e))
@@ -272,8 +272,6 @@ def extract_and_rename():
             print((lfilename + '.pdf').ljust(20) + lname + '.pdf')
             logging.info((lfilename + '.pdf').ljust(20) + lname + '.pdf')
 
-        # sleep for system to affect rename command for all files
-        time.sleep(dparameters["sleeptime"])
         ftp_upload_pdfs()
         os.remove(myzipfile)
  

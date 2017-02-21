@@ -121,8 +121,8 @@ def rename_files():
             if os.path.exists(dir_pdfs + lfilename + '.pdf'):
                 os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
                 print((lfilename + '.pdf').ljust(20) + lname + '.pdf')
-                logging.info((lfilename + '.pdf').ljust(20) + lname + '.pdf')                
-            time.sleep(0.1)
+                logging.info((lfilename + '.pdf').ljust(20) + lname + '.pdf')
+                time.sleep(0.1)
         except Exception as e:
             print(str(e))
             logging.debug(str(e))
