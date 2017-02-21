@@ -14,7 +14,6 @@ from ftplib import FTP
 from ftplib import FTP_TLS
 import ntpath
 
-logging.basicConfig(filename=dir_in + 'transfer_pdfs.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 with open('parameters.txt', 'r') as fp:
     dparameters = json.load(fp)
@@ -24,6 +23,8 @@ dir_downloads = dparameters["dir_downloads"]
 dir_pdfs = dparameters["dir_pdfs"]
 fileshortnames = dparameters["fileshortnames"]
 sheetShortName = dparameters["sheetShortName"]
+
+logging.basicConfig(filename=dir_in + 'transfer_pdfs.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 time1 = time.time()
 
