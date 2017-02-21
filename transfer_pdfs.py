@@ -140,10 +140,14 @@ def download():
 
     def is_download_completed():
         time.sleep(dparameters["sleeptime"])
+        l = glob.glob(dir_downloads + '*.part')
+        zipfilename = ntpath.basename(l[0]).replace('.part', '')
         while True:
             l = glob.glob(dir_downloads + '*.part')
             if len(l) == 0:
                 # print'Downloading ' + audit + ' completed')
+                # shutil.copy2(dirf + scfilename, dirtemp + 'ge' + scfilename)
+                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
                 break
             else:
                 time.sleep(dparameters["sleeptime"])
