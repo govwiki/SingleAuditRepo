@@ -77,7 +77,9 @@ def rename_files():
     print('Renaming files..')
     wbCross = openpyxl.load_workbook(dir_pdfs + 'FileNameCrossReferenceList.xlsx')
     sheetCross = wbCross.get_sheet_by_name('Table1')
-    for zrow in range(99):
+    zrow = -1
+    while True:
+        zrow += 1
         row = zrow + 2
         if sheetCross['A' + str(row)].value == None: 
             break
@@ -116,18 +118,16 @@ def rename_files():
         lname = lname.replace('=', '')
         
         try:
-            os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
-            time.sleep(0.3)
+            if os.path.exists(dir_pdfs + lfilename + '.pdf'):
+                os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
+                print((lfilename + '.pdf').ljust(20) + lname + '.pdf')
+                logging.info((lfilename + '.pdf').ljust(20) + lname + '.pdf')                
+            time.sleep(0.1)
         except Exception as e:
             print(str(e))
             logging.debug(str(e))
         
-        print((lfilename + '.pdf').ljust(20) + lname + '.pdf')
-        logging.info((lfilename + '.pdf').ljust(20) + lname + '.pdf')
-
-        # sleep for system to affect rename command for all files
-        time.sleep(dparameters["sleeptime"])
-        ftp_upload_pdfs()
+    ftp_upload_pdfs()
  
 def calculate_time():
     time2 = time.time()
