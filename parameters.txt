@@ -8,6 +8,7 @@
     "comment_directories"   : "make sure that all directories are previosly created",
     "dir_in"                : "",
     "dir_downloads"         : "",
+    "dir_zipmem"            : "",
     "dir_pdfs"              : "",
     
     "comment_xlsx_short"    : "place file for shortening names in dir_in directory",

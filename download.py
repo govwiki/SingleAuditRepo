@@ -21,6 +21,7 @@ import json
 from ftplib import FTP
 from ftplib import FTP_TLS
 import ntpath
+import shutil
 
 with open('parameters.txt', 'r') as fp:
     dparameters = json.load(fp)
@@ -132,10 +133,13 @@ def download():
 
     def is_download_completed():
         time.sleep(dparameters["sleeptime"])
+        zipfilename = ntpath.basename(l[0]).replace('.part', '')
         while True:
             l = glob.glob(dir_downloads + '*.part')
             if len(l) == 0:
                 # print'Downloading ' + audit + ' completed')
+                # shutil.copy2(dirf + scfilename, dirtemp + 'ge' + scfilename)
+                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
                 break
             else:
                 time.sleep(dparameters["sleeptime"])
