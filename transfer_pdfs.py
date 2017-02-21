@@ -281,7 +281,7 @@ def calculate_time():
     print("processed in %dh:%dm:%ds" % (hours, minutes, sec))    
 
 if __name__ == '__main__':
-    download()
+    #download()
     extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups, 
                          # script have to use this grouped approaching, processing them by 100 or less for final group
     calculate_time()
