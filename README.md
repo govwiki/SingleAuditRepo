@@ -20,6 +20,20 @@ placing previusly in dir_pdfs unrenamed files, also previously preparing FileNam
 as merged document from all FileNameCrossReferenceList.xlsx partials in zip files.  
 Merged FileNameCrossReferenceList.xlsx should be placed in dir_pdfs directory.
   
+# illinois.py  
+Script for downloading pdf Illinois files from public ftp, merging in one if more pdf files in subdirectory  
+then renaming files (and eventually uploading via FTP)  
+  
+Don't forget to fill illinois_parameters.txt with correct values  
+
+Script is dependend on openpyxl, pdftk  
+pip install -U openpyxl  
+pdftk is used for merging (if more then one) pdf files  
+on linux it can be installed sudo apt install pdftk  
+on windows https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_free-2.02-win-setup.exe (is link valid)  
+pdftk.exe must be startable in dir_pdfs  
+testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf  
+  
 # Licence  
 GPL  
 
