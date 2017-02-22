@@ -6,7 +6,7 @@ But downloading these audits require multiple steps and provides PDFs with unint
 Downloaded and renamed Single Audits and CAFRs are being stored at http://www.govwiki.info/pdfs.
 Users of this script can create their own Single Audit/CAFRs repositories.
 
-# Instalation
+# Installation
 Script is python3.5+ program  
 Dependencies installed selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl  
 pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl  
