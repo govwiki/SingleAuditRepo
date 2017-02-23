@@ -11,7 +11,7 @@ The files are divided into folders for General Purpose governments (cities, coun
 
 Following are descriptions of the download scripts.
 
-## transfer_pdfs.py
+## get_FAC.py
 Script for downloading zip files from Federal Audit Clearinghouse, extracting pdfs from, then renaming files and uploading via FTP  
 
 ### Installation
@@ -23,17 +23,17 @@ Also depends on geckodriver.
 geckodriver can be downloaded from  
 https://github.com/mozilla/geckodriver/releases  
   
-Don't forget to fill parameters.txt file with correct values  
+Don't forget to fill FAC_parms.txt file with correct values  
 
-Note. You can use combination of download.py and commented out download() function (at the end) in transfer_pdfs.py  
-or only transfer_pdfs.py with download() function uncommented.  
+Note. You can use combination of get_FAC_downloadpart.py and commented out download() function (at the end) in get_FAC.py  
+or only get_FAC.py <-recommended with download() function uncommented.  
   
-If some of the pdf file(s) are not renamed, you can use rename_upload.py  
+If some of the pdf file(s) are not renamed, you can use get_FAC_rename_upload_part.py  
 placing previously in dir_pdfs unrenamed files, also previously preparing FileNameCrossReferenceList.xlsx  
 as merged document from all FileNameCrossReferenceList.xlsx partials in zip files.  
 Merged FileNameCrossReferenceList.xlsx should be placed in dir_pdfs directory.
   
-## illinois.py  
+## get_IL.py  
 Script for downloading pdfs from Illinois Comptroller's Warehouse, merging partial pdfs when split up in the warehouse  
 then renaming files (and eventually uploading via FTP)  
  
@@ -41,11 +41,11 @@ then renaming files (and eventually uploading via FTP)
 Script depends on openpyxl, pdftk  
 pip install -U openpyxl 
 
-Don't forget to fill illinois_parameters.txt with correct values 
+Don't forget to fill IL_parms.txt with correct values 
 
 pdftk is used for merging (if more then one) pdf files  
 on linux it can be installed sudo apt install pdftk  
-on windows https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_free-2.02-win-setup.exe (is link valid)  
+on windows download and install executable from https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/  
 pdftk.exe must be startable in dir_pdfs  
 testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf  
   
