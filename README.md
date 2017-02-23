@@ -26,7 +26,8 @@ https://github.com/mozilla/geckodriver/releases
 Don't forget to fill FAC_parms.txt file with correct values  
 
 Note. You can use combination of get_FAC_downloadpart.py and commented out download() function (at the end) in get_FAC.py  
-or only get_FAC.py <-recommended with download() function uncommented.  
+or only get_FAC.py <-- recommended  
+with download() function uncommented.  
   
 If some of the pdf file(s) are not renamed, you can use get_FAC_rename_upload_part.py  
 placing previously in dir_pdfs unrenamed files, also previously preparing FileNameCrossReferenceList.xlsx  
