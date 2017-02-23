@@ -11,10 +11,10 @@ The files are divided into folders for General Purpose governments (cities, coun
 
 Following are descriptions of the download scripts.
 
-# transfer_pdfs.py
+## transfer_pdfs.py
 Script for downloading zip files from Federal Audit Clearinghouse, extracting pdfs from, then renaming files and uploading via FTP  
 
-# Installation
+### Installation
 Script is python3.5+ program  
 Depends on installed selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl  
 pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl  
@@ -33,14 +33,15 @@ placing previously in dir_pdfs unrenamed files, also previously preparing FileNa
 as merged document from all FileNameCrossReferenceList.xlsx partials in zip files.  
 Merged FileNameCrossReferenceList.xlsx should be placed in dir_pdfs directory.
   
-# illinois.py  
+## illinois.py  
 Script for downloading pdfs from Illinois Comptroller's Warehouse, merging partial pdfs when split up in the warehouse  
 then renaming files (and eventually uploading via FTP)  
-  
-Don't forget to fill illinois_parameters.txt with correct values  
-
+ 
+### Installation
 Script depends on openpyxl, pdftk  
-pip install -U openpyxl  
+pip install -U openpyxl 
+
+Don't forget to fill illinois_parameters.txt with correct values 
 
 pdftk is used for merging (if more then one) pdf files  
 on linux it can be installed sudo apt install pdftk  
