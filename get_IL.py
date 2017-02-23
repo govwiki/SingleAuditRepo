@@ -42,7 +42,7 @@ illinois_entities_sheet = dparameters["illinois_entities_sheet"]
 
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
-logging.basicConfig(filename=dir_in + 'illinois.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.debug('Started')
 

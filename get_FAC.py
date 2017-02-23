@@ -42,6 +42,7 @@ dir_pdfs = dparameters["dir_pdfs"]
 fileshortnames = dparameters["fileshortnames"]
 sheetShortName = dparameters["sheetShortName"]
 headlessMode = dparameters["headlessMode"]
+todownload = dparameters["todownload"]
 
 # for selenium to work properly, geckodriver is needed to be downloaded,
 # placed in some directory and in next line starting with 
@@ -57,7 +58,7 @@ if headlessMode:
     display.start()
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
-logging.basicConfig(filename=dir_in + 'transfer_pdfs.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=dir_in + 'get_FAClog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.debug('Started')
 
@@ -297,7 +298,8 @@ def calculate_time():
     print("processed in %dh:%dm:%ds" % (hours, minutes, sec))    
 
 if __name__ == '__main__':
-    download()
+    if todownload:
+        download()
     extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups, 
                          # script have to use this grouped approaching, processing them by 100 or less for final group
     calculate_time()

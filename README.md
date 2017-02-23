@@ -25,9 +25,9 @@ https://github.com/mozilla/geckodriver/releases
   
 Don't forget to fill FAC_parms.txt file with correct values  
 
-Note. You can use combination of get_FAC_downloadpart.py and commented out download() function (at the end) in get_FAC.py  
-or only get_FAC.py <-- recommended  
-with download() function uncommented.  
+Note. You can use combination of get_FAC_downloadpart.py and get_FAC.py with todownload value 0 in FAC_parms.txt  
+in which case get_FAC.py will process zip files stored in dir_downloads  
+or only get_FAC.py with todownload value 1 in FAC_parms.txt  
   
 If some of the pdf file(s) are not renamed, you can use get_FAC_rename_upload_part.py  
 placing previously in dir_pdfs unrenamed files, also previously preparing FileNameCrossReferenceList.xlsx  
