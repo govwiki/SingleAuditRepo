@@ -8,10 +8,10 @@
     "comment1_directories"  : "make sure that all directories are previosly created",
     "comment2_directories"  : "example for linux and macos /home/someuser/somedirectory/",
     "comment3_directories"  : "example for windows D:\\data\\somedirectory\\",
-    "dir_in"                : "/data/upwork/Marc_Joffe/testing/",
-    "dir_downloads"         : "/data/upwork/Marc_Joffe/downloads/",
-    "dir_zipmem"            : "/data/upwork/Marc_Joffe/zipmem/",
-    "dir_pdfs"              : "/data/upwork/Marc_Joffe/pdfs/",
+    "dir_in"                : "",
+    "dir_downloads"         : "",
+    "dir_zipmem"            : "",
+    "dir_pdfs"              : "",
     
     "todownload_comment1"   : "can be integer 0 to skip download or 1 to process download in get_FAC.py",
     "todownload_comment2"   : "in case for 0, it will process zip files stored in dir_downloads",
@@ -26,9 +26,9 @@
     "sleeptime"             : 30,
     
     "server"                : "ftp.govwiki.info",
-    "port_comment"          : "port in next line should be integer value, not string",
+    "port_comment"          : "port in next line should be integer value, not string, default is 21",
     "port"                  : 21,
-    "username_comment"      : "example: someuser@someserver.info",
-    "username"              : "staging@govwiki.info",
-    "password"              : "cPc@2O17"
+    "username_comment"      : "example: someuser@govwiki.info",
+    "username"              : "",
+    "password"              : ""
 }
