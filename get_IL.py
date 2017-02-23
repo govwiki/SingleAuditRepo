@@ -28,7 +28,7 @@ import urllib
 import posixpath
 import platform
 
-with open('IL_parms.txt', 'r') as fp:
+with open('illinois_parameters.txt', 'r') as fp:
     dparameters = json.load(fp)
 
 ftpurl = dparameters["ftpurl"]
@@ -150,14 +150,20 @@ def main():
                 print(preparename + ' generated')
                 logging.info(preparename + ' generated')
                 bOK = True
-            except:
+            except Exception as e:
                 print(udir + ' ' + pdfline + ' not generated pdf')
-                logging.critical(udir + ' ' + pdfline + ' not generated pdf')
+                print(str(e))
+                logging.info(udir + ' ' + pdfline + ' not generated pdf')
+                logging.info(str(e))
                 bOK = False
         else:
             # check is there only one pdf file
             if len(files) == 1:
-                os.rename(dir_pdfs + files[0].strip(), dir_pdfs + preparename)
+                try:
+                    os.rename(dir_pdfs + files[0].strip(), dir_pdfs + preparename)
+                except Exception as e:
+                    logging.info(str(e))
+                    print(str(e))
                 print(preparename + ' generated')
                 logging.info(preparename + ' generated')
             else:
