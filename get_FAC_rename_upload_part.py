@@ -24,7 +24,7 @@ dir_pdfs = dparameters["dir_pdfs"]
 fileshortnames = dparameters["fileshortnames"]
 sheetShortName = dparameters["sheetShortName"]
 
-logging.basicConfig(filename=dir_in + 'transfer_pdfs.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=dir_in + 'get_FAClog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 time1 = time.time()
 ddestdir = {}

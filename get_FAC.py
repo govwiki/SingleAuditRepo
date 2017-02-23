@@ -57,7 +57,7 @@ if headlessMode:
     display.start()
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
-logging.basicConfig(filename=dir_in + 'transfer_pdfs.log', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=dir_in + 'get_FAClog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.debug('Started')
 
