@@ -1,0 +1,27 @@
+{
+    "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
+    "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
+    "headlessMode"          : 0,
+    "rangefrom"             : "02/06/2017",
+    "rangeto"               : "02/07/2017",
+    
+    "comment_directories"   : "make sure that all directories are previosly created",
+    "dir_in"                : "",
+    "dir_downloads"         : "",
+    "dir_zipmem"            : "",
+    "dir_pdfs"              : "",
+    
+    "comment_xlsx_short"    : "place file for shortening names in dir_in directory",
+    "fileshortnames"        : "SingleAuditees.xlsx",
+    "sheetShortName"        : "Entity List",
+    
+    "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
+    "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
+    "sleeptime"             : 30,
+    
+    "server"                : "ftp.",
+    "port_comment"          : "port in next line should be integer value, not string",
+    "port"                  : 21,
+    "username"              : "",
+    "password"              : ""
+}

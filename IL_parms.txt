@@ -1,0 +1,22 @@
+{
+    "ftpurl"                       : "ftp://ftp.illinoiscomptroller.com/LocGovAudits/FY2015/",
+    "year"                         : "2015",
+    "start_from_comment1"          : "in next line if server reject ftp connection you can set start dir to continue from",
+    "start_from_comment2"          : "like for example 00200000 as string quoted",
+    "start_from"                   : "00100000",
+
+    "comment1_directories"         : "make sure that all directories are previosly created",
+    "comment2_dir_in"              : "dir_in is place where script resides, also Illinois",
+    "dir_in"                       : "",
+    "dir_pdfs"                     : "",
+
+    "illinois_enttities_comment"   : "make sure that file with entities is placed in dir_in directory",
+    "illinois_entities_xlsx_file"  : "Illinois Entities.xlsx",
+    "illinois_entities_sheet"      : "Sheet1",
+
+    "server"                       : "ftp.",
+    "port_comment"                 : "port in next line should be integer value, not string",
+    "port"                         : 21,
+    "username"                     : "",
+    "password"                     : ""
+}
