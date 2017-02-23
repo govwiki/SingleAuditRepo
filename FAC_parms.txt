@@ -10,8 +10,13 @@
     "comment3_directories"  : "example for windows D:\\data\\somedirectory\\",
     "dir_in"                : "",
     "dir_downloads"         : "",
-    "dir_zipmem"            : "",
     "dir_pdfs"              : "",
+    "comment_make_copies"   : "integer 1 for making copies in dir_zipmem 0 not",
+    "make_copies_in_zipmem" : 0,
+    "dir_zipmem"            : "",
+    
+    "usemarionette_comment" : "integer 0 will use default firefox, 1 will use geckodriver if properly installed",
+    "usemarionette"         : 1,
     
     "todownload_comment1"   : "can be integer 0 to skip download or 1 to process download in get_FAC.py",
     "todownload_comment2"   : "in case for 0, it will process zip files stored in dir_downloads",

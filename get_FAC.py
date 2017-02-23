@@ -30,7 +30,7 @@ from ftplib import FTP
 from ftplib import FTP_TLS
 import ntpath
 
-with open('FAC_parms.txt', 'r') as fp:
+with open('/home/josifoski/SingleAuditRepo/FAC_parms.txt', 'r') as fp:
     dparameters = json.load(fp)
 
 url = dparameters["url"]
@@ -43,9 +43,12 @@ fileshortnames = dparameters["fileshortnames"]
 sheetShortName = dparameters["sheetShortName"]
 headlessMode = dparameters["headlessMode"]
 todownload = dparameters["todownload"]
+sleeptime = dparameters["sleeptime"]
+usemarionette = dparameters["usemarionette"]
+make_copies_in_zipmem = dparameters["make_copies_in_zipmem"]
 
 # for selenium to work properly, geckodriver is needed to be downloaded,
-# placed in some directory and in next line starting with 
+# placed in some directory and in next line starting with
 # os.environ that directory should be inserted
 # geckodriver can be downloaded from
 # https://github.com/mozilla/geckodriver/releases
@@ -66,11 +69,25 @@ time1 = time.time()
 ddestdir = {}
 ddestdiropp = {}
 
+def is_download_completed():
+    time.sleep(sleeptime)
+    l = glob.glob(dir_downloads + '*.part')
+    zipfilename = ntpath.basename(l[0]).replace('.part', '')
+    while True:
+        l = glob.glob(dir_downloads + '*.part')
+        if len(l) == 0:
+            # print'Downloading ' + audit + ' completed')
+            if make_copies_in_zipmem:
+                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
+            break
+        else:
+            time.sleep(sleeptime)
+
 def download():
     ''' function for downloading zip files from server'''
     def open_tag(css_selector):
         driver.find_element_by_css_selector(css_selector).click()
-        
+
     def enter_in_tag(css_selector, date_string):
         driver.find_element_by_css_selector(css_selector).send_keys(date_string)
     global url
@@ -86,7 +103,8 @@ def download():
     profile.set_preference("browser.download.dir", dir_downloads)
     profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/zip")
     capabilities = DesiredCapabilities.FIREFOX
-    capabilities["marionette"] = True
+    if usemarionette:
+        capabilities["marionette"] = True
     driver = webdriver.Firefox(firefox_profile=profile, capabilities=capabilities)
     driver.implicitly_wait(timeout)
 
@@ -97,10 +115,10 @@ def download():
         logging.debug(str(e))
         print(str(e))
         sys.exit()
-    
+
     st = html.unescape(driver.page_source)
     open_tag('#ui-id-1') # click on GENERAL INFORMATION
-    
+
     # unselect All Years
     open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_0')
     # click on 2016
@@ -126,7 +144,7 @@ def download():
         logging.critical("num_of_results is not produced")
         print("num_of_results is not produced")
         bnum = False
-        
+
     # examine Selected Audit Reports
     audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
     audit_reports_innerHTML = driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
@@ -141,24 +159,13 @@ def download():
         print("audit reports list is not produced")
         bnum = False
 
-    def is_download_completed():
-        time.sleep(dparameters["sleeptime"])
-        l = glob.glob(dir_downloads + '*.part')
-        zipfilename = ntpath.basename(l[0]).replace('.part', '')
-        while True:
-            l = glob.glob(dir_downloads + '*.part')
-            if len(l) == 0:
-                # print'Downloading ' + audit + ' completed')
-                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
-                break
-            else:
-                time.sleep(dparameters["sleeptime"])
-
     if bnum:
         # in this for loop we are selecting by groups of 100
         for audit in laudit:
-            audit_reports_select.select_by_visible_text(audit)
+            audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
+            audit_reports_select.select_by_value(audit)
             # now we click on Download Audits button
+            driver.refresh()
             open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
             print('Downloading ' + audit)
             is_download_completed()
@@ -172,7 +179,7 @@ def ftp_upload_pdfs():
     lpdfs = glob.glob(dir_pdfs + "*.pdf")
     lpdfs.sort()
     os.chdir(dir_pdfs) # needed for ftp.storbinary('STOR command work not with paths but with filenames
-    
+
     # connect to FTP server and upload files
     try:
         ftp = FTP()
@@ -204,15 +211,18 @@ def ftp_upload_pdfs():
         print(str(e))
         logging.critical(str(e))
 
+def remove_non_ascii(text):
+    return ''.join([i if ord(i) < 128 else ' ' for i in text])
+
 def extract_and_rename():
     ''' function for extracting zip files and renaming pdf files'''
     lloc = glob.glob(dir_downloads + '*.zip')
     lloc.sort()
-    
+
     if len(lloc) == 0:
         print('no zip file(s). quiting')
         logging.info('no zip file(s). quiting')
-    
+
     print('Making connections with ' + dir_in + fileshortnames.strip())
     # placing shortnames in dictionary
     wbShort = openpyxl.load_workbook(dir_in + fileshortnames.strip(), data_only=True)
@@ -228,19 +238,21 @@ def extract_and_rename():
             scrolldown = False # when finding empty row parsing of Shortnames xlsx will stop
     #with open(dir_in + 'json_ftpdir_connections.txt', 'w') as fdump:
     #    json.dump(ddestdir, fdump)
-    
-    print('Extracting files..')
+
     for myzipfile in lloc:
+        print('----------------------------------------------------------------')
+        print('Extracting ' + myzipfile)
         with zipfile.ZipFile(myzipfile, "r") as z:
             z.extractall(dir_pdfs)
         # here comes part for renaming
         print('Renaming files..')
+        print('connecting with FileNameCrossReferenceList.xlsx')
         wbCross = openpyxl.load_workbook(dir_pdfs + 'FileNameCrossReferenceList.xlsx', data_only=True)
-        
+
         sheetCross = wbCross.get_sheet_by_name('Table1')
         for zrow in range(99):
             row = zrow + 2
-            if sheetCross['A' + str(row)].value == None: 
+            if sheetCross['A' + str(row)].value == None:
                 break
             lfilename = sheetCross['B' + str(row)].value.strip()
             lauditeename = sheetCross['C' + str(row)].value.strip()
@@ -250,8 +262,9 @@ def extract_and_rename():
             # try to find short output name
             # in case there is in lshortname will be appended shortened name else original auditee name
             lname = dshort.get(sheetCross['F' + str(row)].value.strip(), sheetCross['C' + str(row)].value.strip())
-            
+
             # filterling lname from special characters
+            lname = remove_non_ascii(lname)  # this function will replace non ascii characters with single space
             lname = lname.replace('/', '_')
             lname = lname.replace(':', '_')
             lname = lname.replace('\\', '')
@@ -275,32 +288,33 @@ def extract_and_rename():
             #lname = lname.replace('`', '')
             #lname = lname.replace('|', '')
             #lname = lname.replace('=', '')
-            
+
             try:
                 os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
                 ddestdiropp[lstate + ' ' + lname + ' ' + lyearending + '.pdf'] = lein
-                time.sleep(0.3)
+                time.sleep(0.1)
             except Exception as e:
                 print(str(e))
                 logging.debug(str(e))
-            
+
             print((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
             logging.info((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
 
+        time.sleep(10)
         ftp_upload_pdfs()
         os.remove(myzipfile)
- 
+
 def calculate_time():
     time2 = time.time()
     hours = int((time2-time1)/3600)
     minutes = int((time2-time1 - hours * 3600)/60)
     sec = time2 - time1 - hours * 3600 - minutes * 60
-    print("processed in %dh:%dm:%ds" % (hours, minutes, sec))    
+    print("processed in %dh:%dm:%ds" % (hours, minutes, sec))
 
 if __name__ == '__main__':
     if todownload:
         download()
-    extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups, 
+    extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups,
                          # script have to use this grouped approaching, processing them by 100 or less for final group
     calculate_time()
     print('Done.')
