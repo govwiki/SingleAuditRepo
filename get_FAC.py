@@ -30,7 +30,7 @@ from ftplib import FTP
 from ftplib import FTP_TLS
 import ntpath
 
-with open('/home/josifoski/SingleAuditRepo/FAC_parms.txt', 'r') as fp:
+with open('FAC_parms.txt', 'r') as fp:
     dparameters = json.load(fp)
 
 url = dparameters["url"]
