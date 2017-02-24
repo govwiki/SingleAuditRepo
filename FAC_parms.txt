@@ -28,7 +28,7 @@
     
     "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
     "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
-    "sleeptime"             : 30,
+    "sleeptime"             : 10,
     
     "server"                : "ftp.govwiki.info",
     "port_comment"          : "port in next line should be integer value, not string, default is 21",
