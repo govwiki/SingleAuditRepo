@@ -1,7 +1,7 @@
 {
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
-    "headlessMode"          : 1,
+    "headlessMode"          : 0,
     "rangefrom"             : "02/06/2017",
     "rangeto"               : "02/07/2017",
     
