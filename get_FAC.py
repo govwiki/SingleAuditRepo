@@ -3,8 +3,8 @@
 # Aleksandar Josifoski https://about.me/josifsk
 # Script is dependend on selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl
 # pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl
-# Also is dependend on geckodriver. Explanations for geckodriver few lines bellow
-# 2017 February 19
+# Also is depends on geckodriver. Explanations for geckodriver few lines bellow
+# 2017 February 25
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -45,7 +45,6 @@ headlessMode = dparameters["headlessMode"]
 todownload = dparameters["todownload"]
 sleeptime = dparameters["sleeptime"]
 usemarionette = dparameters["usemarionette"]
-make_copies_in_zipmem = dparameters["make_copies_in_zipmem"]
 
 # for selenium to work properly, geckodriver is needed to be downloaded,
 # placed in some directory and in next line starting with
@@ -72,13 +71,10 @@ ddestdiropp = {}
 def is_download_completed():
     time.sleep(sleeptime)
     l = glob.glob(dir_downloads + '*.part')
-    zipfilename = ntpath.basename(l[0]).replace('.part', '')
     while True:
         l = glob.glob(dir_downloads + '*.part')
         if len(l) == 0:
             # print'Downloading ' + audit + ' completed')
-            if make_copies_in_zipmem:
-                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
             break
         else:
             time.sleep(sleeptime)
@@ -162,10 +158,8 @@ def download():
     if bnum:
         # in this for loop we are selecting by groups of 100
         for audit in laudit:
-            audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
-            audit_reports_select.select_by_value(audit)
+            audit_reports_select.select_by_visible_text(audit)
             # now we click on Download Audits button
-            driver.refresh()
             open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
             print('Downloading ' + audit)
             is_download_completed()
@@ -202,7 +196,7 @@ def ftp_upload_pdfs():
                 ftp.cwd('/unknown')
 
             ffile = open(pdffile, 'rb')
-            ftp.storbinary('STOR ' + rpdffile, ffile)
+            ftp.storbinary('STOR ' + rpdffile, ffile, 32768)
             ffile.close()
             # file uploaded delete it now
             os.remove(pdffile)
