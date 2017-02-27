@@ -17,7 +17,7 @@
     
     "todownload_comment1"   : "can be integer 0 to skip download or 1 to process download in get_FAC.py",
     "todownload_comment2"   : "in case for 0, it will process zip files stored in dir_downloads",
-    "todownload"            : 0,
+    "todownload"            : 1,
     
     "comment_xlsx_short"    : "place file for shortening names in dir_in directory",
     "fileshortnames"        : "SingleAuditees.xlsx",
@@ -32,5 +32,5 @@
     "port"                  : 21,
     "username_comment"      : "example: someuser@govwiki.info",
     "username"              : "staging@govwiki.info",
-    "password"              : "cPc@2O17"
+    "password"              : [ASK SYSTEM ADMINISTRATOR]
 }
