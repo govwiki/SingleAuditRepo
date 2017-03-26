@@ -4,7 +4,8 @@
 # Script is dependend on selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl
 # pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl
 # Also is depends on geckodriver. Explanations for geckodriver few lines bellow
-# 2017 February 25
+# 2017-02-25
+# 2017-03-25: If from or to date in config file is 99/99/9999, substitute system date - this allows the script to be run from a daily cron job
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -28,6 +29,7 @@ import openpyxl
 import json
 from ftplib import FTP
 from ftplib import FTP_TLS
+from datetime import date
 import ntpath
 
 with open('FAC_parms.txt', 'r') as fp:
@@ -35,7 +37,13 @@ with open('FAC_parms.txt', 'r') as fp:
 
 url = dparameters["url"]
 rangefrom = dparameters["rangefrom"]
+if rangefrom == "99/99/9999":
+    todaystr = str(date.today())
+    rangefrom = todaystr[5:7] + "/" + todaystr[8:10] + "/" + todaystr[0:4]
 rangeto = dparameters["rangeto"]
+if rangeto == "99/99/9999":
+    todaystr = str(date.today())
+    rangeto = todaystr[5:7] + "/" + todaystr[8:10] + "/" + todaystr[0:4]
 dir_in = dparameters["dir_in"]
 dir_downloads = dparameters["dir_downloads"]
 dir_pdfs = dparameters["dir_pdfs"]
@@ -191,9 +199,9 @@ def ftp_upload_pdfs():
                 logging.info('upload->/' + destinationdir + '/' + rpdffile)
                 print('upload->/' + destinationdir + '/' + rpdffile)
             except:
-                logging.info('upload->/' + 'unknown' + '/' + rpdffile)
-                print('upload->/' + 'unknown' + '/' + rpdffile)
-                ftp.cwd('/unknown')
+                logging.info('upload->/' + 'Unclassified' + '/' + rpdffile)
+                print('upload->/' + 'Unclassified' + '/' + rpdffile)
+                ftp.cwd('/Unclassified')
 
             ffile = open(pdffile, 'rb')
             ftp.storbinary('STOR ' + rpdffile, ffile, 32768)
