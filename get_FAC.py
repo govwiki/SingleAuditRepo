@@ -133,6 +133,11 @@ def download():
     print(rangefrom + ' ' + rangeto)
     # click on Search button
     open_tag('#MainContent_UcSearchFilters_btnSearch_top')
+          
+    # click through new PII and Native Tribe information disclosure screen added April 2017
+    open_tag("#chkAgree")
+    open_tag("#btnIAgree")
+
     # give info how many results are found
     num_of_results = driver.find_element_by_css_selector('.resultsText').text
     print(num_of_results + ' RECORD(S)')
