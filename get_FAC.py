@@ -3,9 +3,10 @@
 # Aleksandar Josifoski https://about.me/josifsk
 # Script is dependend on selenium, pyvirtualdisplay, BeautifulSoup4, openpyxl
 # pip install -U selenium pyvirtualdisplay BeautifulSoup4 openpyxl
-# Also is depends on geckodriver. Explanations for geckodriver few lines bellow
+# Also is depends on geckodriver. Explanations for geckodriver few lines below
 # 2017-02-25
 # 2017-03-25: If from or to date in config file is 99/99/9999, substitute system date - this allows the script to be run from a daily cron job
+# 2017-05-14: If from date in config file is 99/99/9999, substitute system date minus 2 days - handles backdated uploads
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -16,6 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 import datetime
+from datetime import timedelta
 import time
 import html
 import os
@@ -38,8 +40,8 @@ with open('FAC_parms.txt', 'r') as fp:
 url = dparameters["url"]
 rangefrom = dparameters["rangefrom"]
 if rangefrom == "99/99/9999":
-    todaystr = str(date.today())
-    rangefrom = todaystr[5:7] + "/" + todaystr[8:10] + "/" + todaystr[0:4]
+    prevdaystr = str(date.today() - timedelta(days=2))
+    rangefrom = prevdaystr[5:7] + "/" + prevdaystr[8:10] + "/" + prevdaystr[0:4]
 rangeto = dparameters["rangeto"]
 if rangeto == "99/99/9999":
     todaystr = str(date.today())
@@ -128,16 +130,16 @@ def download():
     # click on 2016
     open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_1')
     # Fill ranges
-    enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_FromDate', rangefrom)
-    enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_ToDate', rangeto)
+    enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_FromDate', rangefrom) #rangefrom
+    enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_ToDate', rangeto) #rangeto
     print(rangefrom + ' ' + rangeto)
     # click on Search button
     open_tag('#MainContent_UcSearchFilters_btnSearch_top')
-          
+    
     # click through new PII and Native Tribe information disclosure screen added April 2017
     open_tag("#chkAgree")
     open_tag("#btnIAgree")
-
+    
     # give info how many results are found
     num_of_results = driver.find_element_by_css_selector('.resultsText').text
     print(num_of_results + ' RECORD(S)')
