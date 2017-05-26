@@ -1,0 +1,17 @@
+
+The purpose of the server automation branch for this project is to create reusable code that can be run at regular intervals to poll for newly posted audits on the Federal Audit Clearinghouse (FAC) website.
+
+To-Do:
+- Eliminate the need for the SingleAuditees.xslx file
+- Create an object model for audit reports
+- Automate a pull-down of audit metadata (daily?)
+- Correlate audit metadata with audit reports in the object model
+- Store the object model in some form of persistent storage (MySQL?)
+- Slap a search engine on the audit reports
+- Create web services (REST) and a human consumable web app
+- Figure out how to extract structured data from audit reports
+- Correlate audit metadata with extraneous data
+  - IRS 990
+  - Geospatial
+  - ???
+
