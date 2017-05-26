@@ -66,7 +66,7 @@ os.environ["PATH"] += ":/data/Scrape"
 timeout = 10        # timeout for openning web page
 
 if headlessMode:
-    display = Display(visible=0, size=(1024, 768))
+    display = Display(visible=0, size=(1024, 2048))
     display.start()
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
