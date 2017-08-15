@@ -7,6 +7,7 @@
 # 2017-02-25
 # 2017-03-25: If from or to date in config file is 99/99/9999, substitute system date - this allows the script to be run from a daily cron job
 # 2017-05-14: If from date in config file is 99/99/9999, substitute system date minus 2 days - handles backdated uploads
+# 2017-08-14: Switched to Chrome, because Firefox Selenium is no longer stable
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -80,9 +81,9 @@ ddestdiropp = {}
 
 def is_download_completed():
     time.sleep(sleeptime)
-    l = glob.glob(dir_downloads + '*.part')
+    l = glob.glob(dir_downloads + '*.crdownload')
     while True:
-        l = glob.glob(dir_downloads + '*.part')
+        l = glob.glob(dir_downloads + '*.crdownload')
         if len(l) == 0:
             # print'Downloading ' + audit + ' completed')
             break
@@ -102,16 +103,28 @@ def download():
     url = url.strip()
     rangefrom = rangefrom.strip()
     rangeto = rangeto.strip()
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.download.folderList", 2)
-    profile.set_preference("browser.download.manager.showWhenStarting", False)
-    profile.set_preference("browser.helperApps.alwaysAsk.force", False)
-    profile.set_preference("browser.download.dir", dir_downloads)
-    profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/zip")
-    capabilities = DesiredCapabilities.FIREFOX
+    
+    options = webdriver.ChromeOptions() 
+    options.add_argument("--start-maximized")
+    prefs = {"download.default_directory" : dir_downloads}
+    options.add_experimental_option("prefs",prefs)
+    #profile = webdriver.FirefoxProfile()
+    
+    #profile.set_preference("browser.download.folderList", 2)
+    #profile.set_preference("browser.download.manager.showWhenStarting", False)
+    #profile.set_preference("browser.helperApps.alwaysAsk.force", False)
+    #profile.set_preference("browser.download.dir", dir_downloads)
+    #profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/zip")
+
+    capabilities = DesiredCapabilities.CHROME
+    #capabilities = DesiredCapabilities.FIREFOX
+        
     if usemarionette:
         capabilities["marionette"] = True
-    driver = webdriver.Firefox(firefox_profile=profile, capabilities=capabilities)
+
+    driver = webdriver.Chrome(chrome_options=options)
+    #driver = webdriver.Firefox(firefox_profile=profile, capabilities=capabilities)
+    
     driver.implicitly_wait(timeout)
 
     print('loading: ' + url)
@@ -124,11 +137,14 @@ def download():
 
     st = html.unescape(driver.page_source)
     open_tag('#ui-id-1') # click on GENERAL INFORMATION
+    time.sleep(0.5)
 
     # unselect All Years
     open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_0')
     # click on 2016
     open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_1')
+    # click on 2017
+    open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_2')
     # Fill ranges
     enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_FromDate', rangefrom) #rangefrom
     enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_ToDate', rangeto) #rangeto
@@ -173,6 +189,8 @@ def download():
     if bnum:
         # in this for loop we are selecting by groups of 100
         for audit in laudit:
+            del audit_reports_select
+            audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
             audit_reports_select.select_by_visible_text(audit)
             # now we click on Download Audits button
             open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
