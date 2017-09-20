@@ -7,6 +7,7 @@
 #
 # Authors:
 #   P. Kevin Bohan <votiputox@gmail.com>
+#   Marc Joffe <marc@publicsectorcredit.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,17 +23,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 
-from pyvirtualdisplay import Display
-from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import Select
-from bs4 import BeautifulSoup
-import NIOD
+import ODNR
 import argparse
 import datetime
-import sys
 
 
 ##########
@@ -51,128 +44,6 @@ today       = datetime.datetime.today()
 target_url = 'https://harvester.census.gov/facdissem/SearchA133.aspx'
 target_dir = '.'
 timeout    = 10
-
-
-###############################
-# Helper: Select a web control
-###############################
-
-def open_tag(driver, css_selector):
-    driver.find_element_by_css_selector(css_selector).click()
-
-
-####################################
-# Helper: Input text into a control
-####################################
-
-def enter_in_tag(driver, css_selector, text):
-    driver.find_element_by_css_selector(css_selector).send_keys(text)
-
-
-#######################################
-# Helper: See if a checkbox is checked
-#######################################
-
-def is_checked(driver, css_selector):
-    element = driver.find_element_by_css_selector(css_selector)
-    return element.is_selected()
-
-
-###################################################
-# Helper: Figure out what a given state's index is
-###################################################
-
-def get_state_element_id(driver, state):
-    element = driver.find_element_by_xpath("//input[@value='" + state.get_abbrev() + "']")
-    return '#' + element.get_attribute("id")
-    
-    
-######################################
-# Download a set of audit report PDFs
-######################################
-
-def fetch_from_fac(url, st, begin_date, end_date, dir):
-    # Use Google Chrome
-    drv = webdriver.Chrome()
-    
-    # Set up the virtual display
-    display = Display(visible=0, size=(2048, 2048))
-    display.start()
-
-    # Fetch the top-level page
-    try:
-        drv.get(url)
-    except Exception as e:
-        print(str(e))
-        sys.exit()
-        
-    # Click on "GENERAL INFORMATION"
-    open_tag(drv, '#ui-id-1')
-
-    # Figure out the index of the start year (assume current year is 1)
-    idx_begin = (today.year % begin_date.year) + 1
-    idx_end = (today.year % end_date.year) + 1
-    
-    # Uncheck 'All Years'
-    open_tag(drv, '#MainContent_UcSearchFilters_FYear_CheckableItems_0')
-
-    # Check applicable years
-    for idx in range(idx_end, (idx_begin + 1)):
-        css_id = '#MainContent_UcSearchFilters_FYear_CheckableItems_' + str(idx)
-        open_tag(drv, css_id)
-
-        if is_checked(drv, css_id) == False:
-            enter_in_tag(drv, css_id, Keys.DOWN)
-            open_tag(drv, css_id)
-            
-    # Fill out start and end dates
-    fmt_start = begin_date.strftime('%m/%d/%Y')
-    fmt_end = end_date.strftime('%m/%d/%Y')
-    
-    enter_in_tag(drv, "#MainContent_UcSearchFilters_DateProcessedControl_FromDate", fmt_start)
-    enter_in_tag(drv, "#MainContent_UcSearchFilters_DateProcessedControl_ToDate", fmt_end)
-
-    # Check the state that matches the requested index
-    box_id = '#MainContent_UcSearchFilters_AuditeeState_ItemBox'
-    css_id = get_state_element_id(drv, st)
-    open_tag(drv, css_id)
-    while is_checked(drv, css_id) == False:
-        enter_in_tag(drv, box_id, Keys.DOWN)
-        open_tag(drv, css_id)
-
-    # Submit the form
-    open_tag(drv, '#MainContent_UcSearchFilters_btnSearch_top')
-
-    # Click through the disclosure page
-    open_tag(drv, '#chkAgree')
-    open_tag(drv, '#btnIAgree')
-
-    # Select audits to download
-    rpts_drop = Select(drv.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
-    rpts_html = drv.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
-
-    bs = BeautifulSoup(rpts_html, "html.parser")
-    laudit_tags = bs.findAll("option")
-    laudit = []
-
-    for option in laudit_tags:
-        if option["value"].startswith("Audit Reports"):
-            laudit.append(option["value"])
-            
-    if len(laudit) == 0:
-        # SYSLOG
-        print("audit reports list is not produced")
-    else:
-        # in this for loop we are selecting by groups of 100
-        for audit in laudit:
-            rpts_drop.select_by_visible_text(audit)
-            # now we click on Download Audits button
-            open_tag(drv, '#MainContent_ucA133SearchResults_btnDownloadZipTop')
-            print('Downloading ' + audit)                                       
-    
-    # Clean up
-    drv.close()
-    display.stop()
 
 
 ###########################
@@ -216,6 +87,13 @@ parser.add_argument('-u',
                     default=target_url,
                     help='The top-level URL to connect to')
 
+# Allow the user to specify a timeout value
+parser.add_argument('-t',
+                    '--timeout',
+                    action='store',
+                    default=timeout,
+                    help='The number of seconds to wait for a control to load')
+
 cli = parser.parse_args()
 
 
@@ -226,8 +104,8 @@ cli = parser.parse_args()
 start_date = datetime.datetime.strptime(cli.start, '%Y-%m-%d')
 end_date = datetime.datetime.strptime(cli.end, '%Y-%m-%d')
 
-states = NIOD.State.get_all()
+states = ODNR.State.get_all()
 
     
-s = NIOD.State.find_by_abbrev('OR')
-fetch_from_fac(cli.url, s, start_date, end_date, cli.dir)
+s = ODNR.State.find_by_abbrev('OR')
+ODNR.FAC.fetch_audits(cli.url, s, start_date, end_date, cli.quiet, cli.timeout, cli.dir)
