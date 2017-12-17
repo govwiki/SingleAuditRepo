@@ -1,10 +1,14 @@
 import time
+from pyvirtualdisplay import Display
 from selenium import webdriver
 
 
 class Crawler:
     def __init__(self, config):
         self.downloads_path = config.get('general', 'downloads_path', fallback='/tmp/downloads/')
+        if config.getboolean('general', 'headless_mode', fallback=False):
+            display = Display(visible=0, size=(1920, 1080))
+            display.start()
         self.config = config
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
