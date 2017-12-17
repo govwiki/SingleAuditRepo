@@ -54,7 +54,7 @@ testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pd
 Script for downloading pdfs from Virginia Local Government Reports web page
 Usage:
 
-python get_VA.py --year <YEAR> --category <Category name>
+python get_VA.py --year YEAR --category CATEGORY_NAME
 
 Both arguments are optional.
 
