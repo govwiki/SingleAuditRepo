@@ -48,7 +48,18 @@ pdftk is used for merging (if more then one) pdf files
 on linux it can be installed sudo apt install pdftk  
 on windows download and install executable from https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/  
 pdftk.exe must be startable in dir_pdfs  
-testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf  
+testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf
+
+## get_VA.py
+Script for downloading pdfs from Virginia Local Government Reports web page
+Usage:
+
+python get_VA.py --year <YEAR> --category <Category name>
+
+Both arguments are optional.
+
+### Installation
+pip install -r requirements.txt
   
 # Licence  
 GPL  
