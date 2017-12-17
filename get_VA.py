@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     downloads_path = config.get('general', 'downloads_path', fallback='/tmp/downloads/')
     if not os.path.exists(downloads_path):
-        os.mkdir(downloads_path)
+        os.makedirs(downloads_path)
     elif not os.path.isdir(downloads_path):
         print('ERROR: downloads_path parameter points to file!')
         sys.exit(1)
