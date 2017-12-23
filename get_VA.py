@@ -24,7 +24,7 @@ if __name__ == '__main__':
         print('ERROR: downloads_path parameter points to file!')
         sys.exit(1)
 
-    crawler = Crawler(config)
+    crawler = Crawler(config, 'virginia')
     crawler.get(config.get('virginia', 'url'))
     if args.year:
         crawler.send_keys('#ASPxPageControl1_Grid1_ob_Grid1FilterContainer_ctl02_ob_Grid1FilterControl0', args.year)
@@ -41,9 +41,7 @@ if __name__ == '__main__':
             if url in urls_downloaded:
                 download_complete = True
                 break
-            r = urllib.request.urlopen(url)
-            with open(os.path.join(config.get('general', 'downloads_path', fallback='/tmp/downloads/'), urllib.parse.unquote(url).split('/')[-1]), 'wb') as f:
-                f.write(r.read())
+            crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
             urls_downloaded.append(url)
         crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
     crawler.close()

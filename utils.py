@@ -1,6 +1,8 @@
 import glob
 import os
+import sys
 import time
+import urllib.request
 from ftplib import FTP
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -8,8 +10,13 @@ from selenium.webdriver.support.ui import Select
 
 
 class Crawler:
-    def __init__(self, config):
-        self.downloads_path = config.get('general', 'downloads_path', fallback='/tmp/downloads/')
+    def __init__(self, config, section):
+        self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
+        if not os.path.exists(self.downloads_path):
+            os.makedirs(self.downloads_path)
+        elif not os.path.isdir(self.downloads_path):
+            print('ERROR:{} downloads_path parameter points to file!'.format(section))
+            sys.exit(1)
         if config.getboolean('general', 'headless_mode', fallback=False):
             display = Display(visible=0, size=(1920, 1080))
             display.start()
@@ -30,6 +37,15 @@ class Crawler:
         self.browser.get(url)
         time.sleep(3)
 
+    def wait_for_displayed(self, selector):
+        element = self.browser.find_element_by_css_selector(selector)
+        while not element.is_displayed():
+            pass
+
+    def click_by_text(self, text):
+        self.browser.find_element_by_link_text(text)
+        time.sleep(3)
+
     def click_xpath(self, path, single=True):
         if single:
             self.browser.find_element_by_xpath(path).click()
@@ -47,8 +63,13 @@ class Crawler:
         time.sleep(3)
 
     def send_keys(self, selector, keys):
-        self.browser.find_element_by_css_selector(selector).send_keys(keys)
+        elem = self.browser.find_element_by_css_selector(selector)
+        elem.clear()
+        elem.send_keys(keys)
         time.sleep(3)
+
+    def get_text(self, selector):
+        return self.browser.find_element_by_css_selector(selector).text
 
     def get_attr(self, selector, attr, single=True):
         if single:
@@ -80,10 +101,20 @@ class Crawler:
     def close(self):
         self.browser.quit()
 
+    def download(self, url, filename):
+        print('Downloading', url)
+        try:
+            r = urllib.request.urlopen(url)
+            with open(os.path.join(self.downloads_path, filename), 'wb') as f:
+                f.write(r.read())
+        except Exception:
+            print('ERROR: Downloading failed!')
+
     def _get_remote_filename(local_filename):
         raise NotImplemented
 
     def upload_to_ftp(self):
+        return
         pdf_paths = glob.glob(self.downloads_path + "*.pdf")
         pdf_paths.sort()
 
@@ -110,8 +141,6 @@ class Crawler:
                 if not self.config.getboolean('virginia', 'overwrite_remote_files', fallback=False):
                     if filename in [f[0] for f in ftp.mlsd(directory)]:
                         continue
-                import ipdb
-                ipdb.set_trace()
                 ftp.cwd('/{}'.format(directory))
                 ftp.storbinary('STOR {}'.format(filename), pdf_file)
                 pdf_file.close()

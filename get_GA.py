@@ -23,7 +23,7 @@ if __name__ == '__main__':
         print('ERROR: downloads_path parameter points to file!')
         sys.exit(1)
 
-    crawler = Crawler(config)
+    crawler = Crawler(config, 'georgia')
     crawler.get(config.get('georgia', 'url'))
     crawler.select_option('#edit-field-fiscal-year-value-min-year', args.start_year)
     crawler.select_option('#edit-field-fiscal-year-value-max-year', args.end_year)
@@ -38,13 +38,7 @@ if __name__ == '__main__':
         all_pages_crawled = False
         while not all_pages_crawled:
             for url in crawler.get_attr('.file a', 'href', single=False):
-                print('Downloading', url)
-                try:
-                    r = urllib.request.urlopen(url)
-                    with open(os.path.join(config.get('general', 'downloads_path', fallback='/tmp/downloads/'), urllib.parse.unquote(url).split('/')[-1]), 'wb') as f:
-                        f.write(r.read())
-                except:
-                    print('ERROR: Downloading failed!')
+                crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
             try:
                 crawler.click('.pager-next a')
             except Exception:
