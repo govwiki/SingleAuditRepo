@@ -27,8 +27,7 @@ if __name__ == '__main__':
     crawler = Crawler(config, 'virginia')
     crawler.get(config.get('virginia', 'url'))
     if args.year:
-        crawler.send_keys('#ASPxPageControl1_Grid1_ob_Grid1FilterContainer_ctl02_ob_Grid1FilterControl0', args.year)
-        crawler.send_keys('#ASPxPageControl1_Grid1_ob_Grid1FilterContainer_ctl02_ob_Grid1FilterControl0', Keys.ENTER)
+        crawler.send_keys('#ASPxPageControl1_Grid1_ob_Grid1FilterContainer_ctl02_ob_Grid1FilterControl0', args.year + Keys.ENTER)
     if args.category:
         crawler.click('#ob_iDdlddlCategoriesTB')
         crawler.click_xpath('//div[@id="ob_iDdlddlCategoriesItemsContainer"]//ul[@class="ob_iDdlICBC"]//li/b[text() = "{}"]/..'.format(args.category))

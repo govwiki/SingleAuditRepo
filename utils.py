@@ -1,5 +1,6 @@
 import glob
 import os
+import ssl
 import sys
 import time
 import urllib.request
@@ -68,8 +69,10 @@ class Crawler:
         elem.send_keys(keys)
         time.sleep(3)
 
-    def get_text(self, selector):
-        return self.browser.find_element_by_css_selector(selector).text
+    def get_text(self, selector, single=True):
+        if single:
+            return self.browser.find_element_by_css_selector(selector).text
+        return [el.text for el in self.browser.find_elements_by_css_selector(selector)]
 
     def get_attr(self, selector, attr, single=True):
         if single:
@@ -103,11 +106,17 @@ class Crawler:
 
     def download(self, url, filename):
         print('Downloading', url)
-        try:
-            r = urllib.request.urlopen(url)
+        if url.startswith('https'):
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        else:
+            ctx = None
+        if 1:
+            r = urllib.request.urlopen(url, context=ctx)
             with open(os.path.join(self.downloads_path, filename), 'wb') as f:
                 f.write(r.read())
-        except Exception:
+        else:#except Exception:
             print('ERROR: Downloading failed!')
 
     def _get_remote_filename(local_filename):
