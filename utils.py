@@ -39,6 +39,11 @@ class Crawler:
         self.browser.get(url)
         time.sleep(3)
 
+    def get_elements(self, selector, root=None):
+        if root is None:
+            root = self.browser
+        return root.find_elements_by_css_selector(selector)
+
     def wait_for_displayed(self, selector):
         element = self.browser.find_element_by_css_selector(selector)
         while not element.is_displayed():
@@ -70,15 +75,19 @@ class Crawler:
         elem.send_keys(keys)
         time.sleep(3)
 
-    def get_text(self, selector, single=True):
+    def get_text(self, selector, single=True, root=None):
+        if root is None:
+            root = self.browser
         if single:
-            return self.browser.find_element_by_css_selector(selector).text
-        return [el.text for el in self.browser.find_elements_by_css_selector(selector)]
+            return root.find_element_by_css_selector(selector).text
+        return [el.text for el in root.find_elements_by_css_selector(selector)]
 
-    def get_attr(self, selector, attr, single=True):
+    def get_attr(self, selector, attr, single=True, root=None):
+        if root is None:
+            root = self.browser
         if single:
-            return self.browser.find_element_by_css_selector(selector).get_attribute(attr)
-        return [el.get_attribute(attr) for el in self.browser.find_elements_by_css_selector(selector)]
+            return root.find_element_by_css_selector(selector).get_attribute(attr)
+        return [el.get_attribute(attr) for el in root.find_elements_by_css_selector(selector)]
 
     def execute(self, script):
         self.browser.execute_script(script, [])

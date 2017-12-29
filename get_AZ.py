@@ -10,25 +10,15 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'arizona')
-    crawler.get(config.get('arizona', 'url_1'))
-    while True:
-        for row in crawler.browser.find_elements_by_css_selector('div.views-row'):
-            row_type = row.find_element_by_css_selector('.views-field-field-audit-type').text
-            if 'financial audit' in row_type.lower() or 'single audit' in row_type.lower():
-                url = row.find_element_by_css_selector('strong a').get_attribute('href')
-                crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
-        try:
-            crawler.click('.next a')
-        except Exception:
-            break
-    crawler.get(config.get('arizona', 'url_2'))
-    while True:
-        for row in crawler.browser.find_elements_by_css_selector('div.views-row'):
-            row_type = row.find_element_by_css_selector('.views-field-field-audit-type').text
-            if 'financial audit' in row_type.lower() or 'single audit' in row_type.lower():
-                url = row.find_element_by_css_selector('strong a').get_attribute('href')
-                crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
-        try:
-            crawler.get(crawler.get_attr('.next a', 'href'))
-        except Exception:
-            break
+    for state_url in config.get('arizona', 'url_1'), config.get('arizona', 'url_2'):
+        crawler.get(state_url)
+        while True:
+            for row in crawler.get_elements('div.views-row'):
+                row_type = crawler.get_text('.views-field-field-audit-type', root=row)
+                if 'financial audit' in row_type.lower() or 'single audit' in row_type.lower():
+                    url = crawler.get_attr('strong a', 'href', root=row)
+                    crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
+            try:
+                crawler.click('.next a')
+            except Exception:
+                break
