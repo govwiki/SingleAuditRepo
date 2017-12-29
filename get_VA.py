@@ -4,8 +4,21 @@ import os
 import sys
 import urllib.parse
 import urllib.request
-from utils import Crawler
+from utils import Crawler as CoreCrawler
 from selenium.webdriver.common.keys import Keys
+
+
+class Crawler(CoreCrawler):
+    abbr = 'VA'
+
+    def _get_remote_filename(self, local_filename):
+        if ' CAFR' not in local_filename or ' memo ' in local_filename:
+            return None
+        directory = 'School District' if 'Schools' in local_filename else 'General Purpose'
+        filename = '{} {}'.format(
+            self.abbr, local_filename.replace(' CAFR', '').replace(' reissue', '')
+        )
+        return directory, filename
 
 
 if __name__ == '__main__':
@@ -43,4 +56,5 @@ if __name__ == '__main__':
             crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
             urls_downloaded.append(url)
         crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
+    crawler.upload_to_ftp()
     crawler.close()

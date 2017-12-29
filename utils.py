@@ -4,7 +4,7 @@ import ssl
 import sys
 import time
 import urllib.request
-from ftplib import FTP
+from ftplib import FTP, error_perm
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -12,6 +12,7 @@ from selenium.webdriver.support.ui import Select
 
 class Crawler:
     def __init__(self, config, section):
+        self.section = section
         self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
         if not os.path.exists(self.downloads_path):
             os.makedirs(self.downloads_path)
@@ -123,7 +124,6 @@ class Crawler:
         raise NotImplemented
 
     def upload_to_ftp(self):
-        return
         pdf_paths = glob.glob(self.downloads_path + "*.pdf")
         pdf_paths.sort()
 
@@ -137,23 +137,28 @@ class Crawler:
                 user=self.config.get('general', 'ftp_username').strip(),
                 passwd=self.config.get('general', 'ftp_password').strip(),
             )
-            # ftp.prot_p() if using FTP_TLS uncomment this line
-            print("Connection to ftp successfully established...")
+            print('Connection to ftp successfully established...')
 
             for path in pdf_paths:
+                print('Uploading {}'.format(path))
                 pdf_filename = os.path.basename(path)
                 pdf_file = open(path, 'rb')
                 remote_filename = self._get_remote_filename(pdf_filename)
                 if not remote_filename:
                     continue
                 directory, filename = remote_filename
-                if not self.config.getboolean('virginia', 'overwrite_remote_files', fallback=False):
-                    if filename in [f[0] for f in ftp.mlsd(directory)]:
-                        continue
                 ftp.cwd('/{}'.format(directory))
+                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                    print('Checking if {}/{} already exists'.format(directory, filename))
+                    try:
+                        ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
+                        continue
+                    except error_perm:
+                        pass
+
                 ftp.storbinary('STOR {}'.format(filename), pdf_file)
+                print('{} uploaded'.format(path))
                 pdf_file.close()
-                break
             ftp.quit()
         except Exception as e:
             print(str(e))
