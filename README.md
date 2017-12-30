@@ -60,6 +60,52 @@ Both arguments are optional.
 
 ### Installation
 pip install -r requirements.txt
+
+## get_GA.py
+Script for downloading pdfs from Georgia Local Government Reports web page
+Usage:
+
+python get_GA.py START_YEAR END_YEAR
+
+Both arguments are required.
+
+## get_WA.py
+Script for downloading pdfs from Washington State Local Government Reports web page
+Usage:
+
+python get_WA.py START_YEAR END_YEAR
+
+Both arguments are required.
+
+## get_AZ.py
+Script for downloading pdfs from Arizona Local Government Reports web page
+Usage:
+
+python get_AZ.py
+
+## get_FL.py
+Script for downloading pdfs from Florida Local Government Reports web page
+Usage:
+
+python get_FL.py START_YEAR END_YEAR
+
+Both arguments are required.
+
+## get_AK.py
+Script for downloading pdfs from Alaska Local Government Reports web page
+Usage:
+
+python get_AK.py YEAR
+
+YEAR arguments is required.
+
+## get_UT.py
+Script for downloading pdfs from Utah Local Government Reports web page
+Usage:
+
+python get_UT.py YEAR
+
+YEAR arguments is required.
   
 # Licence  
 GPL  
