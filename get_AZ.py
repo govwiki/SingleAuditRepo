@@ -1,6 +1,4 @@
 import configparser
-import os
-import sys
 import urllib.parse
 from utils import Crawler
 
@@ -10,8 +8,8 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'arizona')
-    for state_url in config.get('arizona', 'url_1'), config.get('arizona', 'url_2'):
-        crawler.get(state_url)
+    for state_url in config.get('arizona', 'urls').split('\n'):
+        crawler.get(state_url.strip())
         while True:
             for row in crawler.get_elements('div.views-row'):
                 row_type = crawler.get_text('.views-field-field-audit-type', root=row)
