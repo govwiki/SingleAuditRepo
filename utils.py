@@ -122,11 +122,11 @@ class Crawler:
             ctx.verify_mode = ssl.CERT_NONE
         else:
             ctx = None
-        if 1:
+        try:
             r = urllib.request.urlopen(url, context=ctx)
             with open(os.path.join(self.downloads_path, filename), 'wb') as f:
                 f.write(r.read())
-        else:#except Exception:
+        except Exception:
             print('ERROR: Downloading failed!')
 
     def _get_remote_filename(local_filename):
