@@ -39,6 +39,9 @@ class Crawler:
         self.browser.get(url)
         time.sleep(3)
 
+    def assert_exists(self, selector):
+        _ = self.browser.find_element_by_css_selector(selector)
+
     def get_elements(self, selector, root=None):
         if root is None:
             root = self.browser
