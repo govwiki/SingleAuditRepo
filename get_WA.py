@@ -2,8 +2,33 @@ import argparse
 import configparser
 import os
 import sys
-from utils import Crawler
+from utils import Crawler as CoreCrawler
 from selenium.webdriver.common.keys import Keys
+
+
+class Crawler(CoreCrawler):
+    abbr = 'WA'
+    ['Commodity Commission', 'Economic/Industrial Development', 'Educational Service District (ESD)', 'Emergency Management Service']
+
+    def _get_remote_filename(self, local_filename):
+        entity_name, entity_type = local_filename[:-4].split('|')
+        if entity_type == 'City_Town':
+            name = entity_name.split(' of ')[1]
+            directory = 'General Purpose'
+        elif entity_type == 'County':
+            name = entity_name
+            directory = 'General Purpose'
+        elif entity_type in ('School Districts', 'Educational Service District (ESD)'):
+            name = entity_name
+            directory = 'School District'
+        elif 'Community' in entity_type and 'College' in entity_type:
+            name = entity_name
+            directory = 'Community College Districts'
+        else:
+            name = entity_name
+            directory = 'Special District'
+        filename = '{} {}.pdf'.format(self.abbr, name)
+        return directory, filename
 
 
 if __name__ == '__main__':
@@ -31,16 +56,19 @@ if __name__ == '__main__':
     current_page = int(crawler.get_text('.pageItemSel'))
     while True:
         for row in crawler.browser.find_elements_by_css_selector('#resultsContainer table.table tbody tr'):
-            row_type = row.find_element_by_css_selector('td[data-bind="text: AuditTypeName"]').text
+            row_type = crawler.get_text('td[data-bind="text: AuditTypeName"]', root=row)
             if row_type.lower() not in ('financial', 'financial and federal'):
                 continue
-            a = row.find_element_by_css_selector('td:first-child a')
+            entity_type = crawler.get_text('td[data-bind="text: GovTypeDesc"]', root=row)
+            a = crawler.get_elements('td:first-child a', root=row)[0]
             url = a.get_attribute('href')
             text = a.text
-            crawler.download(url, '{} {}.pdf'.format(text, row_type))
+            crawler.download(url, '{}|{}.pdf'.format(text, entity_type.replace('/', '_')))
         current_page += 1
         try:
             crawler.click('#PagerPage{}'.format(current_page))
             crawler.wait_for_displayed('#resultsContainer')
         except Exception:
             break
+    crawler.upload_to_ftp()
+    crawler.close()

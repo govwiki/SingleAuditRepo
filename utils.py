@@ -64,11 +64,13 @@ class Crawler:
                 el.click()
         time.sleep(3)
 
-    def click(self, selector, single=True):
+    def click(self, selector, single=True, root=None):
+        if root is None:
+            root = self.browser
         if single:
-            self.browser.find_element_by_css_selector(selector).click()
+            root.find_element_by_css_selector(selector).click()
         else:
-            for el in self.browser.find_elements_by_css_selector(selector):
+            for el in root.find_elements_by_css_selector(selector):
                 el.click()
         time.sleep(3)
 
@@ -118,7 +120,7 @@ class Crawler:
         self.browser.quit()
 
     def download(self, url, filename):
-        print('Downloading', url)
+        print('Downloading', filename)
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
