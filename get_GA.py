@@ -3,8 +3,29 @@ import configparser
 import os
 import sys
 import urllib.parse
-import urllib.request
-from utils import Crawler
+from utils import Crawler as CoreCrawler
+
+
+class Crawler(CoreCrawler):
+    abbr = 'GA'
+
+    def _get_remote_filename(self, local_filename):
+        name, year = local_filename[:-4].split('|')
+        entity_type, entity_name = name.split(': ')
+        if entity_type == 'City':
+            directory = 'General Purpose'
+            name = entity_name
+        elif entity_type == 'County':
+            directory = 'General Purpose'
+            name = '{} County'.format(entity_name)
+        elif entity_type == 'School District':
+            directory = 'School District'
+            name = entity_name
+        elif entity_type == 'State':
+            directory = 'General Purpose'
+            name = 'State of {}'.format(entity_name)
+        filename = '{} {} {}.pdf'.format(self.abbr, name, year)
+        return directory, filename
 
 
 if __name__ == '__main__':
@@ -37,8 +58,11 @@ if __name__ == '__main__':
         crawler.click('#edit-submit-financial-documents-advanced')
         all_pages_crawled = False
         while not all_pages_crawled:
-            for url in crawler.get_attr('.file a', 'href', single=False):
-                crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
+            for row in crawler.get_elements('tbody tr'):
+                url = crawler.get_attr('.file a', 'href', root=row)
+                name = crawler.get_text('a', root=row)
+                year = crawler.get_text('.date-display-single', root=row)
+                crawler.download(url, '{}|{}.pdf'.format(name, year))
             try:
                 crawler.click('.pager-next a')
             except Exception:

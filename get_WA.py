@@ -11,7 +11,8 @@ class Crawler(CoreCrawler):
     ['Commodity Commission', 'Economic/Industrial Development', 'Educational Service District (ESD)', 'Emergency Management Service']
 
     def _get_remote_filename(self, local_filename):
-        entity_name, entity_type = local_filename[:-4].split('|')
+        entity_name, entity_type, date = local_filename[:-4].split('|')
+        _, _, year = date.split('/')
         if entity_type == 'City_Town':
             name = entity_name.split(' of ')[1]
             directory = 'General Purpose'
@@ -27,7 +28,7 @@ class Crawler(CoreCrawler):
         else:
             name = entity_name
             directory = 'Special District'
-        filename = '{} {}.pdf'.format(self.abbr, name)
+        filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename
 
 
@@ -60,10 +61,11 @@ if __name__ == '__main__':
             if row_type.lower() not in ('financial', 'financial and federal'):
                 continue
             entity_type = crawler.get_text('td[data-bind="text: GovTypeDesc"]', root=row)
+            date = crawler.get_text('td[data-bind="dateString: DateReleased, datePattern: \'MM/dd/yyyy\'"]', root=row)
             a = crawler.get_elements('td:first-child a', root=row)[0]
             url = a.get_attribute('href')
             text = a.text
-            crawler.download(url, '{}|{}.pdf'.format(text, entity_type.replace('/', '_')))
+            crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), date))
         current_page += 1
         try:
             crawler.click('#PagerPage{}'.format(current_page))
