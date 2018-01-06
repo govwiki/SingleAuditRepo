@@ -1,7 +1,13 @@
 import argparse
 import configparser
-import urllib.parse
-from utils import Crawler
+from utils import Crawler as CoreCrawler
+
+
+class Crawler(CoreCrawler):
+    abbr = 'AK'
+
+    def _get_remote_filename(self, local_filename):
+        return 'General Purpose', '{} {}'.format(self.abbr, local_filename)
 
 
 if __name__ == '__main__':
@@ -23,4 +29,6 @@ if __name__ == '__main__':
         items = crawler.get_elements('td', root=row)
         if items[1].text.strip() in ('Certified Financial Statement', 'Audit'):
             url = crawler.get_attr('a', 'href', root=items[3])
-            crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
+            name = items[0].text
+            year = items[2].text
+            crawler.download(url, '{} {}.pdf'.format(name, year))
