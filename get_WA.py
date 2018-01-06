@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 
 class Crawler(CoreCrawler):
     abbr = 'WA'
-    ['Commodity Commission', 'Economic/Industrial Development', 'Educational Service District (ESD)', 'Emergency Management Service']
 
     def _get_remote_filename(self, local_filename):
         entity_name, entity_type, date = local_filename[:-4].split('|')
