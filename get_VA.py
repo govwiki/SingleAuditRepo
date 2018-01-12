@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 download_complete = True
                 break
             crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
+            crawler.upload_to_ftp(urllib.parse.unquote(url).split('/')[-1])
             urls_downloaded.append(url)
         crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
-    crawler.upload_to_ftp()
     crawler.close()

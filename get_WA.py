@@ -65,11 +65,11 @@ if __name__ == '__main__':
             url = a.get_attribute('href')
             text = a.text
             crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), date))
+            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), date))
         current_page += 1
         try:
             crawler.click('#PagerPage{}'.format(current_page))
             crawler.wait_for_displayed('#resultsContainer')
         except Exception:
             break
-    crawler.upload_to_ftp()
     crawler.close()

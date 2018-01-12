@@ -34,10 +34,10 @@ if __name__ == '__main__':
                         text = crawler.get_text('.views-field.views-field-field-community-college', root=row)
                     year = crawler.get_text('span[datatype="xsd:dateTime"]', root=row)[-4:]
                     crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type, year))
+                    crawler.upload_to_ftp('{}|{}|{}.pdf'.format(text, entity_type, year))
             try:
                 crawler.get(crawler.get_attr('.next a', 'href'))
             except Exception:
                 break
         entity_type = 'Community College'
-    crawler.upload_to_ftp()
     crawler.close()

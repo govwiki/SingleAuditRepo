@@ -61,6 +61,5 @@ if __name__ == '__main__':
             crawler.click('.btn.btnUploadDetails.btnSearch')
             url = crawler.get_attr('tbody.reportData a', 'href')
             crawler.download(url, '{}|{}|{}.pdf'.format(entity, entity_type, args.year).replace('/', ' '))
-
-    crawler.upload_to_ftp()
+            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(entity, entity_type, args.year).replace('/', ' '))
     crawler.close()

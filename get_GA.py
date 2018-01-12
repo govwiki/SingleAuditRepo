@@ -63,7 +63,9 @@ if __name__ == '__main__':
                 name = crawler.get_text('a', root=row)
                 year = crawler.get_text('.date-display-single', root=row)
                 crawler.download(url, '{}|{}.pdf'.format(name, year))
+                crawler.upload_to_ftp('{}|{}.pdf'.format(name, year))
             try:
                 crawler.click('.pager-next a')
             except Exception:
                 all_pages_crawled = True
+    crawler.close()

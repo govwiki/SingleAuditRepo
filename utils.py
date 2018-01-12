@@ -35,6 +35,17 @@ class Crawler:
         self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
         self.browser.implicitly_wait(10)
 
+        self.ftp = FTP()
+        self.ftp.connect(
+            self.config.get('general', 'ftp_server').strip(),
+            int(self.config.get('general', 'ftp_port')),
+        )
+        self.ftp.login(
+            user=self.config.get('general', 'ftp_username').strip(),
+            passwd=self.config.get('general', 'ftp_password').strip(),
+        )
+        print('Connection to ftp successfully established...')
+
     def get(self, url):
         self.browser.get(url)
         time.sleep(3)
@@ -118,9 +129,10 @@ class Crawler:
 
     def close(self):
         self.browser.quit()
+        self.ftp.quit()
 
     def download(self, url, filename):
-        print('Downloading', filename)
+        print('Downloading', filename, self._get_remote_filename(filename))
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
@@ -134,45 +146,29 @@ class Crawler:
         except Exception:
             print('ERROR: Downloading failed!')
 
-    def _get_remote_filename(local_filename):
+    def _get_remote_filename(self, local_filename):
         raise NotImplemented
 
-    def upload_to_ftp(self):
-        pdf_paths = glob.glob(self.downloads_path + "*.pdf")
-        pdf_paths.sort()
-
+    def upload_to_ftp(self, filename):
         try:
-            ftp = FTP()
-            ftp.connect(
-                self.config.get('general', 'ftp_server').strip(),
-                int(self.config.get('general', 'ftp_port')),
-            )
-            ftp.login(
-                user=self.config.get('general', 'ftp_username').strip(),
-                passwd=self.config.get('general', 'ftp_password').strip(),
-            )
-            print('Connection to ftp successfully established...')
+            path = os.path.join(self.downloads_path, filename)
+            print('Uploading {}'.format(path))
+            pdf_file = open(path, 'rb')
+            remote_filename = self._get_remote_filename(filename)
+            if not remote_filename:
+                return
+            directory, filename = remote_filename
+            self.ftp.cwd('/{}'.format(directory))
+            if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                print('Checking if {}/{} already exists'.format(directory, filename))
+                try:
+                    self.ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
+                    return
+                except error_perm:
+                    pass
 
-            for path in pdf_paths:
-                print('Uploading {}'.format(path))
-                pdf_filename = os.path.basename(path)
-                pdf_file = open(path, 'rb')
-                remote_filename = self._get_remote_filename(pdf_filename)
-                if not remote_filename:
-                    continue
-                directory, filename = remote_filename
-                ftp.cwd('/{}'.format(directory))
-                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
-                    print('Checking if {}/{} already exists'.format(directory, filename))
-                    try:
-                        ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
-                        continue
-                    except error_perm:
-                        pass
-
-                ftp.storbinary('STOR {}'.format(filename), pdf_file)
-                print('{} uploaded'.format(path))
-                pdf_file.close()
-            ftp.quit()
+            self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
+            print('{} uploaded'.format(path))
+            pdf_file.close()
         except Exception as e:
             print(str(e))

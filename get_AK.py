@@ -32,3 +32,5 @@ if __name__ == '__main__':
             name = items[0].text
             year = items[2].text
             crawler.download(url, '{} {}.pdf'.format(name, year))
+            crawler.upload_to_ftp('{} {}.pdf'.format(name, year))
+    crawler.close()

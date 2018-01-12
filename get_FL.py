@@ -40,5 +40,5 @@ if __name__ == '__main__':
             for url in report_urls:
                 if int(url.split('/')[-1][:4]) in years_range:
                     crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
-    crawler.upload_to_ftp()
+                    crawler.upload_to_ftp(urllib.parse.unquote(url).split('/')[-1])
     crawler.close()

@@ -43,9 +43,11 @@ if __name__ == '__main__':
                             crawler.get_attr('a', 'href', root=row),
                             '{} {}.pdf'.format(crawler.get_text('b', root=row), year)
                         )
+                        crawler.upload_to_ftp('{} {}.pdf'.format(crawler.get_text('b', root=row), year))
                     try:
                         crawler.assert_exists('li.next.disabled')
                         break
                     except Exception:
                         crawler.click('li.next a')
                 break
+    crawler.close()
