@@ -1,6 +1,7 @@
 import argparse
 import configparser
-from utils import Crawler
+from utils import Crawler as CoreCrawler
+
 
 ENTITY_TYPES = (
     'City',
@@ -12,6 +13,27 @@ ENTITY_TYPES = (
     'School District or Charter School',
     'Town',
 )
+
+
+class Crawler(CoreCrawler):
+    abbr = 'UT'
+
+    def _get_remote_filename(self, local_filename):
+        entity_name, entity_type, year = local_filename[:-4].split('|')
+        if entity_type in ('City' 'Town'):
+            directory = 'General Purpose'
+            name = entity_name.replace(' Town', '').replace(' City', '')
+        elif entity_type in ('City' 'Town'):
+            directory = 'General Purpose'
+            name = entity_name
+        elif entity_type == 'School District or Charter School':
+            directory = 'School District'
+            name = entity_name
+        else:
+            directory = 'Special District'
+            name = entity_name
+        filename = '{} {} {}.pdf'.format(self.abbr, name, year)
+        return directory, filename
 
 
 if __name__ == '__main__':
@@ -38,4 +60,7 @@ if __name__ == '__main__':
                 continue
             crawler.click('.btn.btnUploadDetails.btnSearch')
             url = crawler.get_attr('tbody.reportData a', 'href')
-            crawler.download(url, 'UT {}.pdf'.format(entity).replace('/', ' '))
+            crawler.download(url, '{}|{}|{}.pdf'.format(entity, entity_type, args.year).replace('/', ' '))
+
+    crawler.upload_to_ftp()
+    crawler.close()
