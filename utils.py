@@ -1,4 +1,3 @@
-import glob
 import os
 import ssl
 import sys
@@ -7,6 +6,7 @@ import urllib.request
 from ftplib import FTP, error_perm
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 
 
@@ -91,6 +91,14 @@ class Crawler:
         elem.send_keys(keys)
         time.sleep(3)
 
+    def open_new_tab(self):
+        self.browser.execute_script("window.open('');")
+        self.browser.switch_to.window(self.browser.window_handles[1])
+
+    def close_current_tab(self):
+        self.browser.close()
+        self.browser.switch_to.window(self.browser.window_handles[-1])
+
     def get_text(self, selector, single=True, root=None):
         if root is None:
             root = self.browser
@@ -127,12 +135,17 @@ class Crawler:
             return True
         return False
 
+    def back(self):
+        self.browser.back()
+        time.sleep(3)
+
     def close(self):
         self.browser.quit()
         self.ftp.quit()
 
     def download(self, url, filename):
         print('Downloading', filename, self._get_remote_filename(filename))
+        return
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
@@ -148,6 +161,13 @@ class Crawler:
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
+
+    def merge_files(self, filenames):
+        pdfline = ' '.join(filenames)
+        res_filename = filenames[0].split(' part')[0] + '.pdf'
+        command = 'pdftk ' + pdfline + ' cat output ' + res_filename
+        os.system(command)
+        return res_filename
 
     def upload_to_ftp(self, filename):
         try:

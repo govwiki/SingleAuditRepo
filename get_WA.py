@@ -10,8 +10,7 @@ class Crawler(CoreCrawler):
     abbr = 'WA'
 
     def _get_remote_filename(self, local_filename):
-        entity_name, entity_type, date = local_filename[:-4].split('|')
-        _, _, year = date.split('/')
+        entity_name, entity_type, year = local_filename[:-4].split('|')
         if entity_type == 'City_Town':
             name = entity_name.split(' of ')[1]
             directory = 'General Purpose'
@@ -60,12 +59,12 @@ if __name__ == '__main__':
             if row_type.lower() not in ('financial', 'financial and federal'):
                 continue
             entity_type = crawler.get_text('td[data-bind="text: GovTypeDesc"]', root=row)
-            date = crawler.get_text('td[data-bind="dateString: DateReleased, datePattern: \'MM/dd/yyyy\'"]', root=row)
+            year = crawler.get_text('td[data-bind="dateString: DateReleased, datePattern: \'MM/dd/yyyy\'"]', root=row).split('/')[-1]
             a = crawler.get_elements('td:first-child a', root=row)[0]
             url = a.get_attribute('href')
             text = a.text
-            crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), date))
-            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), date))
+            crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year))
+            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year))
         current_page += 1
         try:
             crawler.click('#PagerPage{}'.format(current_page))

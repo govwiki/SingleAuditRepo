@@ -8,15 +8,18 @@ class Crawler(CoreCrawler):
     abbr = 'FL'
 
     def _get_remote_filename(self, local_filename):
+        entity_type, local_filename = local_filename.split('|')
         parts = local_filename[:-4].split(' ')
         year = parts[0]
         name = ' '.join([p.capitalize() for p in parts[1:]])
-        if 'school' in local_filename:
-            directory = 'School District'
-        elif 'district' in local_filename:
-            directory = 'Special District'
-        else:
+        if entity_type == 'Municipalities':
             directory = 'General Purpose'
+        elif entity_type == 'Counties':
+            directory = 'General Purpose'
+        elif entity_type == 'Special Districts':
+            directory = 'Special Districts'
+        elif entity_type == 'District School Boards':
+            directory = 'School District'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename
 
@@ -34,11 +37,35 @@ if __name__ == '__main__':
     crawler = Crawler(config, 'florida')
     for url in config.get('florida', 'urls').split('\n'):
         crawler.get(url.strip())
+        entity_type = crawler.get_text('h1')
         for state_url in crawler.get_attr('div.column1 a, div.column2 a', 'href', single=False):
             crawler.get(state_url)
             report_urls = crawler.get_attr('p.efile a', 'href', single=False)
+            urls = {}
             for url in report_urls:
-                if int(url.split('/')[-1][:4]) in years_range:
-                    crawler.download(url, urllib.parse.unquote(url).split('/')[-1])
-                    crawler.upload_to_ftp(urllib.parse.unquote(url).split('/')[-1])
+                year = url.split('/')[-1][:4]
+                if int(year) in years_range:
+                    if year not in urls:
+                        urls[year] = []
+                    urls[year].append(url)
+            for year in urls:
+                filenames = []
+                for url in urls[year]:
+                    filename = '{}|{}'.format(
+                        entity_type,
+                        urllib.parse.unquote(url).split('/')[-1]
+                    )
+                    crawler.download(url, filename)
+                    filenames.append(filename)
+                if len(filenames) > 1:
+                    if not all(['part' in filename.lower() for filename in filenames]):
+                        filename = None
+                        for filename in filenames:
+                            crawler.upload_to_ftp(filename)
+                    else:
+                        filename = crawler.merge_files(filenames).replace(' -', '')
+                else:
+                    filename = filenames[0]
+                if filename:
+                    crawler.upload_to_ftp(filename)
     crawler.close()

@@ -10,7 +10,10 @@ class Crawler(CoreCrawler):
             directory = 'General Purpose'
             name = local_filename.replace('City of ', '')
         else:
-            directory = 'Special District'
+            if 'Inc.' in local_filename or 'Foundation' in local_filename:
+                directory = 'Non-Profit'
+            else:
+                directory = 'Special District'
             name = local_filename
         filename = '{} {}'.format(self.abbr, name)
         return directory, filename

@@ -2,7 +2,6 @@ import argparse
 import configparser
 import os
 import sys
-import urllib.parse
 from utils import Crawler as CoreCrawler
 
 
@@ -17,6 +16,8 @@ class Crawler(CoreCrawler):
             name = entity_name
         elif entity_type == 'County':
             directory = 'General Purpose'
+            if '(' in entity_name:
+                entity_name = entity_name[entity_name.index('(') + 1: entity_name.index(')')]
             name = '{} County'.format(entity_name)
         elif entity_type == 'School District':
             directory = 'School District'
