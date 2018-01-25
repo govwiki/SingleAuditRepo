@@ -8,7 +8,7 @@ ENTITY_TYPES = (
     'County',
     'District Health',
     'Interlocal',
-    'Local or Special Service District',
+    'Local and Special Service District',
     'Mental Health',
     'School District or Charter School',
     'Town',
