@@ -34,7 +34,10 @@ if __name__ == '__main__':
 
     while True:
         for row in crawler.get_elements('tbody tr'):
-            url = crawler.get_attr('.sticky-text-adjustment a', 'href', root=row)
+            try:
+                url = crawler.get_attr('.sticky-text-adjustment a', 'href', root=row)
+            except Exception:
+                continue
             entity_type = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'unitType\' }"]', root=row)
             entity_name = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'unitName\' }"]', root=row)
             year = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'endDate\' }"]', root=row).split('-')[-1]
