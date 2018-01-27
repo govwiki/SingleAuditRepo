@@ -6,7 +6,7 @@ class Crawler(CoreCrawler):
     abbr = 'ME'
 
     def _get_remote_filename(self, local_filename):
-        return '{} {}'.format(self.abbr, local_filename)
+        return 'General Purpose', '{} {}'.format(self.abbr, local_filename)
 
 
 if __name__ == '__main__':
