@@ -21,7 +21,7 @@ class Crawler(CoreCrawler):
             name = '{} County'.format(entity_name)
         elif entity_type == 'School District':
             directory = 'School District'
-            name = entity_name
+            name = '{} Schools'.format(entity_name)
         elif entity_type == 'State':
             directory = 'General Purpose'
             name = 'State of {}'.format(entity_name)
