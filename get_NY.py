@@ -17,7 +17,7 @@ class Crawler(CoreCrawler):
             name = name.split('  ')[0]
             directory = 'School District'
         else:
-            directory = 'Special Districts'
+            directory = 'Special District'
         return directory, '{} {} {}.pdf'.format(self.abbr, name, year)
 
 

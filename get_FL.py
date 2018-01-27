@@ -17,7 +17,7 @@ class Crawler(CoreCrawler):
         elif entity_type == 'Counties':
             directory = 'General Purpose'
         elif entity_type == 'Special Districts':
-            directory = 'Special Districts'
+            directory = 'Special District'
         elif entity_type == 'District School Boards':
             directory = 'School District'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)

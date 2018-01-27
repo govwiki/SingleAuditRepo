@@ -17,7 +17,7 @@ class Crawler(CoreCrawler):
         elif entity_type == 'Community Colleges':
             directory = 'Community College Districts'
         else:
-            directory = 'Special Districts'
+            directory = 'Special District'
         filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
         return directory, filename
 
