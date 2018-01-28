@@ -39,7 +39,10 @@ if __name__ == '__main__':
         else:
             crawler.open_new_tab()
             crawler.get(url)
-            file_url = crawler.get_attr('#textContainer1 a', 'href')
+            try:
+                file_url = crawler.get_attr('#textContainer1 a', 'href')
+            except Exception:
+                pass
             crawler.download(file_url, filename)
             crawler.close_current_tab()
         crawler.upload_to_ftp(filename)
