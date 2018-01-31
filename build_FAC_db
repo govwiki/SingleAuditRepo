@@ -26,7 +26,7 @@
 import ODNR
 import argparse
 import datetime
-
+import sys
 
 ##########
 # Globals
@@ -43,6 +43,7 @@ today       = datetime.datetime.today()
 
 target_url = 'https://harvester.census.gov/facdissem/SearchA133.aspx'
 target_dir = '.'
+tmp_dir    = '.'
 timeout    = 10
 
 
@@ -73,6 +74,13 @@ parser.add_argument('-e',
                     default=today.strftime(date_format),
                     help='The end date, in format YYYY-MM-DD')
 
+# Set the temporary (working) directory
+parser.add_argument('-w',
+                    '--tmp',
+                    action='store',
+                    default=tmp_dir,
+                    help='The directory to use for temporary files')
+
 # Set the target directory for PDF storage
 parser.add_argument('-d',
                     '--dir',
@@ -101,11 +109,16 @@ cli = parser.parse_args()
 # Download the audit reports
 #############################
 
+#db = ODNR.FACDB.from_file()
+#print(db)
+
+#sys.exit(0)
+
 start_date = datetime.datetime.strptime(cli.start, '%Y-%m-%d')
 end_date = datetime.datetime.strptime(cli.end, '%Y-%m-%d')
 
 states = ODNR.State.get_all()
 
     
-s = ODNR.State.find_by_abbrev('OR')
-ODNR.FAC.fetch_audits(cli.url, s, start_date, end_date, cli.quiet, cli.timeout, cli.dir)
+s = ODNR.State.find_by_abbrev('IN')
+ODNR.FAC.fetch_audits(cli.url, s, start_date, end_date, cli.quiet, cli.timeout, cli.dir, cli.tmp)
