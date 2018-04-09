@@ -50,6 +50,16 @@ on windows download and install executable from https://www.pdflabs.com/tools/pd
 pdftk.exe must be startable in dir_pdfs  
 testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf
 
+## get_AL.py  
+Script for downloading, renaming and filtering pdfs from Alabama Department of Examiners of Public Accounts, allocating the files to relevant folders, corresponding to catgeories based on the document entity.  
+ 
+### Installation
+The script was written for Python 3.6.3
+Dependencies can be installed by the following command
+pip install -r dependencies
+
+Fill in rangeFrom and rangeTo dates in the AL_params.txt file, to control results by date range.
+
 ## get_VA.py
 Script for downloading pdfs from Virginia Local Government Reports web page
 Usage:
