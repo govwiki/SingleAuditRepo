@@ -1,2 +1,7 @@
+beautifulsoup4==4.6.0
+bs4==0.0.1
+configparser==3.5.0
+EasyProcess==0.2.3
 PyVirtualDisplay==0.2.1
-selenium==3.8.0
+selenium==3.11.0
+python==3.6.3
