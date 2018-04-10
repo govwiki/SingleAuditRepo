@@ -18,7 +18,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 import datetime
-from datetime import timedelta
 import time
 import html
 import os
@@ -89,12 +88,10 @@ def is_download_completed():
             break
         else:
             time.sleep(sleeptime)
-
 def download():
     ''' function for downloading zip files from server'''
     def open_tag(css_selector):
         driver.find_element_by_css_selector(css_selector).click()
-
     def enter_in_tag(css_selector, date_string):
         driver.find_element_by_css_selector(css_selector).send_keys(date_string)
     global url
@@ -103,7 +100,6 @@ def download():
     url = url.strip()
     rangefrom = rangefrom.strip()
     rangeto = rangeto.strip()
-    
     options = webdriver.ChromeOptions() 
     options.add_argument("--start-maximized")
     prefs = {"download.default_directory" : dir_downloads}
@@ -124,7 +120,7 @@ def download():
 
     driver = webdriver.Chrome(chrome_options=options)
     #driver = webdriver.Firefox(firefox_profile=profile, capabilities=capabilities)
-    
+   
     driver.implicitly_wait(timeout)
 
     print('loading: ' + url)
@@ -138,7 +134,6 @@ def download():
     st = html.unescape(driver.page_source)
     open_tag('#ui-id-1') # click on GENERAL INFORMATION
     time.sleep(0.5)
-
     # unselect All Years
     open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_0')
     # click on 2016
@@ -155,7 +150,7 @@ def download():
     # click through new PII and Native Tribe information disclosure screen added April 2017
     open_tag("#chkAgree")
     open_tag("#btnIAgree")
-    
+ 
     # give info how many results are found
     num_of_results = driver.find_element_by_css_selector('.resultsText').text
     print(num_of_results + ' RECORD(S)')
@@ -171,7 +166,6 @@ def download():
         logging.critical("num_of_results is not produced")
         print("num_of_results is not produced")
         bnum = False
-
     # examine Selected Audit Reports
     audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
     audit_reports_innerHTML = driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
@@ -186,11 +180,22 @@ def download():
         print("audit reports list is not produced")
         bnum = False
 
+    def is_download_completed():
+        time.sleep(dparameters["sleeptime"])
+        l = glob.glob(dir_downloads + '*.part')
+        zipfilename = ntpath.basename(l[0]).replace('.part', '')
+        while True:
+            l = glob.glob(dir_downloads + '*.part')
+            if len(l) == 0:
+                # print'Downloading ' + audit + ' completed')
+                shutil.copy2(dir_downloads + zipfilename, dir_zipmem + zipfilename)
+                break
+            else:
+                time.sleep(dparameters["sleeptime"])
+
     if bnum:
         # in this for loop we are selecting by groups of 100
         for audit in laudit:
-            del audit_reports_select
-            audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
             audit_reports_select.select_by_visible_text(audit)
             # now we click on Download Audits button
             open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
@@ -206,7 +211,6 @@ def ftp_upload_pdfs():
     lpdfs = glob.glob(dir_pdfs + "*.pdf")
     lpdfs.sort()
     os.chdir(dir_pdfs) # needed for ftp.storbinary('STOR command work not with paths but with filenames
-
     # connect to FTP server and upload files
     try:
         ftp = FTP()
@@ -249,7 +253,6 @@ def extract_and_rename():
     if len(lloc) == 0:
         print('no zip file(s). quiting')
         logging.info('no zip file(s). quiting')
-
     print('Making connections with ' + dir_in + fileshortnames.strip())
     # placing shortnames in dictionary
     wbShort = openpyxl.load_workbook(dir_in + fileshortnames.strip(), data_only=True)
@@ -265,10 +268,9 @@ def extract_and_rename():
             scrolldown = False # when finding empty row parsing of Shortnames xlsx will stop
     #with open(dir_in + 'json_ftpdir_connections.txt', 'w') as fdump:
     #    json.dump(ddestdir, fdump)
-
+    
+    print('Extracting files..')
     for myzipfile in lloc:
-        print('----------------------------------------------------------------')
-        print('Extracting ' + myzipfile)
         with zipfile.ZipFile(myzipfile, "r") as z:
             z.extractall(dir_pdfs)
         # here comes part for renaming
@@ -289,7 +291,6 @@ def extract_and_rename():
             # try to find short output name
             # in case there is in lshortname will be appended shortened name else original auditee name
             lname = dshort.get(sheetCross['F' + str(row)].value.strip(), sheetCross['C' + str(row)].value.strip())
-
             # filterling lname from special characters
             lname = remove_non_ascii(lname)  # this function will replace non ascii characters with single space
             lname = lname.replace('/', '_')
@@ -315,33 +316,32 @@ def extract_and_rename():
             #lname = lname.replace('`', '')
             #lname = lname.replace('|', '')
             #lname = lname.replace('=', '')
-
+            
             try:
                 os.rename(dir_pdfs + lfilename + '.pdf', dir_pdfs + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
                 ddestdiropp[lstate + ' ' + lname + ' ' + lyearending + '.pdf'] = lein
-                time.sleep(0.1)
+                time.sleep(0.3)
             except Exception as e:
                 print(str(e))
                 logging.debug(str(e))
-
+            
             print((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
             logging.info((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
 
-        time.sleep(10)
         ftp_upload_pdfs()
         os.remove(myzipfile)
-
+ 
 def calculate_time():
     time2 = time.time()
     hours = int((time2-time1)/3600)
     minutes = int((time2-time1 - hours * 3600)/60)
     sec = time2 - time1 - hours * 3600 - minutes * 60
-    print("processed in %dh:%dm:%ds" % (hours, minutes, sec))
+    print("processed in %dh:%dm:%ds" % (hours, minutes, sec))    
 
 if __name__ == '__main__':
     if todownload:
         download()
-    extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups,
+    extract_and_rename() # since FileNameCrossReferenceList.xlsx is same for all groups, 
                          # script have to use this grouped approaching, processing them by 100 or less for final group
     calculate_time()
     print('Done.')
