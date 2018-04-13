@@ -110,3 +110,45 @@ YEAR arguments is required.
 # Licence  
 GPL  
 
+# Naming Convention Info
+Purpose
+
+My goal is to create a complete library of audited financial statements for US state and local governments. These entities publish audited financial statements each year, but they are often hard to find.  This library is intended to save researchers time and effort by allowing them to find all the documents in one place with easily recognizable file names.
+
+We are using web scraping programs to find the documents, and load them into the library at http://www.govwiki.info/pdfs, but the uploading and renaming algorithms are not reliable.  So human librarians are needed to make sure that the documents have correct names and are located in the correct subfolders.
+
+Note:  In May 2018, I anticipate that the library will be moved to the Azure platform.
+
+Note:  Data sources that we scrape often contain financial statements for non-profit, non-governmental organizations.  We will capture these as well, but they are not the focus of this project.
+
+
+File Names and Locations
+
+The file naming convention is [SS EEEEE YYYY.pdf] where: 
+SS = Two position state code 
+EEEEE = Name of entity (variable number of positions) 
+YYYY = Four digit year for the date on which the fiscal year ends.
+
+The files are divided into folders for 
+General Purpose governments (cities, towns, townships, villages, boroughs. municipalities, Puerto Rican municipios, counties, parishes and states)
+School Districts (public school systems serving students between Kindergarten and 12th grade, known as K-12)
+Community College Districts
+Public Higher Education (state or local government operated four year colleges and universities)
+Special Districts. These are governments that provide specialized services such as transportation, water, sewers, irrigation, reclamation and mosquito control.  Their names often end with one of these words:  Agency, Authority and Special District.
+Non-Profit (Non-Governmental Organizations that don’t try to earn financial profits)
+
+
+For General Purpose governments, there are some rules to follow for the EEEEE (Name of Entity) portion of the file name:
+For counties, the name should end with the word “County”.  For example, Alameda County’s 2017 financial statement should be named CA Alameda County 2017.pdf  This distinguishes Alameda County from the city of Alameda whose 2017 financial statement would be named CA Alameda 2017.pdf
+In Louisiana (LA). Counties are called Parishes.  Use the same naming approach as for Counties but use the word “Parish” instead of “County”.
+In Alaska (AK), Counties are called Boroughs. Use the same naming approach as for Counties but use the word “Borough” instead of “County”
+Puerto Rico has 78 municipios - which serve as both cities and counties.  Just provide the name of each municipio; it is not necessary to include the word “municipio” at the end
+Several states have a unit of government called a Township.  Townships usually include multiple towns or villages within their geographical area.  You should use the put the word “Township” at the end of the name, like you would do with Counties.
+For Cities, Villages and Towns, you should generally NOT end the name with these types.  The only exception is when the name of the government typically includes one f these words.  An example is the city of Kansas City, MO.  In this case, you would use the name MO Kansas City 2017.pdf for the 2017 financial statement.
+For State financial statements, use the two-word state abbreviation followed by “State of “ and then the fill name of the state.  For example:  MO State of Missouri 2017.pdf.
+In some states, there are towns, townships, villages and cities with duplicate names.  We can’t have duplicates in our library, so we have to have a way of distinguishing them.  The way we do this is to include the name of the County in which the government is located at the end of the file name just before the “YYYY.pdf”.  For example, Michigan has two townships named “Bingham Township” - one in Clinton County and the other in Leelanau County.  These files are named:
+MI Bingham Township (Clinton County) 2016.pdf
+MI Bingham Township (Leelanau County) 2016.pdf
+This issue also occurs for school districts.
+
+
