@@ -25,12 +25,11 @@ if __name__ == '__main__':
     crawler = Crawler(config, 'michigan')
     crawler.get(config.get('michigan', 'url'))
 
-    county_list = ['LENAWEE-46', 'LIVINGSTON-47', 'LUCE-48', 'MACKINAC-49', 'MACOMB-50',
-                   'MANISTEE-51', 'MARQUETTE-52', 'MASON-53', 'MECOSTA-54', 'MENOMINEE-55']
-    # for county in crawler.get_elements('#ddlCounty option'):
-    #     if 'Select County' in county.text:
-    #         continue
-    #     county_list.append(county.text)
+    county_list = []
+    for county in crawler.get_elements('#ddlCounty option'):
+        if 'Select County' in county.text:
+            continue
+        county_list.append(county.text)
 
     for county in county_list:
         print('Current Selected County:{}'.format(county))
