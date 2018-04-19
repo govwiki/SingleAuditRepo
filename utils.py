@@ -192,3 +192,18 @@ class Crawler:
             pdf_file.close()
         except Exception as e:
             print(str(e))
+
+    def move_to_another(self, filename):
+        try:
+            entity_type = filename.split('|')[1]
+            remote_filename = self._get_remote_filename(filename)
+            if not remote_filename:
+                return
+            if (entity_type == 'County') or (entity_type == 'City') or \
+                    (entity_type == 'Township') or (entity_type == 'Village'):
+                return
+            directory, server_filename = remote_filename
+            self.ftp.rename('/General Purpose/{}'.format(server_filename), '/{}/{}'.format(directory, server_filename))
+            print('Moved {} to {}'.format(server_filename, directory))
+        except Exception as e:
+            print(str(e))

@@ -8,7 +8,16 @@ class Crawler(CoreCrawler):
     abbr = 'MI'
 
     def _get_remote_filename(self, local_filename):
-        return 'General Purpose', '{} {}'.format(self.abbr, local_filename)
+        entity_name, entity_type, year = local_filename[:-4].split('|')
+        if (entity_type == 'County') or (entity_type == 'City') or \
+                (entity_type == 'Township') or (entity_type == 'Village'):
+            directory = 'General Purpose'
+        elif entity_type == 'Community College':
+            directory = 'Community College District'
+        else:
+            directory = 'Special District'
+        filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
+        return directory, filename
 
 
 if __name__ == '__main__':
@@ -44,17 +53,18 @@ if __name__ == '__main__':
             if year == 'Year':
                 continue
             name = items[1].text
-            m_type = items[2].text
+            entity_type = items[2].text
             url = crawler.get_attr('a', 'href', root=items[3])
 
-            if (m_type not in name) and (m_type == 'County' or m_type == 'Village' or m_type == 'Charter Township'):
-                name = '{} {}'.format(name, m_type)
-            if m_type == 'Township':
-                if m_type in name:
+            if (entity_type not in name) and (entity_type == 'County' or entity_type == 'Village' or entity_type == 'Charter Township'):
+                name = '{} {}'.format(name, entity_type)
+            if entity_type == 'Township':
+                if entity_type in name:
                     name = '{} ({} County)'.format(name, county.split('-')[0].title())
                 else:
-                    name = '{} {} ({} County)'.format(name, m_type, county.split('-')[0].title())
+                    name = '{} {} ({} County)'.format(name, entity_type, county.split('-')[0].title())
 
-            crawler.download(url, '{} {}.pdf'.format(name, year))
-            crawler.upload_to_ftp('{} {}.pdf'.format(name, year))
+            crawler.download(url, '{}|{}|{}.pdf'.format(name, entity_type, year))
+            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(name, entity_type, year))
+
     crawler.close()
