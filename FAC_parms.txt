@@ -2,8 +2,8 @@
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
     "headlessMode"          : 0,
-    "rangefrom"             : "02/09/2017",
-    "rangeto"               : "02/11/2017",
+    "rangefrom"             : "02/06/2017",
+    "rangeto"               : "02/07/2017",
     
     "comment1_directories"  : "make sure that all directories are previosly created",
     "comment2_directories"  : "example for linux and macos /home/someuser/somedirectory/",
@@ -25,7 +25,7 @@
     
     "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
     "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
-    "sleeptime"             : 10,
+    "sleeptime"             : 30,
     
     "server"                : "ftp.govwiki.info",
     "port_comment"          : "port in next line should be integer value, not string, default is 21",
