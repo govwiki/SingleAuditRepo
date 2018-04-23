@@ -1,0 +1,6 @@
+{
+	"rangeFrom" : "2017",
+	"rangeTo"   : "2018",
+	"year"      : "2004",
+	"county"    : "WHEELER"
+}

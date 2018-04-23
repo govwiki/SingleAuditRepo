@@ -9,7 +9,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 
-
 class Crawler:
     def __init__(self, config, section):
         self.section = section
@@ -35,6 +34,9 @@ class Crawler:
         self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
         self.browser.implicitly_wait(10)
 
+        self.ftp_connect()
+
+    def ftp_connect(self):
         self.ftp = FTP()
         self.ftp.connect(
             self.config.get('general', 'ftp_server').strip(),
@@ -144,20 +146,37 @@ class Crawler:
         self.ftp.quit()
 
     def download(self, url, filename):
-        print('Downloading', filename, self._get_remote_filename(filename))
-        return
+        #print('Downloading', filename, self._get_remote_filename(filename))
+        #return
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
         else:
             ctx = None
-        try:
-            r = urllib.request.urlopen(url, context=ctx)
-            with open(os.path.join(self.downloads_path, filename), 'wb') as f:
-                f.write(r.read())
-        except Exception:
-            print('ERROR: Downloading failed!')
+        
+        content_length = 1
+        retry = 0
+        file_size = 0
+        file_name = ''
+        while file_size != content_length and retry<3:
+            try:
+                r = urllib.request.urlopen(url, context=ctx)
+                content_length = r.length
+                file_name = os.path.join(self.downloads_path, filename)
+                with open(file_name, 'wb') as f:
+                    f.write(r.read())
+                    file_size = os.stat(file_name).st_size
+                    retry += 1
+                    #print('Attempt', retry, 'Downloaded', file_size, 'bytes of', content_length)
+            except Exception as e:
+                retry +=1
+                print('Attempt', retry, 'ERROR: Downloading failed!', url, str(e))
+                try:  
+                    os.remove(file_name)
+                except OSError:
+                    pass 
+
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
@@ -170,28 +189,41 @@ class Crawler:
         return res_filename
 
     def upload_to_ftp(self, filename):
-        try:
-            path = os.path.join(self.downloads_path, filename)
-            print('Uploading {}'.format(path))
-            pdf_file = open(path, 'rb')
-            remote_filename = self._get_remote_filename(filename)
-            if not remote_filename:
-                return
-            directory, filename = remote_filename
-            self.ftp.cwd('/{}'.format(directory))
-            if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
-                print('Checking if {}/{} already exists'.format(directory, filename))
-                try:
-                    self.ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
+        retries = 0
+        while retries<3:
+            try:
+                path = os.path.join(self.downloads_path, filename)
+                #print('Uploading {}'.format(path))
+                pdf_file = open(path, 'rb')
+                remote_filename = self._get_remote_filename(filename)
+                if not remote_filename:
                     return
-                except error_perm:
-                    pass
+                directory, filename = remote_filename
+                try:
+                    self.ftp.cwd('/{}'.format(directory))
+                except Exception:
+                    self.ftp.mkd('/{}'.format(directory))
+                    self.ftp.cwd('/{}'.format(directory))
+                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                    #print('Checking if {}/{} already exists'.format(directory, filename))
+                    try:
+                        self.ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
+                        return
+                    except error_perm:
+                        pass
+    
+                self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
+                #print('{} uploaded'.format(path))
+                pdf_file.close()
+                retries +=1
+            except Exception as e:
+                print(str(e))
+                retries+=1
+                try:
+                    self.ftp.voidcmd("NOOP")
+                except Exception as ex:
+                    self.ftp_connect()
 
-            self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
-            print('{} uploaded'.format(path))
-            pdf_file.close()
-        except Exception as e:
-            print(str(e))
 
     def move_to_another(self, filename):
         try:
