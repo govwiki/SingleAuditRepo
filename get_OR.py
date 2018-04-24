@@ -39,11 +39,14 @@ rangeTo = dparameters["rangeTo"]
 
 # generate year range
 years = range(int(rangeFrom), int(rangeTo) + 1)
+years = list(years)
 print("testing years...", years)
 
-# generate single year and county
-year = dparameters["year"]
-county = dparameters["county"]
+### DEFINE DOCUMENT CATEGORIES ###
+schools = ['CHARTER SCHOOLS', ' SCHOOL DISTRICTS + ESD']
+colleges = ['COMMUNITY COLLEGES']
+special_districts = ['AIR POLLUTION AUTHORITY', 'AIRPORT DISTRICTS', 'CEMETERY DISTRICTS', 'DIKING DISTRICTS', 'DRAINAGE DISTRICTS', 'EMERGENCY COMMUNICATION DIST', 'FLOOD CONTROL DISTRICTS', 'GEOTHERMAL HEATING DISTRICTS', 'HOSPITAL DISTRICTS', 'HOSPITAL FACILITIES AUTHORITY', 'INSECT/HERBICIDE CONTROL DIST', 'IRRIGATION DISTRICTS', 'LIBRARY DISTRICTS', 'LIGHTING DISTRICTS', 'LIVESTOCK DISTRICTS', 'MASS TRANSIT DISTRICTS', 'METROPOLITAN SERVICE DISTRICTS', 'PARKS AND RECREATION DISTRICTS', 'PORT DISTRICTS', 'PUBLIC HOUSING AUTHORITY', 'PUBLIC UTILITY DISTRICTS', 'REGIONAL PLANNING DISTRICTS', 'ROAD ASSESSMENT DISTRICTS', 'RURAL FIRE PROTECTION DISTRICT', 'SANITARY DISTRICTS', 'SOIL WATER CONSERVATION DIST', 'TRANSLATOR DISTRICTS', 'URBAN RENEWAL AGENCIES', 'VECTOR CONTROL DISTRICTS', 'WATER CONTROL DISTRICTS', 'WATER DISTRICTS', 'WATER IMPROVEMENT DISTRICTS', 'WEATHER MODIFICATION DISTRICTS', 'WEED CONTROL DISTRICTS']
+general_purpose = ['CITIES', 'COUNTIES', 'CITY UTILITY BOARDS', 'COUNCIL OF GOVERNMENTS']
 
 
 def init_driver():
@@ -58,6 +61,8 @@ def scrape(driver):
 
     global dump
     global pdf
+    global year
+    global option
 
     driver.get("https://secure.sos.state.or.us/muni/public.do")
 
@@ -69,28 +74,40 @@ def scrape(driver):
         global get_year
         global pdfs
 
+        ### get code ###
+        get_html = driver.find_elements_by_xpath('//div[@id="content"]')
+        get_html = [e.get_attribute('innerHTML') for e in get_html]
+        split_results = get_html[0].split('<hr>')
+        clean = [record for record in split_results if 'resultDisplyForm' in record]
+        
         # integrate this into a function
-        doc_types = driver.find_elements_by_xpath('//*[@id="content"]/table//tr[1]/td[2]')
-        doc_types = [record.text for record in doc_types if not re.match('.*?(?:(\d+\s+)+\s*>>|<<\s*\d+(\s+\d+)+).*', record.text)]
+        doc_types = [re.match('(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e).group(1) if re.match('(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e) else '' for e in clean]
+        doc_types = [e for e in doc_types if not re.match('.*?(?:(\d+\s+)+\s*>>|<<\s*\d+(\s+\d+)+).*', e)]
+        print("doc_types", len(doc_types), doc_types)
         # get doc title
-        doc_titles = driver.find_elements_by_xpath('//*[@id="content"]/strong')
-        doc_titles = [title.text for title in doc_titles]
+        doc_titles = [re.match('(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e).group(1) if re.match('(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e) else '' for e in clean]
+        doc_titles = [e for e in doc_titles if not re.match('.*?(?:(\d+\s+)+\s*>>|<<\s*\d+(\s+\d+)+).*', e)]
+        print("doc_titles", len(doc_titles), doc_titles)
         # get doc year
         doc_links = driver.find_elements_by_xpath('//*[@id="content"]/form/input[2]')
         doc_link_text = [link.get_attribute('value').encode('utf-8') for link in doc_links]
         get_year = [re.match('.*(20\d{2})', str(year)).group(1) for year in doc_link_text]
-
+        print("get_year", len(get_year), get_year)
         ###GET DOCUMENT ID###
-        get_ids = driver.find_elements_by_xpath('//form[@name="resultDisplyForm"]/input[2]')
-        get_ids = [re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick")).group(1) for e in get_ids if re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick"))]
+        ids = driver.find_elements_by_css_selector('#content > strong + table + form > input:nth-child(2)')
+        get_ids = [re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick")).group(1) for e in ids if re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick"))]
         # make list of links for pdfs
         pdfs = ['https://secure.sos.state.or.us/muni/report.do?doc_rsn=' + code for code in get_ids]
-
+        # print("get_ids", len(get_ids), get_ids)
         return doc_types, doc_titles, get_year, pdfs
 
+        
     ### create function - process pdf file names ###   
     def process_files():
         extract_data()
+        ### PROCESS DOC TITLE ###
+        if '/' in doc_titles[i]:
+            doc_titles[i] = doc_titles[i].replace('/', '-')
         ### TEST FOR DOC TYPES AND GENERATE NEW DOC NAMES ###
         if doc_types[i] in schools:
             # a) schools
@@ -169,57 +186,59 @@ def scrape(driver):
 
     ### set options ###
     fiscal_year = Select(driver.find_element_by_id("fiscalYr"))
-    fiscal_year.select_by_visible_text(year)
     county_options = Select(driver.find_element_by_id("county"))
-    county_options.select_by_visible_text(county)
 
-    driver.find_element_by_xpath('//*[@id="publicsearchform"]/table//input').submit()
+    for year in years:
+        fiscal_year.select_by_visible_text(str(year))
 
-    search_results = driver.find_element_by_xpath('//p[@class="search_results"]').text
+        ### GENERATE OPTION LIST ###
+        county = Select(driver.find_element_by_id("county"))
+        county_options = county.options
+        options = [e.text for e in county_options if '\n' not in e.text]
 
-    ### DEFINE DOCUMENT CATEGORIES ###
-    schools = ['CHARTER SCHOOLS', ' SCHOOL DISTRICTS + ESD']
-    colleges = ['COMMUNITY COLLEGES']
-    special_districts = ['AIR POLLUTION AUTHORITY', 'AIRPORT DISTRICTS', 'CEMETERY DISTRICTS', 'DIKING DISTRICTS', 'DRAINAGE DISTRICTS', 'EMERGENCY COMMUNICATION DIST', 'FLOOD CONTROL DISTRICTS', 'GEOTHERMAL HEATING DISTRICTS', 'HOSPITAL DISTRICTS', 'HOSPITAL FACILITIES AUTHORITY', 'INSECT/HERBICIDE CONTROL DIST', 'IRRIGATION DISTRICTS', 'LIBRARY DISTRICTS', 'LIGHTING DISTRICTS', 'LIVESTOCK DISTRICTS', 'MASS TRANSIT DISTRICTS', 'METROPOLITAN SERVICE DISTRICTS', 'PARKS AND RECREATION DISTRICTS', 'PORT DISTRICTS', 'PUBLIC HOUSING AUTHORITY', 'PUBLIC UTILITY DISTRICTS', 'REGIONAL PLANNING DISTRICTS', 'ROAD ASSESSMENT DISTRICTS', 'RURAL FIRE PROTECTION DISTRICT', 'SANITARY DISTRICTS', 'SOIL WATER CONSERVATION DIST', 'TRANSLATOR DISTRICTS', 'URBAN RENEWAL AGENCIES', 'VECTOR CONTROL DISTRICTS', 'WATER CONTROL DISTRICTS', 'WATER DISTRICTS', 'WATER IMPROVEMENT DISTRICTS', 'WEATHER MODIFICATION DISTRICTS', 'WEED CONTROL DISTRICTS']
-    general_purpose = ['CITIES', 'COUNTIES', 'CITY UTILITY BOARDS', 'COUNCIL OF GOVERNMENTS']
+        ### iterate through counties ###
+        for option in options:
+            print("testing options...", option)
+            county.select_by_visible_text(option)
+            driver.find_element_by_xpath('//*[@id="publicsearchform"]/table//input').submit()
+            search_results = driver.find_element_by_xpath('//p[@class="search_results"]').text
 
-    
-    ### TEST FOR RESULTS ###
-    if "No results for search criteria" not in search_results:
-        print("content element matches!")
+            ### TEST FOR RESULTS ###
+            if "No results for search criteria" not in search_results:
+                print("content element matches!")
 
-        
-        ### PROCESS FIRST PAGE (I) ###
-
-        # DOWNLOAD AND RENAME FILES
-        extract_data()
-        for i, pdf in enumerate(pdfs):
-            download_file()
-            save_file()
-            process_files()
-
-        # test and click next page
-        while True:
-            ###TEST FOR NEXT PAGE (II) ###
-            try: 
-                next = driver.find_element_by_link_text('>>')
-                next.click()
-
+                
+                ### PROCESS FIRST PAGE (I) ###
                 # DOWNLOAD AND RENAME FILES
                 extract_data()
                 for i, pdf in enumerate(pdfs):
                     download_file()
                     save_file()
                     process_files()
-            except:
-                print("No more pages!")
-                new_search = driver.find_element_by_link_text('New Search')
-                new_search.click()
-                fiscal_year = Select(driver.find_element_by_id("fiscalYr"))
-                fiscal_year.select_by_visible_text(year)
-                county_options = Select(driver.find_element_by_id("county"))
-                county_options.select_by_visible_text(county)
-                break
+
+                # test and click next page
+                while True:
+                    ###TEST FOR NEXT PAGE (II) ###
+                    try: 
+                        next = driver.find_element_by_link_text('>>')
+                        next.click()
+
+                        # DOWNLOAD AND RENAME FILES
+                        extract_data()
+                        for i, pdf in enumerate(pdfs):
+                            download_file()
+                            save_file()
+                            process_files()
+                    except:
+                        print("No more pages!")
+                        new_search = driver.find_element_by_link_text('New Search')
+                        new_search.click()
+                        fiscal_year = Select(driver.find_element_by_id("fiscalYr"))
+                        fiscal_year.select_by_visible_text(str(year))
+                        county = Select(driver.find_element_by_id("county"))
+                        county_options = county.options
+                        options = [e.text for e in county_options if '\n' not in e.text]
+                        break
 
 if __name__ == "__main__":
     driver = init_driver()
