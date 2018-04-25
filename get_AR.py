@@ -59,6 +59,8 @@ if __name__ == '__main__':
                 for row in results:
                     items = crawler.get_elements('div', root=row)
                     name = items[1].text.title()
+                    if ('City Of' in name) or ('Town Of' in name):
+                        name = name.replace(', City Of', '').replace(', Town Of', '')
                     url = crawler.get_attr('a', 'href', root=items[1])
 
                     crawler.download(url, '{}|{}|{}.pdf'.format(name, entity_type, year))
@@ -88,6 +90,8 @@ if __name__ == '__main__':
                 for row in results:
                     items = crawler.get_elements('div', root=row)
                     name = items[1].text.title()
+                    if ('City Of' in name) or ('Town Of' in name):
+                        name = name.replace(', City Of', '').replace(', Town Of', '')
                     url = crawler.get_attr('a', 'href', root=items[1])
 
                     crawler.download(url, '{}|{}|{}.pdf'.format(name, entity_type, year))
