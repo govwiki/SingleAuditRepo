@@ -215,9 +215,9 @@ class Crawler:
                 self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
                 #print('{} uploaded'.format(path))
                 pdf_file.close()
-                retries +=1
+                retries =3
             except Exception as e:
-                print(str(e))
+                print('Error uploading to ftp,', str(e))
                 retries+=1
                 try:
                     self.ftp.voidcmd("NOOP")
