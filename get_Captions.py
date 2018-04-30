@@ -29,34 +29,39 @@ if __name__ == '__main__':
         print("Current Filename is {}".format(filename))
         url = crawler.get_attr('a', 'href', root=items[0])
         crawler.download(url, filename)
+
         convert_filename = filename.replace('.pdf', '.txt')
         os.system("pdftotext '%s' '%s'" % (downloads_path + 'Captions/' + filename,
                                            downloads_path + 'Captions/' + convert_filename))
         file_handle = open(downloads_path + 'Captions/' + convert_filename, encoding="utf-8")
         content = file_handle.readlines()
-        content = filter(None, [x.strip() for x in content])
+        content = list(filter(None, [x.strip() for x in content]))
 
         line_cnt = 0
         caption_line = False
 
         for line in content:
             upper_line = line.upper().strip()
-            if upper_line[0:23] == "STATEMENT OF ACTIVITIES":
-                line_cnt = 10
+            if upper_line[0:28] == 'FOR THE YEAR ENDED SEPTEMBER':
+                index = content.index(line)
+                upper_prev_line = content[int(index-1)].upper().strip()
+                if upper_prev_line[0:23] == "STATEMENT OF ACTIVITIES":
+                    line_cnt = 20
 
             if line_cnt > 0:
                 line_cnt = line_cnt - 1
 
-                if upper_line[0:28] == 'FOR THE YEAR ENDED SEPTEMBER':
-                    captions = upper_line[0:50]
+                if 'PROGRAM' in upper_line:
                     caption_line = True
 
-                if upper_line[0:24] == 'TOTAL PRIMARY GOVERNMENT' or 'FUND' in upper_line or 'REVENUE' in upper_line \
-                        or 'CITY' in upper_line or 'TOWN' in upper_line or 'ASSET' in upper_line \
-                        or 'EXPENDITURE' in upper_line or '(' in upper_line:
-                    caption_line = False
+                if upper_line[0:24] == 'TOTAL PRIMARY GOVERNMENT':
+                    break
+
+                if line.isupper():
+                    continue
 
                 if caption_line:
+                    upper_line = upper_line[0:50]
                     if len(line.strip()) > 0 and 'TOTAL' not in upper_line and 'FOR THE YEAR' not in upper_line \
                             and '$' not in upper_line and 'ACTIVITIES' not in upper_line and 'PROGRAM' not in upper_line \
                             and 'EXPENSE' not in upper_line and ':' not in upper_line \
@@ -64,11 +69,11 @@ if __name__ == '__main__':
                             and 'CHARGES' not in upper_line and not upper_line[0:8] == 'SERVICES' \
                             and 'REVENUE' not in upper_line and 'ASSET' not in upper_line and 'CITY' not in upper_line \
                             and 'TOWN' not in upper_line and 'COUNTY' not in upper_line \
-                            and 'FINANCIAL' not in upper_line and 'TABLE OF CONTENTS' not in upper_line:
+                            and 'TABLE OF CONTENTS' not in upper_line and '(' not in upper_line:
                         captions_list.append(str(line[0:50]).replace('& ', 'and ')
-                                             .replace('', ' ').replace('-', '')
+                                             .replace('*', '').replace('-', '')
                                              .replace('$', '').replace('—', '')
-                                             .replace('…', '').replace('.', '').replace('*', '').strip())
+                                             .replace('…', '').replace('.', '').strip())
 
         os.remove(downloads_path + 'Captions/' + convert_filename)
         print("Removed {}".format(convert_filename))
@@ -76,7 +81,7 @@ if __name__ == '__main__':
     seen = set()
     seen_add = seen.add
 
-    captions_list = [caption + ',' + str(captions_list.count(caption)) for caption in captions_list
+    captions_list = [caption + ':' + str(captions_list.count(caption)) for caption in captions_list
                           if not (caption.lower() in seen or seen_add(caption.lower()))]
 
     with open(downloads_path + 'Captions/output_file.csv', 'w', newline='') as csv_file:
@@ -84,8 +89,8 @@ if __name__ == '__main__':
         writer.writerow(["Caption Name", "Count"])
         for caption in captions_list:
             if '-' not in caption:
-                caption_name = caption.split(',')[0]
-                count = caption.split(',')[1]
+                caption_name = caption.split(':')[0]
+                count = caption.split(':')[1]
                 writer.writerow([caption_name, count])
 
     print("Done")
