@@ -48,12 +48,9 @@ if __name__ == '__main__':
             upper_line = line.upper().strip()
 
             if "STATEMENT OF REVENUES, EXPENDITURES" in upper_line:
-                index = content.index(line)
-                upper_next_line = content[int(index + 1)].upper().strip()
-                if upper_next_line[0:24] == "CHANGES IN FUND BALANCES":
-                    revenue_line = False
-                    expenditure_line = False
-                    line_cnt = 30
+                revenue_line = False
+                expenditure_line = False
+                line_cnt = 30
 
             if line_cnt > 0:
                 line_cnt = line_cnt - 1
@@ -77,17 +74,19 @@ if __name__ == '__main__':
                 # INSERT
                 if revenue_line:
                     if len(line.strip()) > 0 and 'TOTAL' not in upper_line \
-                            and not any(u_line_char.isdigit() for u_line_char in upper_line[0:50]):
+                            and not any(u_line_char.isdigit() for u_line_char in upper_line[0:50]) \
+                            and not upper_line[0:8] == "REVENUES":
                         revenue_list.append(str(line[0:50]).replace('& ', 'and ')
-                                            .replace('', ' ').replace('-', '')
-                                            .replace('$', '').replace('—', '')
+                                            .replace('', ' ').replace('-', '').replace(':', '')
+                                            .replace('$', '').replace('—', '').replace('*', '')
                                             .replace('…', '').replace('.', '').lower().strip())
 
                 if expenditure_line:
                     if len(line.strip()) > 0 and 'TOTAL' not in upper_line \
-                            and not any(u_line_char.isdigit() for u_line_char in upper_line[0:50]):
-                        expenditure_list.append(str(line[0:50]).replace('& ', 'and ')
-                                                .replace('', ' ').replace('-', '')
+                            and not any(u_line_char.isdigit() for u_line_char in upper_line[0:50]) \
+                            and not upper_line[0:12] == "EXPENDITURES":
+                        expenditure_list.append(str(line[0:50]).replace('& ', 'and ').replace(':', '')
+                                                .replace('', ' ').replace('-', '').replace('*', '')
                                                 .replace('$', '').replace('—', '')
                                                 .replace('…', '').replace('.', '').lower().strip())
 
