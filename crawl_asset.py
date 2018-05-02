@@ -1,11 +1,9 @@
 import configparser
 import os
-import sys
 import csv
 from utils import Crawler
 from PyPDF2 import PdfFileReader
 import sys
-import textract
 
 if __name__ == '__main__':
     config = configparser.ConfigParser()
@@ -48,12 +46,9 @@ if __name__ == '__main__':
             upper_line = line.upper().strip()
 
             if upper_line[0:25] == "STATEMENT OF NET POSITION":
-                index = content.index(line)
-                upper_next_line = content[int(index+1)].upper().strip()
-                if upper_next_line[0:18] == "SEPTEMBER 30, 2016":
-                    line_cnt = 30
-                    asset_line = 0
-                    liability_line = 0
+                line_cnt = 30
+                asset_line = 0
+                liability_line = 0
 
             if line_cnt > 0:
                 line_cnt = line_cnt - 1
@@ -100,7 +95,7 @@ if __name__ == '__main__':
                     if asset_line:
                         if len(line.strip()) > 0 and 'TOTAL' not in upper_line and not upper_line[0:5] == 'ASSET':
                             line = line.replace('$', '').replace('& ', 'and ')\
-                                .replace('‐', '').replace(',', '')\
+                                .replace('‐', '').replace(',', '').replace(':', '')\
                                 .replace('.', '').replace('(', '')\
                                 .replace('—', '').replace(')', '').replace('-', '').strip()
                             line = ''.join([i for i in line[0:50] if not i.isdigit()])
@@ -109,7 +104,7 @@ if __name__ == '__main__':
                     if liability_line:
                         if len(line.strip()) > 0 and 'TOTAL' not in upper_line and not upper_line[0:8] == 'LIABILIT':
                             line = line.replace('$', '').replace('& ', 'and ')\
-                                .replace('‐', '').replace('…', '')\
+                                .replace('‐', '').replace('…', '').replace(':', '')\
                                 .replace(',', '').replace('.', '')\
                                 .replace('(', '').replace('—', '')\
                                 .replace(')', '').replace('-', '').strip()
