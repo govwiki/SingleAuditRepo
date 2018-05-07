@@ -3,11 +3,13 @@ import ssl
 import sys
 import time
 import urllib.request
+from azure.storage.file import FileService, ContentSettings
 from ftplib import FTP, error_perm
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+from fileinput import filename
 
 class Crawler:
     def __init__(self, config, section):
@@ -34,8 +36,27 @@ class Crawler:
         self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
         self.browser.implicitly_wait(10)
 
-        self.ftp_connect()
-
+        #self.ftp_connect()
+        self.file_storage_connect()
+        
+    def file_storage_connect(self):
+        self.file_storage_url = self.config.get('general','fs_server').strip()
+        self.file_storage_user = self.config.get('general','fs_username')
+        self.file_storage_pwd = self.config.get('general','fs_password')
+        self.file_storage_share = self.config.get('general','fs_share')
+        self.file_storage_dir = self.config.get('general','fs_directory_prefix')
+        self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
+        try:
+            if self.file_service.exists(self.file_storage_share):
+                print('Connection to Azure file storage successfully established...')
+                if len(self.file_storage_dir)>0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
+                    self.file_service.create_directory(self.file_storage_share, self.file_storage_dir)
+                    print('Created directory:' + self.file_storage_dir)
+            else:
+                print('Filaed to connect to Asure file storage, share does not exist: '+ self.file_storage_share)
+        except Exception as ex:
+            print('Error connecting to Azure file storage: ', ex)
+        
     def ftp_connect(self):
         self.ftp = FTP()
         self.ftp.connect(
@@ -188,7 +209,10 @@ class Crawler:
         os.system(command)
         return res_filename
 
-    def upload_to_ftp(self, filename):
+    def upload_to_ftp(self,filename):
+        self.upload_to_file_storage(filename)
+
+    def upload_to_ftp_old(self, filename):
         retries = 0
         while retries<3:
             try:
@@ -239,3 +263,34 @@ class Crawler:
             print('Moved {} to {}'.format(server_filename, directory))
         except Exception as e:
             print(str(e))
+            
+    def upload_to_file_storage(self,filename):
+        retries = 0
+        while retries<3:
+            try:
+                path = os.path.join(self.downloads_path, filename)
+                print('Uploading {}'.format(path))
+                remote_filename = self._get_remote_filename(filename)
+                if not remote_filename:
+                    return
+                directory, filename = remote_filename
+                if len(self.file_storage_dir)>0:
+                    directory = self.file_storage_dir+'/'+directory
+                if not self.file_service.exists(self.file_storage_share,directory_name=directory):
+                    self.file_service.create_directory(self.file_storage_share,directory)
+                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                    print('Checking if {}/{} already exists'.format(directory, filename))
+                    if self.file_service.exists(self.file_storage_share,directory_name=directory, file_name=filename):
+                        print('{}/{} already exists'.format(directory, filename))
+                        return
+                self.file_service.create_file_from_path(
+                    self.file_storage_share,
+                    directory,
+                    filename,
+                    path,
+                    content_settings=ContentSettings(content_type='application/pdf'))    
+                print('{} uploaded'.format(path))
+                retries =3
+            except Exception as e:
+                print('Error uploading to Asure file storage,', str(e))
+                retries+=1
