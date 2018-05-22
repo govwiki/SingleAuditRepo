@@ -33,4 +33,10 @@
     "username_comment"      : "example: someuser@govwiki.info",
     "username"              : "staging@govwiki.info",
     "password"              : [ASK SYSTEM ADMINISTRATOR]
+    
+    "fs_server"             : "https://cafr.file.core.windows.net",
+    "fs_username"           : "cafr",
+    "fs_password"           : [ASK SYSTEM ADMINISTRATOR],
+    "fs_share"              : "cafr",
+    "fs_directory_prefix"   : "test",
 }

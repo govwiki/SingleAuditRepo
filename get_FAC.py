@@ -33,6 +33,7 @@ from ftplib import FTP
 from ftplib import FTP_TLS
 from datetime import date
 import ntpath
+from azure.storage.file import FileService, ContentSettings
 
 with open('FAC_parms.txt', 'r') as fp:
     dparameters = json.load(fp)
@@ -328,6 +329,9 @@ def extract_and_rename():
             print((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
             logging.info((lfilename + '.pdf').ljust(20) + lstate + ' ' + lname + ' ' + lyearending + '.pdf')
 
+        ##### upload to Azure before uploading to pdf
+        upload_to_file_storage()
+        #####
         ftp_upload_pdfs()
         os.remove(myzipfile)
  
@@ -345,3 +349,70 @@ if __name__ == '__main__':
                          # script have to use this grouped approaching, processing them by 100 or less for final group
     calculate_time()
     print('Done.')
+
+#######    
+# a function to upload files to Azure services (not tested)
+def upload_to_file_storage():
+    # get a list of pdf files in dir_pdfs
+    lpdfs = glob.glob(dir_pdfs + "*.pdf")
+    lpdfs.sort()
+    #os.chdir(dir_pdfs) # needed for ftp.storbinary('STOR command work not with paths but with filenames
+    # connect to FTP server and upload files
+    try:
+        file_storage_url = dparameters['fs_server'].strip()
+        file_storage_user = dparameters['fs_username'].strip()
+        file_storage_pwd = dparameters['fs_password'].strip()
+        file_storage_share = dparameters['fs_share'].strip()
+        file_storage_dir = dparameters['fs_directory_prefix'].strip()
+        file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
+        try:
+            if self.file_service.exists(self.file_storage_share):
+                print('Connection to Azure file storage successfully established...')
+                if len(self.file_storage_dir)>0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
+                    self.file_service.create_directory(self.file_storage_share, self.file_storage_dir)
+                    print('Created directory:' + self.file_storage_dir)
+            else:
+                print('Filaed to connect to Asure file storage, share does not exist: '+ self.file_storage_share)
+        except Exception as ex:
+            print('Error connecting to Azure file storage: ', ex)
+        
+        for pdffile in lpdfs:
+            rpdffile = ntpath.basename(pdffile)
+            
+            try:
+                destinationdir = ddestdir[ddestdiropp[rpdffile]]
+            except:
+                destinationdir ='Unclassified'
+            
+            retries = 0
+            while retries<3:
+                try:
+                    path = os.path.join(dir_pdfs, rpdffile)
+                    print('Uploading {}'.format(path))
+                    remote_filename = self._get_remote_filename(filename)
+                    if not remote_filename:
+                        return
+                    if len(self.file_storage_dir)>0:
+                        directory = self.file_storage_dir+'/'+destinationdir
+                    if not self.file_service.exists(self.file_storage_share,directory_name=directory):
+                        self.file_service.create_directory(self.file_storage_share,directory)
+                    if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                        print('Checking if {}/{} already exists'.format(directory, filename))
+                        if self.file_service.exists(self.file_storage_share,directory_name=directory, file_name=filename):
+                            print('{}/{} already exists'.format(directory, filename))
+                            return
+                    self.file_service.create_file_from_path(
+                        self.file_storage_share,
+                        directory,
+                        filename,
+                        path,
+                        content_settings=ContentSettings(content_type='application/pdf'))    
+                    print('{} uploaded'.format(path))
+                    retries =3
+                except Exception as e:
+                    print('Error uploading to Asure file storage,', str(e))
+                    retries+=1
+    except Exception as e:
+        print(str(e))
+        logging.critical(str(e))
+######
