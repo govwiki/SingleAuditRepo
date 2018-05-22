@@ -6,7 +6,6 @@ import re
 from utils import Crawler as CoreCrawler
 from selenium.webdriver.common.keys import Keys
 
-
 class Crawler(CoreCrawler):
     abbr = 'TN'
 
@@ -15,15 +14,15 @@ class Crawler(CoreCrawler):
         name = entity_name
         if entity_type == 'Common':
             if 'College' in entity_name:
-                directory = 'Community College Districts'
+                directory = 'Community College District'
             elif 'University' in entity_name:
                 directory = 'Public Higher Education'
             elif 'Education' in entity_name or 'School' in entity_name or 'Institute' in entity_name or 'Academy' in entity_name or ' Prep ' in entity_name or ' Prep.' in entity_name or 'Technical Center' in entity_name or 'Technology' in entity_name or 'Influence1 Foundation' in entity_name or 'Voc-Tech' in entity_name or 'New Consortium' in entity_name or 'Elementary' in entity_name or 'Academ' in entity_name:
-                directory = 'School Districts'
+                directory = 'School District'
             elif 'Inc.' in entity_name or 'Incorporated' in entity_name or 'Company' in entity_name or 'Society' in entity_name or 'LLC' in entity_name or 'Community' in entity_name or 'Coalition' in entity_name or 'Arc of' in entity_name or 'Clubs' in entity_name or 'Corporation' in entity_name or 'Memorial Care' in entity_name or 'CARES' in entity_name or 'Neighborhood' in entity_name or 'Program' in entity_name or 'CADAS' in entity_name or 'P.C.' in entity_name or 'Care' in entity_name or 'Independent' in entity_name or 'Bank' in entity_name or 'Organization' in entity_name or 'Friends' in entity_name or 'Initiative' in entity_name or 'Foundation' in entity_name or 'Group' in entity_name or 'Association' in entity_name or 'Residency' in entity_name or 'Commission' in entity_name or 'DDS' in entity_name or 'Support' in entity_name or 'Public' in entity_name or 'Nature' in entity_name or 'Cooperative' in entity_name or 'Parenthood' in entity_name or 'Child' in entity_name or 'Panel' in entity_name or 'Catholic' in entity_name or 'Alliance' in entity_name or 'Nursing' in entity_name:
                 directory = 'Non-Profit'
             elif 'Department' in entity_name or 'Division' in entity_name or 'Agency' in entity_name or 'Authority' in entity_name or 'Center' in entity_name or 'Museum' in entity_name or 'Utilit' in entity_name or 'Pension' in entity_name or 'Development' in entity_name or 'Service' in entity_name or 'Energy' in entity_name or 'Transportation' in entity_name or 'Airport' in entity_name or 'Gas' in entity_name or 'Water' in entity_name or 'Sewer' in entity_name or 'Medical' in entity_name or 'Electric' in entity_name or 'Golf' in entity_name or 'Animal Shelter' in entity_name or 'Light' in entity_name or 'Power' in entity_name or 'Transit' in entity_name or 'Library' in entity_name or 'Stadium' in entity_name or 'Housing' in entity_name or 'Sport' in entity_name or 'Cemetery' in entity_name or 'Stormwater' in entity_name or 'Area Investment' in entity_name or 'Redevelopment' in entity_name or 'Landfill' in entity_name or 'Health' in entity_name or 'Homes' in entity_name or 'Government' in entity_name or 'Hous' in entity_name or 'Tennergy' in entity_name or 'Municipal' in entity_name or 'Risk Management' in entity_name or 'Promotion' in entity_name or 'Facility' in entity_name or 'Traffic' in entity_name:
-                directory = 'Special Districts'
+                directory = 'Special District'
             else:
                 directory = 'General Purpose'
                 
@@ -34,7 +33,7 @@ class Crawler(CoreCrawler):
         else:
             directory = entity_type
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':

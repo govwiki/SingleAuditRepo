@@ -273,11 +273,18 @@ class Crawler:
                 remote_filename = self._get_remote_filename(filename)
                 if not remote_filename:
                     return
-                directory, filename = remote_filename
+                try:
+                    directory, filename, year = remote_filename
+                except:
+                    directory, filename = remote_filename
                 if len(self.file_storage_dir)>0:
                     directory = self.file_storage_dir+'/'+directory
                 if not self.file_service.exists(self.file_storage_share,directory_name=directory):
                     self.file_service.create_directory(self.file_storage_share,directory)
+                if year:
+                    directory = self.file_storage_dir+'/'+year
+                    if not self.file_service.exists(self.file_storage_share,directory_name=directory):
+                        self.file_service.create_directory(self.file_storage_share,directory)
                 if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
                     print('Checking if {}/{} already exists'.format(directory, filename))
                     if self.file_service.exists(self.file_storage_share,directory_name=directory, file_name=filename):
