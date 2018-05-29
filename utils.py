@@ -164,7 +164,7 @@ class Crawler:
 
     def close(self):
         self.browser.quit()
-        self.ftp.quit()
+        # self.ftp.quit()
 
     def download(self, url, filename):
         #print('Downloading', filename, self._get_remote_filename(filename))

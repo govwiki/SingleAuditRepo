@@ -2,6 +2,8 @@ import argparse
 import configparser
 import os
 import sys
+import time
+import re
 from utils import Crawler as CoreCrawler
 
 
@@ -9,23 +11,15 @@ class Crawler(CoreCrawler):
     abbr = 'MSRB'
 
     def _get_remote_filename(self, local_filename):
-        name, year = local_filename[:-4].split('|')
-        entity_type, entity_name = name.split(': ')
-        if entity_type == 'City':
+        entity_name, year = local_filename[:-4].split('|')
+
+        if 'city' or 'county' or 'state' in entity_name:
             directory = 'General Purpose'
-            name = entity_name
-        elif entity_type == 'County':
-            directory = 'General Purpose'
-            if '(' in entity_name:
-                entity_name = entity_name[entity_name.index('(') + 1: entity_name.index(')')]
-            name = '{} County'.format(entity_name)
-        elif entity_type == 'School District':
+        elif 'school' in entity_name:
             directory = 'School District'
-            name = '{} Schools'.format(entity_name)
-        elif entity_type == 'State':
-            directory = 'General Purpose'
-            name = 'State of {}'.format(entity_name)
-        filename = '{} {} {}.pdf'.format(self.abbr, name, year)
+        else:
+            directory = 'Special District'
+        filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
         return directory, filename
 
 
@@ -64,6 +58,7 @@ if __name__ == '__main__':
             break
 
     crawler.click('#runSearchButton')
+    time.sleep(10)
 
     # Check it rendered all data properly
     count = crawler.get_text('#counterLabel')
@@ -71,9 +66,53 @@ if __name__ == '__main__':
 
     crawler.select_option('#lvDocuments_length select', '100')
 
-    for row in crawler.get_elements('#lvDocuments tbody tr'):
-    	url = None  # need to implement
-    	name = None  # need to implement
-    	year = None  # need to implement
+    all_pages_crawled = False
+    entity_type = None
+    while not all_pages_crawled:
+        for row in crawler.get_elements('#lvDocuments tbody tr'):
+            if crawler.get_elements('th', root=row):
+                continue
+            items = crawler.get_elements('td', root=row)
+            name = items[0].text
+            posted_date = items[2].text
+            render_url = crawler.get_attr('a', 'href', root=items[1])
+
+            if 'http' not in render_url:
+                render_url = 'https://emma.msrb.org/' + render_url.replace('../')
+
+            print(render_url)
+            crawler_detail = Crawler(config, 'msrb')
+            crawler_detail.get(render_url)
+            time.sleep(10)
+            if crawler_detail.assert_exists('#ctl00_mainContentArea_disclaimerContent_yesButton') is None:
+                crawler_detail.click('#ctl00_mainContentArea_disclaimerContent_yesButton')
+
+            # Move to detailed page
+            member_part = crawler_detail.get_elements('#memberlist tbody tr')
+            for member in member_part:
+                member_items = crawler_detail.get_elements('td', root=member)
+                url = crawler_detail.get_attr('a', 'href', root=member_items[0])
+                year = crawler_detail.get_text('#ruleMandatedDiv table tbody tr td')
+                year = year.split('for the year ended')[1].split('/')[-1]
+
+                if name == '-':
+                    name = crawler_detail.get_text('td', root=member)
+                    name = name.split('Filing -')[-1].split('.pdf')[0]
+                    name = re.sub(r'\d+', '', name).replace('-', '').strip()
+
+                print(name)
+                crawler_detail.download(url, '{}|{}.pdf'.format(name, year))
+                print("Downloaded {}|{}.pdf".format(name, year))
+            crawler_detail.close()
+
+        # Pagination
+        if not crawler.get_elements('.next.paginate_button.paginate_button_disabled'):
+            for page_instance in crawler.get_elements('.next.paginate_button'):
+                if crawler.get_text(page_instance) == 'Next':
+                    crawler.click(page_instance)
+                    time.sleep(10)
+                    break
+        else:
+            all_pages_crawled = True
 
     crawler.close()
