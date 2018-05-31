@@ -31,5 +31,19 @@
     
     "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
     "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
-    "sleeptime"             : 10
+
+    "sleeptime"             : 30,
+    
+    "server"                : "ftp.govwiki.info",
+    "port_comment"          : "port in next line should be integer value, not string, default is 21",
+    "port"                  : 21,
+    "username_comment"      : "example: someuser@govwiki.info",
+    "username"              : "staging@govwiki.info",
+    "password"              : [ASK SYSTEM ADMINISTRATOR]
+    
+    "fs_server"             : "https://cafr.file.core.windows.net",
+    "fs_username"           : "cafr",
+    "fs_password"           : [ASK SYSTEM ADMINISTRATOR],
+    "fs_share"              : "cafr",
+    "fs_directory_prefix"   : "test",
 }
