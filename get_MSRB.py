@@ -13,7 +13,7 @@ class Crawler(CoreCrawler):
     def _get_remote_filename(self, local_filename):
         entity_name, year = local_filename[:-4].split('|')
 
-        if 'city' or 'county' or 'state' in entity_name:
+        if 'city' or 'county' or 'cnty' or 'state' in entity_name:
             directory = 'General Purpose'
         elif 'school' in entity_name:
             directory = 'School District'
@@ -54,7 +54,6 @@ if __name__ == '__main__':
         text = crawler.get_text('label', root=row)
         if text == 'Audited Financial Statements or CAFR':
             crawler.click('#financialFilingCheckBox', root=row)
-            print(text)
             break
 
     crawler.click('#runSearchButton')
@@ -93,14 +92,16 @@ if __name__ == '__main__':
                 member_items = crawler_detail.get_elements('td', root=member)
                 url = crawler_detail.get_attr('a', 'href', root=member_items[0])
                 year = crawler_detail.get_text('#ruleMandatedDiv table tbody tr td')
-                year = year.split('for the year ended')[1].split('/')[-1]
+                if 'for the year ended':
+                    year = year.split('for the year ended')[1].split('/')[-1]
+                else:
+                    year = year.split('/')[-1]
 
                 if name == '-':
                     name = crawler_detail.get_text('td', root=member)
                     name = name.split('Filing -')[-1].split('.pdf')[0]
                     name = re.sub(r'\d+', '', name).replace('-', '').strip()
 
-                print(name)
                 crawler_detail.download(url, '{}|{}.pdf'.format(name, year))
                 print("Downloaded {}|{}.pdf".format(name, year))
             crawler_detail.close()
