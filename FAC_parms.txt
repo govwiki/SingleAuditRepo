@@ -1,19 +1,25 @@
 {
+    
+    "comment1_operating_system"  : "please enter one of the following keywords - windows, mac or linux",
+    "operating_system"      : "linux",
+    "path_to_chromedriver"  : "/usr/local/bin/chromedriver",
+    "path_to_script"        : "/home/seraphina/Documents/CONTRACTS/UPWORK/PDF_CRAWLING/get_fac/",
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
     "headlessMode"          : 0,
-    "rangefrom"             : "02/06/2017",
-    "rangeto"               : "02/07/2017",
+    
+    "rangefrom"             : "05/18/2018",
+    "rangeto"               : "05/20/2018",
     
     "comment1_directories"  : "make sure that all directories are previosly created",
     "comment2_directories"  : "example for linux and macos /home/someuser/somedirectory/",
     "comment3_directories"  : "example for windows D:\\data\\somedirectory\\",
-    "dir_in"                : "D:\\data\\upwork\\Marc_Joffe\\",
-    "dir_downloads"         : "D:\\data\\upwork\\Marc_Joffe\\downloads\\",
-    "dir_pdfs"              : "D:\\data\\upwork\\Marc_Joffe\\pdfs\\",
+    "dir_in"                : "/home/seraphina/Documents/CONTRACTS/UPWORK/PDF_CRAWLING/get_fac/IN/",
+    "dir_downloads"         : "/home/seraphina/Downloads/",
+    "dir_pdfs"              : "/home/seraphina/Documents/CONTRACTS/UPWORK/PDF_CRAWLING/get_fac/PDFS/",
     
     "usemarionette_comment" : "integer 0 will use default firefox, 1 will use geckodriver if properly installed",
-    "usemarionette"         : 1,
+    "usemarionette"         : 0,
     
     "todownload_comment1"   : "can be integer 0 to skip download or 1 to process download in get_FAC.py",
     "todownload_comment2"   : "in case for 0, it will process zip files stored in dir_downloads",
@@ -25,6 +31,7 @@
     
     "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
     "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
+
     "sleeptime"             : 30,
     
     "server"                : "ftp.govwiki.info",
