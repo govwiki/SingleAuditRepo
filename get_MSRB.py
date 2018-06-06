@@ -8,10 +8,8 @@ from utils import Crawler as CoreCrawler
 
 
 class Crawler(CoreCrawler):
-    abbr = 'MSRB'
-
     def _get_remote_filename(self, local_filename):
-        entity_name, year = local_filename[:-4].split('|')
+        abbr, entity_name, year = local_filename[:-4].split('|')
 
         if 'city' or 'county' or 'cnty' or 'state' in entity_name:
             directory = 'General Purpose'
@@ -19,7 +17,7 @@ class Crawler(CoreCrawler):
             directory = 'School District'
         else:
             directory = 'Special District'
-        filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
+        filename = '{} {} {}.pdf'.format(abbr, entity_name, year)
         return directory, filename
 
 
@@ -73,6 +71,10 @@ if __name__ == '__main__':
                 continue
             items = crawler.get_elements('td', root=row)
             name = items[0].text
+            if ',' in name:
+                name_list = name.split(',')[:-1]
+                name = ''.join(name_list)
+
             posted_date = items[2].text
             render_url = crawler.get_attr('a', 'href', root=items[1])
 
@@ -92,7 +94,7 @@ if __name__ == '__main__':
                 member_items = crawler_detail.get_elements('td', root=member)
                 url = crawler_detail.get_attr('a', 'href', root=member_items[0])
                 year = crawler_detail.get_text('#ruleMandatedDiv table tbody tr td')
-                if 'for the year ended':
+                if 'for the year ended' in year:
                     year = year.split('for the year ended')[1].split('/')[-1]
                 else:
                     year = year.split('/')[-1]
@@ -102,15 +104,17 @@ if __name__ == '__main__':
                     name = name.split('Filing -')[-1].split('.pdf')[0]
                     name = re.sub(r'\d+', '', name).replace('-', '').strip()
 
-                crawler_detail.download(url, '{}|{}.pdf'.format(name, year))
-                print("Downloaded {}|{}.pdf".format(name, year))
+                addition_name = crawler_detail.get_elements('#divCusip6List ul li')[0].text
+                abbr = addition_name.split(',')[-2].strip()
+
+                crawler_detail.download(url, '{}|{}|{}.pdf'.format(abbr, name, year))
             crawler_detail.close()
 
         # Pagination
         if not crawler.get_elements('.next.paginate_button.paginate_button_disabled'):
             for page_instance in crawler.get_elements('.next.paginate_button'):
-                if crawler.get_text(page_instance) == 'Next':
-                    crawler.click(page_instance)
+                if page_instance.text == 'Next':
+                    page_instance.click()
                     time.sleep(10)
                     break
         else:
