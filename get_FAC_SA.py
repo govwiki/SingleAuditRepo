@@ -43,12 +43,13 @@ global special_district
 global non_profit
 global miscellaneous
 
-general_purpose = 'General_Purpose'
-school_district = 'School_District'
-community_college_district = 'Community_College_District'
-special_district = 'Special_District'
-non_profit = 'Non_Profit'
-miscellaneous = 'Miscellaneous'
+general_purpose = r"General Purpose"
+school_district = r"School District"
+public_higher_education = r"Public Higher Education"
+community_college_district = r"Community College District"
+special_district = r"Special District"
+non_profit = r"Non-Profit"
+unclassified = r"Unclassified"
 
 
 url = dparameters["url"]
@@ -284,7 +285,7 @@ def classify_doc():
     process_cross_ref_file()
 
     dbkeys = [refs[rec]['DBkey'] for rec in refs]
-    classify = {'general_purpose': ['000', '100', '200', '300', '710', '700'], 'school_district': ['005', '105', '205', '305', '505', '605', '705', '715'], 'community_college_district': ['004', '104', '204', '304', '504', '604', '704', '714', '904'], 'special_district': ['001', '002', '003', '006', '007', '009', '101', '102', '103', '106', '107', '109', '201', '202', '203', '206', '207', '209', '301', '302', '303', '306', '307', '309', '401', '402', '403', '406', '407', '409', '600', '602', '603', '606', '607', '609', '701', '702', '703', '706', '707', '709', '711', '712', '713', '716', '717', '719'], 'non_profit': ['901', '902', '903', '905', '906', '907', '908', '909'], 'unknown': ['808', '888']}
+    classify = {'general_purpose': ['000', '100', '200', '300', '710', '700'], 'school_district': ['005', '105', '205', '305', '505', '605', '705', '715'], 'public_higher_education': ['004', '104', '204', '304', '504', '604', '704', '714', '904'], 'special_district': ['001', '002', '003', '006', '007', '009', '101', '102', '103', '106', '107', '109', '201', '202', '203', '206', '207', '209', '301', '302', '303', '306', '307', '309', '401', '402', '403', '406', '407', '409', '600', '602', '603', '606', '607', '609', '701', '702', '703', '706', '707', '709', '711', '712', '713', '716', '717', '719'], 'non_profit': ['901', '902', '903', '905', '906', '907', '908', '909'], 'unclassified': ['808', '888']}
     states = [['AL', 'Alabama'], ['AK', 'Alaska'], ['AS', 'America Samoa'], ['AZ', 'Arizona'], ['AR', 'Arkansas'], ['CA', 'California'], ['CO', 'Colorado'], ['CT', 'Connecticut'], ['DE', 'Delaware'], ['DC', 'District of Columbia'], ['FM', 'Micronesia1'], ['FL', 'Florida'], ['GA', 'Georgia'], ['GU', 'Guam'], ['HI', 'Hawaii'], ['ID', 'Idaho'], ['IL', 'Illinois'], ['IN', 'Indiana'], ['IA', 'Iowa'], ['KS', 'Kansas'], ['KY', 'Kentucky'], ['LA', 'Louisiana'], ['ME', 'Maine'], ['MH', 'Islands1'], ['MD', 'Maryland'], ['MA', 'Massachusetts'], ['MI', 'Michigan'], ['MN', 'Minnesota'], ['MS', 'Mississippi'], ['MO', 'Missouri'], ['MT', 'Montana'], ['NE', 'Nebraska'], ['NV', 'Nevada'], ['NH', 'New Hampshire'], ['NJ', 'New Jersey'], ['NM', 'New Mexico'], ['NY', 'New York'], ['NC', 'North Carolina'], ['ND', 'North Dakota'], ['OH', 'Ohio'], ['OK', 'Oklahoma'], ['OR', 'Oregon'], ['PW', 'Palau'], ['PA', 'Pennsylvania'], ['PR', 'Puerto Rico'], ['RI', 'Rhode Island'], ['SC', 'South Carolina'], ['SD', 'South Dakota'], ['TN', 'Tennessee'], ['TX', 'Texas'], ['UT', 'Utah'], ['VT', 'Vermont'], ['VI', 'Virgin Island'], ['VA', 'Virginia'], ['WA', 'Washington'], ['WV', 'West Virginia'], ['WI', 'Wisconsin'], ['WY', 'Wyoming']]
     codes = ['AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY']
 
@@ -325,18 +326,21 @@ def rename_and_move_files():
                     elif file_folder == 'school_district':
                         print(PATH + school_district + '/' + pdf_name)
                         os.rename(PATH + 'PDFS/' + pdf, PATH + school_district + '/' + pdf_name)
-                    elif file_folder == 'community_college_district':
-                        print(PATH + community_college_district + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + community_college_district + '/' + pdf_name)
+                    elif file_folder == 'public_higher_education':
+                        print(PATH + public_higher_education + '/' + pdf_name)
+                        os.rename(PATH + 'PDFS/' + pdf, PATH + public_higher_education + '/' + pdf_name)
                     elif file_folder == 'special_district':
                         print(PATH + special_district + '/' + pdf_name)
                         os.rename(PATH + 'PDFS/' + pdf, PATH + special_district + '/' + pdf_name)
                     elif file_folder == 'non_profit':
                         print(PATH + non_profit + '/' + pdf_name)
                         os.rename(PATH + 'PDFS/' + pdf, PATH + non_profit + '/' + pdf_name)
-                    else:
-                        print(PATH + miscellaneous + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + miscellaneous + '/' + pdf_name)
+                    elif file_folder == 'unclassified':
+                        print(PATH + unclassified + '/' + pdf_name)
+                        os.rename(PATH + 'PDFS/' + pdf, PATH + unclassified + '/' + pdf_name)
+                    elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
+                        print(PATH + community_college_district + '/' + pdf_name)
+                        os.rename(PATH + 'PDFS/' + pdf, PATH + community_college_district + '/' + pdf_name)
 
                 elif operating_system == 'windows':
                     if file_folder == 'general_purpose':
@@ -351,10 +355,10 @@ def rename_and_move_files():
                             os.rename(PATH + 'PDFS\\' + pdf, PATH + school_district + '\\' + pdf_name)
                         except:
                             pass
-                    elif file_folder == 'community_college_district':
+                    elif file_folder == 'public_higher_education':
                         try:
-                            print(PATH + community_college_district + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + community_college_district + '\\' + pdf_name)
+                            print(PATH + public_higher_education + '\\' + pdf_name)
+                            os.rename(PATH + 'PDFS\\' + pdf, PATH + public_higher_education + '\\' + pdf_name)
                         except:
                             pass
                     elif file_folder == 'special_district':
@@ -369,10 +373,16 @@ def rename_and_move_files():
                             os.rename(PATH + 'PDFS\\' + pdf, PATH + non_profit + '\\' + pdf_name)
                         except:
                             pass
-                    else:
+                    elif file_folder == 'unclassified':
                         try:
-                            print(PATH + miscellaneous + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + miscellaneous + '\\' + pdf_name)
+                            print(PATH + unclassified + '\\' + pdf_name)
+                            os.rename(PATH + 'PDFS\\' + pdf, PATH + unclassified + '\\' + pdf_name)
+                        except:
+                            pass
+                    elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
+                        try:
+                            print(PATH + community_college_district + '\\' + pdf_name)
+                            os.rename(PATH + 'PDFS\\' + pdf, PATH + community_college_district + '\\' + pdf_name)
                         except:
                             pass
 
