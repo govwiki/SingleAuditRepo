@@ -95,6 +95,10 @@ if __name__ == '__main__':
                         name = name.split(state)[0].strip()
                     break
 
+            if 'County Of' in name:
+                name = name.replace('County Of', '') + ' County'
+                name = name.strip()
+
             posted_date = items[2].text
             render_url = crawler.get_attr('a', 'href', root=items[1])
 
