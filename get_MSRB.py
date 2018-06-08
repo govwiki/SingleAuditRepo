@@ -11,8 +11,11 @@ class Crawler(CoreCrawler):
     def _get_remote_filename(self, local_filename):
         abbr, entity_name, year = local_filename[:-4].split('|')
 
-        if 'city' or 'county' or 'cnty' or 'state' in entity_name:
+        if 'county' or 'cnty' or 'state' in entity_name:
             directory = 'General Purpose'
+        elif 'city' in entity_name:
+            directory = 'General Purpose'
+            entity_name = entity_name.replace('City', '').replace('Of', '').strip()
         elif 'school' in entity_name:
             directory = 'School District'
         else:
@@ -65,21 +68,38 @@ if __name__ == '__main__':
 
     all_pages_crawled = False
     entity_type = None
+
+    states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado",
+              "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois",
+              "Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland",
+              "Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana",
+              "Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York",
+              "North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+              "Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah",
+              "Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
+
     while not all_pages_crawled:
         for row in crawler.get_elements('#lvDocuments tbody tr'):
             if crawler.get_elements('th', root=row):
                 continue
             items = crawler.get_elements('td', root=row)
-            name = items[0].text
+            name = items[0].text.replace('CNTY', 'COUNTY').title()
+
             if ',' in name:
                 name_list = name.split(',')[:-1]
                 name = ''.join(name_list)
+
+            for state in states:
+                if state in name:
+                    if not name.partition(' ')[0] == state:
+                        name = name.split(state)[0].strip()
+                    break
 
             posted_date = items[2].text
             render_url = crawler.get_attr('a', 'href', root=items[1])
 
             if 'http' not in render_url:
-                render_url = 'https://emma.msrb.org/' + render_url.replace('../')
+                render_url = 'https://emma.msrb.org/' + render_url.replace('../', '')
 
             print(render_url)
             crawler_detail = Crawler(config, 'msrb')
@@ -107,7 +127,8 @@ if __name__ == '__main__':
                 addition_name = crawler_detail.get_elements('#divCusip6List ul li')[0].text
                 abbr = addition_name.split(',')[-2].strip()
 
-                crawler_detail.download(url, '{}|{}|{}.pdf'.format(abbr, name, year))
+                if not os.path.isfile(downloads_path + '{}|{}|{}.pdf'.format(abbr, name, year)):
+                    crawler_detail.download(url, '{}|{}|{}.pdf'.format(abbr, name, year))
             crawler_detail.close()
 
         # Pagination
