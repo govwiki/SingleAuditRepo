@@ -31,6 +31,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
+from azure.storage.file import FileService, ContentSettings
 
 with open('FAC_parms.txt', 'r') as fp: 
     dparameters = json.load(fp)
@@ -66,6 +67,7 @@ path_to_chromedriver = dparameters["path_to_chromedriver"]
 operating_system = dparameters["operating_system"]
 dir_in = dparameters["dir_in"]
 dir_downloads = dparameters["dir_downloads"]
+dir_upload = dparameters["dir_upload"]
 dir_pdfs = dparameters["dir_pdfs"]
 fileshortnames = dparameters["fileshortnames"]
 sheetShortName = dparameters["sheetShortName"]
@@ -117,7 +119,12 @@ def download():
     
     options = webdriver.ChromeOptions() 
     options.add_argument("--start-maximized")
-    prefs = {"download.default_directory" : dir_downloads}
+    prefs = {
+            'download.default_directory': dir_downloads,
+            'download.prompt_for_download': False,
+            'download.directory_upgrade': True,
+            'plugins.always_open_pdf_externally': True,
+        }
     options.add_experimental_option("prefs",prefs)
 
     capabilities = DesiredCapabilities.CHROME
@@ -125,7 +132,7 @@ def download():
     if usemarionette:
         capabilities["marionette"] = True
 
-    driver = webdriver.Chrome(path_to_chromedriver,chrome_options=options)
+    driver = webdriver.Chrome(chrome_options=options)
     
     driver.implicitly_wait(timeout)
 
@@ -223,7 +230,7 @@ def get_pdfs():
 
 def process_summary_report():
     global refs
-    open_summary = openpyxl.load_workbook('Summary_Reports.xlsx', data_only=True)
+    open_summary = openpyxl.load_workbook(dir_upload+'Summary_Reports.xlsx', data_only=True)
     general_info = open_summary['GENERAL INFO']
     col_b = general_info['B'][1:]
     col_c = general_info['C'][1:] 
@@ -317,74 +324,37 @@ def rename_and_move_files():
             file_folder = [classify_file['record_' + str(i)]['folder'] for i, rec in enumerate(classify_file) if classify_file['record_' + str(i)]['dbkey'] == file_key]
             pdf_record = [classify_file['record_' + str(i)] for i, rec in enumerate(classify_file) if classify_file['record_' + str(i)]['dbkey'] == file_key]
             def move_to_folder():
+                
+                dest_filename = dir_upload
+                
+                if file_folder == 'general_purpose':
+                    dest_filename += general_purpose
+                elif file_folder == 'school_district':
+                    dest_filename += school_district
+                elif file_folder == 'public_higher_education':
+                    dest_filename += public_higher_education
+                elif file_folder == 'special_district':
+                    dest_filename += special_district
+                elif file_folder == 'non_profit':
+                    dest_filename += non_profit
+                elif file_folder == 'unclassified':
+                    dest_filename += unclassified
+                elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
+                    dest_filename += community_college_district
+
+                os.makedirs(dest_filename, exist_ok = True)
+                
                 # test for operating system
                 if operating_system == 'mac' or operating_system == 'linux':
-
-                    if file_folder == 'general_purpose':
-                        print(PATH + general_purpose + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + general_purpose + '/' + pdf_name)
-                    elif file_folder == 'school_district':
-                        print(PATH + school_district + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + school_district + '/' + pdf_name)
-                    elif file_folder == 'public_higher_education':
-                        print(PATH + public_higher_education + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + public_higher_education + '/' + pdf_name)
-                    elif file_folder == 'special_district':
-                        print(PATH + special_district + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + special_district + '/' + pdf_name)
-                    elif file_folder == 'non_profit':
-                        print(PATH + non_profit + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + non_profit + '/' + pdf_name)
-                    elif file_folder == 'unclassified':
-                        print(PATH + unclassified + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + unclassified + '/' + pdf_name)
-                    elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
-                        print(PATH + community_college_district + '/' + pdf_name)
-                        os.rename(PATH + 'PDFS/' + pdf, PATH + community_college_district + '/' + pdf_name)
-
+                    dest_filename += '/'
                 elif operating_system == 'windows':
-                    if file_folder == 'general_purpose':
-                        try:
-                            print(PATH + general_purpose + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + general_purpose + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif file_folder == 'school_district':
-                        try:
-                            print(PATH + school_district + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + school_district + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif file_folder == 'public_higher_education':
-                        try:
-                            print(PATH + public_higher_education + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + public_higher_education + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif file_folder == 'special_district':
-                        try:
-                            print(PATH + special_district + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + special_district + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif file_folder == 'non_profit':
-                        try:
-                            print(PATH + non_profit + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + non_profit + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif file_folder == 'unclassified':
-                        try:
-                            print(PATH + unclassified + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + unclassified + '\\' + pdf_name)
-                        except:
-                            pass
-                    elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
-                        try:
-                            print(PATH + community_college_district + '\\' + pdf_name)
-                            os.rename(PATH + 'PDFS\\' + pdf, PATH + community_college_district + '\\' + pdf_name)
-                        except:
-                            pass
+                    dest_filename += '\\'
+                dest_filename += pdf_name
+                print(dest_filename)
+                try:
+                    os.rename(dir_pdfs + pdf, dest_filename)
+                except Exception as e:
+                    print(e)                
 
             if file_folder != []:
                 file_folder = file_folder[0]
@@ -455,7 +425,11 @@ def extract_and_rename():
     loc_summary = glob.glob(dir_downloads + 'Summary_Reports.xlsx')
 
     # move file to current directory
-    os.rename(dir_downloads + 'Summary_Reports.xlsx', 'Summary_Reports.xlsx')
+    os.makedirs(dir_upload, exist_ok = True)
+    try:
+        os.rename(dir_downloads + 'Summary_Reports.xlsx', dir_upload + 'Summary_Reports.xlsx')
+    except Exception as e:
+        print(e)
 
     print("Extracting zip...")
 
@@ -476,7 +450,7 @@ def extract_and_rename():
 
         time.sleep(10)
         os.remove(myzipfile)
-    os.remove('Summary_Reports.xlsx')
+    os.remove(dir_upload + 'Summary_Reports.xlsx')
 
 def calculate_time():
     time2 = time.time()
@@ -485,9 +459,84 @@ def calculate_time():
     sec = time2 - time1 - hours * 3600 - minutes * 60
     print("processed in %dh:%dm:%ds" % (hours, minutes, sec))
 
+#######    
+# a function to upload files to Azure services
+def upload_to_file_storage():
+    # get a list of pdf files in dir_pdfs
+    template = dir_upload + "**"
+    if operating_system == 'mac' or operating_system == 'linux':
+        template += '/*.pdf'
+    elif operating_system == 'windows':
+        template += '\\*.pdf'
+    lpdfs = glob.glob(template, recursive = True)
+    lpdfs.sort()
+    #os.chdir(dir_pdfs) # needed for ftp.storbinary('STOR command work not with paths but with filenames
+    # connect to FTP server and upload files
+    try:
+        file_storage_url = dparameters['fs_server'].strip()
+        file_storage_user = dparameters['fs_username'].strip()
+        file_storage_pwd = dparameters['fs_password'].strip()
+        file_storage_share = dparameters['fs_share'].strip()
+        file_storage_dir = dparameters['fs_directory_prefix'].strip()
+        file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd) 
+        try:
+            if file_service.exists(file_storage_share):
+                print('Connection to Azure file storage successfully established...')
+                if len(file_storage_dir)>0 and not file_service.exists(file_storage_share, directory_name=file_storage_dir):
+                    file_service.create_directory(file_storage_share, file_storage_dir)
+                    print('Created directory:' + file_storage_dir)
+            else:
+                print('Failed to connect to Asure file storage, share does not exist: '+ file_storage_share)
+        except Exception as ex:
+            print('Error connecting to Azure file storage: ', ex)
+        
+        for pdffile in lpdfs:
+            dir, rpdffile = ntpath.split(pdffile)
+            
+            destinationdir = ''
+            
+            if (dir + '\\') == dir_upload or (dir + '/')== dir_upload:
+                destinationdir ='Unclassified'
+            else:
+                dir, destinationdir = ntpath.split(dir) 
+            
+            retries = 0
+            while retries<3:
+                try:
+                    path = pdffile
+                    print('Uploading {}'.format(path))
+                    filename = pdffile
+                    remote_filename = rpdffile
+                    if not remote_filename:
+                        return
+                    if len(file_storage_dir)>0:
+                        directory = file_storage_dir+'/'+destinationdir
+                    if not file_service.exists(file_storage_share,directory_name=directory):
+                        file_service.create_directory(file_storage_share,directory)
+                    print('Checking if {}/{} already exists'.format(directory, remote_filename))
+                    if file_service.exists(file_storage_share,directory_name=directory, file_name=remote_filename):
+                        print('{}/{} already exists'.format(directory, remote_filename))
+                        break
+                    file_service.create_file_from_path(
+                        file_storage_share,
+                        directory,
+                        remote_filename,
+                        path,
+                        content_settings=ContentSettings(content_type='application/pdf'))    
+                    print('{} uploaded'.format(path))
+                    retries =3
+                except Exception as e:
+                    print('Error uploading to Asure file storage,', str(e))
+                    retries+=1
+    except Exception as e:
+        print(str(e))
+        logging.critical(str(e))
+######
+
 if __name__ == '__main__':
-    if todownload:
-        download()
-    extract_and_rename()
-    calculate_time()
+    #if todownload:
+#        download()
+    #extract_and_rename()
+    #calculate_time()
+    upload_to_file_storage()
     print('Done.')
