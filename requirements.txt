@@ -18,3 +18,5 @@ selenium==3.11.0
 urllib3==1.22
 wget==3.2
 azure-storage-file==1.1.0
+openpyxl==2.5.3
+bs4==0.0.1
