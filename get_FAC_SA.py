@@ -85,6 +85,7 @@ if headlessMode:
     display.start()
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
+os.makedirs(dir_in, exist_ok = True)
 logging.basicConfig(filename=dir_in + 'get_FAClog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.debug('Started')
@@ -104,6 +105,7 @@ def is_download_completed():
             time.sleep(sleeptime)
 
 def download():
+    os.makedirs(dir_downloads, exist_ok = True)
     ''' function for downloading zip files from server'''
     def open_tag(css_selector):
         driver.find_element_by_css_selector(css_selector).click()
@@ -132,7 +134,8 @@ def download():
     if usemarionette:
         capabilities["marionette"] = True
 
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
+    #driver = webdriver.Chrome(chrome_options=options)
     
     driver.implicitly_wait(timeout)
 
@@ -534,9 +537,9 @@ def upload_to_file_storage():
 ######
 
 if __name__ == '__main__':
-    #if todownload:
-#        download()
-    #extract_and_rename()
-    #calculate_time()
+    if todownload:
+        download()
+    extract_and_rename()
+    calculate_time()
     upload_to_file_storage()
     print('Done.')
