@@ -16,6 +16,12 @@ class Crawler(CoreCrawler):
         elif 'city' in entity_name:
             directory = 'General Purpose'
             entity_name = entity_name.replace('City', '').replace('Of', '').strip()
+        elif 'village' in entity_name:
+            directory = 'General Purpose'
+            entity_name = entity_name.replace('Village', '').replace('Of', '').strip()
+        elif 'town' in entity_name:
+            directory = 'General Purpose'
+            entity_name = entity_name.replace('Town', '').replace('Of', '').strip()
         elif 'school' in entity_name:
             directory = 'School District'
         else:
@@ -58,7 +64,7 @@ if __name__ == '__main__':
             break
 
     crawler.click('#runSearchButton')
-    time.sleep(10)
+    time.sleep(20)
 
     # Check it rendered all data properly
     count = crawler.get_text('#counterLabel')
@@ -133,6 +139,7 @@ if __name__ == '__main__':
 
                 if not os.path.isfile(downloads_path + '{}|{}|{}.pdf'.format(abbr, name, year)):
                     crawler_detail.download(url, '{}|{}|{}.pdf'.format(abbr, name, year))
+                    crawler_detail.upload_to_file_storage('{}|{}|{}.pdf'.format(abbr, name, year))
             crawler_detail.close()
 
         # Pagination
