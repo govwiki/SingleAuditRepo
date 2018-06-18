@@ -1,12 +1,12 @@
 {
     
     "comment1_operating_system"  : "please enter one of the following keywords - windows, mac or linux",
-    "operating_system"      : "windows",
-    "path_to_chromedriver"  : "chromedriver",
-    "path_to_script"        : "D:\\tmp\\test\\",
+    "operating_system"      : "linux",
+    "path_to_chromedriver"  : "/usr/local/bin/chromedriver",
+    "path_to_script"        : "/tmp/fac/",
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
-    "headlessMode"          : 0,
+    "headlessMode"          : 1,
     
     "rangefrom"             : "05/18/2018",
     "rangeto"               : "05/20/2018",
@@ -14,10 +14,10 @@
     "comment1_directories"  : "make sure that all directories are previosly created",
     "comment2_directories"  : "example for linux and macos /home/someuser/somedirectory/",
     "comment3_directories"  : "example for windows D:\\data\\somedirectory\\",
-    "dir_in"                : "D:\\tmp\\test\\IN\\",
-    "dir_downloads"         : "D:\\tmp\\test\\Downloads\\",
-    "dir_pdfs"              : "D:\\tmp\\test\\PDFS\\",
-    "dir_upload"              : "D:\\tmp\\test\\upload\\",
+    "dir_in"                : "/tmp/fac/IN/",
+    "dir_downloads"         : "/tmp/fac/Downloads/",
+    "dir_pdfs"              : "/tmp/fac/PDFS/",
+    "dir_upload"              : "tmp/fac/upload/",
     
     "usemarionette_comment" : "integer 0 will use default firefox, 1 will use geckodriver if properly installed",
     "usemarionette"         : 0,
