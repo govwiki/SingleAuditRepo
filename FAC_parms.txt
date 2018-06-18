@@ -2,8 +2,8 @@
     
     "comment1_operating_system"  : "please enter one of the following keywords - windows, mac or linux",
     "operating_system"      : "windows",
-    "path_to_chromedriver"  : "/usr/local/bin/chromedriver",
-    "path_to_script"        : "D:\\test\\suka\\",
+    "path_to_chromedriver"  : "chromedriver",
+    "path_to_script"        : "D:\\tmp\\test\\",
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
     "headlessMode"          : 0,

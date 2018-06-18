@@ -32,6 +32,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from azure.storage.file import FileService, ContentSettings
+from utils import Logger as dbLog
+from datetime import datetime
 
 with open('FAC_parms.txt', 'r') as fp: 
     dparameters = json.load(fp)
@@ -75,6 +77,14 @@ headlessMode = dparameters["headlessMode"]
 todownload = dparameters["todownload"]
 sleeptime = dparameters["sleeptime"]
 usemarionette = dparameters["usemarionette"]
+
+#make dirs
+os.makedirs(dir_in,exist_ok=True)
+os.makedirs(dir_downloads,exist_ok=True)
+os.makedirs(dir_upload,exist_ok=True)
+os.makedirs(dir_pdfs,exist_ok=True)
+os.makedirs(PATH,exist_ok=True)
+
 
 os.environ["PATH"] += ":/data/Scrape"
 
@@ -132,7 +142,7 @@ def download():
     if usemarionette:
         capabilities["marionette"] = True
 
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
     
     driver.implicitly_wait(timeout)
 
@@ -342,13 +352,14 @@ def rename_and_move_files():
                 elif re.match('.*community\s*college.*', auditeename, re.IGNORECASE):
                     dest_filename += community_college_district
 
-                os.makedirs(dest_filename, exist_ok = True)
-                
                 # test for operating system
                 if operating_system == 'mac' or operating_system == 'linux':
-                    dest_filename += '/'
+                    dest_filename += '/' + year + '/'
                 elif operating_system == 'windows':
-                    dest_filename += '\\'
+                    dest_filename += '\\' + year + '\\'
+                
+                os.makedirs(dest_filename, exist_ok = True)    
+                
                 dest_filename += pdf_name
                 print(dest_filename)
                 try:
@@ -534,9 +545,30 @@ def upload_to_file_storage():
 ######
 
 if __name__ == '__main__':
-    #if todownload:
-#        download()
-    #extract_and_rename()
-    #calculate_time()
-    upload_to_file_storage()
-    print('Done.')
+    #collect data for logs
+    start_time = datetime.utcnow()
+    script_name = "get_FAC_SA.py"
+    result = 1
+    config_file = str(dparameters)
+    error_message = ""
+    
+    try:
+        if todownload:
+            download()
+        extract_and_rename()
+        calculate_time()
+        #upload_to_file_storage()
+        print('Done.')
+    except Exception as e:
+        result = 0
+        error_message = str(e)
+    end_time = datetime.utcnow()
+    
+    config = configparser.ConfigParser()
+    config.read('conf.ini')
+    log = dbLog(config)
+    try:
+        log.log(script_name, start_time, end_time, config_file, result, error_message)
+    finally:
+        log.close()
+    

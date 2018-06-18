@@ -10,8 +10,13 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from fileinput import filename
+from email._header_value_parser import Section
+import mysql.connector
+from _sqlite3 import connect
+
 
 class Crawler:
+
     def __init__(self, config, section):
         self.section = section
         self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
@@ -36,24 +41,24 @@ class Crawler:
         self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
         self.browser.implicitly_wait(10)
 
-        #self.ftp_connect()
+        # self.ftp_connect()
         self.file_storage_connect()
         
     def file_storage_connect(self):
-        self.file_storage_url = self.config.get('general','fs_server').strip()
-        self.file_storage_user = self.config.get('general','fs_username')
-        self.file_storage_pwd = self.config.get('general','fs_password')
-        self.file_storage_share = self.config.get('general','fs_share')
-        self.file_storage_dir = self.config.get('general','fs_directory_prefix')
+        self.file_storage_url = self.config.get('general', 'fs_server').strip()
+        self.file_storage_user = self.config.get('general', 'fs_username')
+        self.file_storage_pwd = self.config.get('general', 'fs_password')
+        self.file_storage_share = self.config.get('general', 'fs_share')
+        self.file_storage_dir = self.config.get('general', 'fs_directory_prefix')
         self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
         try:
             if self.file_service.exists(self.file_storage_share):
                 print('Connection to Azure file storage successfully established...')
-                if len(self.file_storage_dir)>0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
+                if len(self.file_storage_dir) > 0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
                     self.file_service.create_directory(self.file_storage_share, self.file_storage_dir)
                     print('Created directory:' + self.file_storage_dir)
             else:
-                print('Filaed to connect to Asure file storage, share does not exist: '+ self.file_storage_share)
+                print('Filaed to connect to Asure file storage, share does not exist: ' + self.file_storage_share)
         except Exception as ex:
             print('Error connecting to Azure file storage: ', ex)
         
@@ -167,8 +172,8 @@ class Crawler:
         # self.ftp.quit()
 
     def download(self, url, filename):
-        #print('Downloading', filename, self._get_remote_filename(filename))
-        #return
+        # print('Downloading', filename, self._get_remote_filename(filename))
+        # return
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
@@ -180,7 +185,7 @@ class Crawler:
         retry = 0
         file_size = 0
         file_name = ''
-        while file_size != content_length and retry<3:
+        while file_size != content_length and retry < 3:
             try:
                 r = urllib.request.urlopen(url, context=ctx)
                 content_length = r.length
@@ -189,15 +194,14 @@ class Crawler:
                     f.write(r.read())
                     file_size = os.stat(file_name).st_size
                     retry += 1
-                    #print('Attempt', retry, 'Downloaded', file_size, 'bytes of', content_length)
+                    # print('Attempt', retry, 'Downloaded', file_size, 'bytes of', content_length)
             except Exception as e:
-                retry +=1
+                retry += 1
                 print('Attempt', retry, 'ERROR: Downloading failed!', url, str(e))
                 try:  
                     os.remove(file_name)
                 except OSError:
                     pass 
-
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
@@ -209,15 +213,15 @@ class Crawler:
         os.system(command)
         return res_filename
 
-    def upload_to_ftp(self,filename):
+    def upload_to_ftp(self, filename):
         self.upload_to_file_storage(filename)
 
     def upload_to_ftp_old(self, filename):
         retries = 0
-        while retries<3:
+        while retries < 3:
             try:
                 path = os.path.join(self.downloads_path, filename)
-                #print('Uploading {}'.format(path))
+                # print('Uploading {}'.format(path))
                 pdf_file = open(path, 'rb')
                 remote_filename = self._get_remote_filename(filename)
                 if not remote_filename:
@@ -229,7 +233,7 @@ class Crawler:
                     self.ftp.mkd('/{}'.format(directory))
                     self.ftp.cwd('/{}'.format(directory))
                 if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
-                    #print('Checking if {}/{} already exists'.format(directory, filename))
+                    # print('Checking if {}/{} already exists'.format(directory, filename))
                     try:
                         self.ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
                         return
@@ -237,17 +241,16 @@ class Crawler:
                         pass
     
                 self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
-                #print('{} uploaded'.format(path))
+                # print('{} uploaded'.format(path))
                 pdf_file.close()
-                retries =3
+                retries = 3
             except Exception as e:
                 print('Error uploading to ftp,', str(e))
-                retries+=1
+                retries += 1
                 try:
                     self.ftp.voidcmd("NOOP")
                 except Exception as ex:
                     self.ftp_connect()
-
 
     def move_to_another(self, filename):
         try:
@@ -264,9 +267,9 @@ class Crawler:
         except Exception as e:
             print(str(e))
             
-    def upload_to_file_storage(self,filename):
+    def upload_to_file_storage(self, filename):
         retries = 0
-        while retries<3:
+        while retries < 3:
             try:
                 path = os.path.join(self.downloads_path, filename)
                 print('Uploading {}'.format(path))
@@ -277,17 +280,17 @@ class Crawler:
                     directory, filename, year = remote_filename
                 except:
                     directory, filename = remote_filename
-                if len(self.file_storage_dir)>0:
-                    directory = self.file_storage_dir+'/'+directory
-                if not self.file_service.exists(self.file_storage_share,directory_name=directory):
-                    self.file_service.create_directory(self.file_storage_share,directory)
+                if len(self.file_storage_dir) > 0:
+                    directory = self.file_storage_dir + '/' + directory
+                if not self.file_service.exists(self.file_storage_share, directory_name=directory):
+                    self.file_service.create_directory(self.file_storage_share, directory)
                 if year:
-                    directory = self.file_storage_dir+'/'+year
-                    if not self.file_service.exists(self.file_storage_share,directory_name=directory):
-                        self.file_service.create_directory(self.file_storage_share,directory)
+                    directory = self.file_storage_dir + '/' + year
+                    if not self.file_service.exists(self.file_storage_share, directory_name=directory):
+                        self.file_service.create_directory(self.file_storage_share, directory)
                 if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
                     print('Checking if {}/{} already exists'.format(directory, filename))
-                    if self.file_service.exists(self.file_storage_share,directory_name=directory, file_name=filename):
+                    if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
                         print('{}/{} already exists'.format(directory, filename))
                         return
                 self.file_service.create_file_from_path(
@@ -297,7 +300,55 @@ class Crawler:
                     path,
                     content_settings=ContentSettings(content_type='application/pdf'))    
                 print('{} uploaded'.format(path))
-                retries =3
+                retries = 3
             except Exception as e:
                 print('Error uploading to Asure file storage,', str(e))
-                retries+=1
+                retries += 1
+
+                
+class Logger:
+
+    def __init__(self, config):
+        self.db_url = config.get('sql', 'url', fallback='127.0.0.1')
+        self.db_user = config.get('sql', 'user', fallback='govwiki')
+        self.db_password = config.get('sql', 'password', fallback='test123')
+        self.db_name = config.get('sql', 'name', fallback='govwiki_production')
+        self.connect()
+        
+    def connect(self):
+        try:
+            self.connection = mysql.connector.connect(user=self.db_user, password=self.db_password,
+                              host=self.db_url,
+                              database=self.db_name) 
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Failed to connect to database: wrong credentials")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Failed to connect to database: Database does not exist ", self.db_name)
+            else:
+                print("Failed to connect to database:", err)
+        
+    def log(self, name, start, end, config, result, error):
+        statement = None
+        try:
+            statement = self.connection.cursor()
+        except mysql.connector.InterfaceError as e:
+            print("Error accessing database, trying to reconnect")
+            self.connect()
+        try:
+            query = ("INSERT INTO script_execution_log "
+                   "(name, start_time, end_time, config_file, result, error_message) "
+                   "VALUES (%s, %s, %s, %s, %s, %s)")
+            data = (name, start, end, config, result, error)
+            statement.execute(query, data)
+            self.connection.commit()
+        except mysql.connector.InterfaceError as e:
+            print("Error wringing log to database:", e)
+        finally:
+            statement.close()
+        
+    def close(self):
+        try:
+            self.connection.close()
+        except:
+            pass
