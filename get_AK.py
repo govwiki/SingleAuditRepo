@@ -7,7 +7,8 @@ class Crawler(CoreCrawler):
     abbr = 'AK'
 
     def _get_remote_filename(self, local_filename):
-        return 'General Purpose', '{} {}'.format(self.abbr, local_filename)
+        name, year = local_filename[:-4].split('@&')
+        return 'General Purpose', '{} {} {}'.format(self.abbr, name, year), year
 
 
 if __name__ == '__main__':
@@ -31,6 +32,6 @@ if __name__ == '__main__':
             url = crawler.get_attr('a', 'href', root=items[3])
             name = items[0].text
             year = items[2].text
-            crawler.download(url, '{} {}.pdf'.format(name, year))
-            crawler.upload_to_ftp('{} {}.pdf'.format(name, year))
+            crawler.download(url, '{}@&{}.pdf'.format(name, year))
+            crawler.upload_to_ftp('{}@&{}.pdf'.format(name, year))
     crawler.close()

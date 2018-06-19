@@ -21,3 +21,4 @@ azure-storage-file==1.1.0
 openpyxl==2.5.3
 bs4==0.0.1
 mysql-connector-python==8.0.11
+PyPDF2==1.26.0

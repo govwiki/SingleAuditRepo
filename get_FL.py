@@ -8,7 +8,7 @@ class Crawler(CoreCrawler):
     abbr = 'FL'
 
     def _get_remote_filename(self, local_filename):
-        entity_type, local_filename = local_filename.split('|')
+        entity_type, local_filename = local_filename.split('@#')
         parts = local_filename[:-4].split(' ')
         year = parts[0]
         name = ' '.join([p.capitalize() for p in parts[1:]])
@@ -21,7 +21,7 @@ class Crawler(CoreCrawler):
         elif entity_type == 'District School Boards':
             directory = 'School District'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -51,7 +51,7 @@ if __name__ == '__main__':
             for year in urls:
                 filenames = []
                 for url in urls[year]:
-                    filename = '{}|{}'.format(
+                    filename = '{}@#{}'.format(
                         entity_type,
                         urllib.parse.unquote(url).split('/')[-1]
                     )

@@ -7,14 +7,14 @@ class Crawler(CoreCrawler):
     abbr = 'IA'
 
     def _get_remote_filename(self, local_filename):
-        entity_type, name = local_filename.split('|')
+        entity_type, name, year = local_filename.split('@#')
         if entity_type in ('City', 'County'):
             directory = 'General Purpose'
         elif entity_type == 'School':
             directory = 'School District'
         else:
             directory = 'Special District'
-        return directory, '{} {}'.format(self.abbr, name.replace('/', ' '))
+        return directory, '{} {} {}.pdf'.format(self.abbr, name.replace('/', ' '), year), year
 
 
 if __name__ == '__main__':
@@ -36,7 +36,7 @@ if __name__ == '__main__':
             entity_type = cols[1].text.strip()
             entity_name = cols[0].text.strip()
             year = cols[3].text.strip().split('/')[-1]
-            filename = '{}|{} {}.pdf'.format(entity_type, entity_name, year)
+            filename = '{}@#{}@#{}'.format(entity_type, entity_name, year)
             crawler.download(url, filename)
             crawler.upload_to_ftp(filename)
         try:

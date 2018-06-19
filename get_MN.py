@@ -6,14 +6,14 @@ class Crawler(CoreCrawler):
     abbr = 'MN'
 
     def _get_remote_filename(self, local_filename):
-        year, name = local_filename[:-4].split('|')
+        year, name = local_filename[:-4].split('#$')
         name = name.split(' Financial Statements')[0]
         if name.endswith('County'):
             directory = 'General Purpose'
         else:
             directory = 'Special District'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -34,7 +34,7 @@ if __name__ == '__main__':
                 name = crawler.get_text('#ctl00_Header_h1Title')
                 if 'Financial Statements' in name:
                     url = crawler.get_attr('#content a', 'href')
-                    filename = '{}|{}.pdf'.format(year, name).replace('/', ' ')
+                    filename = '{}#${}.pdf'.format(year, name).replace('/', ' ')
                     crawler.download(url, filename)
                     crawler.upload_to_ftp(filename)
             crawler.close_current_tab()

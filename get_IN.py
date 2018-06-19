@@ -6,7 +6,7 @@ class Crawler(CoreCrawler):
     abbr = 'IN'
 
     def _get_remote_filename(self, local_filename):
-        entity_type, entity_name, year = local_filename[:-4].split('|')
+        entity_type, entity_name, year = local_filename[:-4].split('@#')
         if entity_type in ('City', 'Town'):
             directory = 'General Purpose'
             name = [w.capitalize() for w in entity_name.replace('{} OF '.format(entity_type.upper()), '').split(' ')]
@@ -22,7 +22,7 @@ class Crawler(CoreCrawler):
         else:
             directory = 'Special District'
             name = [w.capitalize() for w in entity_name.split(' ')]
-        return directory, '{} {} {}.pdf'.format(self.abbr, ' '.join(name).replace('/', ' '), year)
+        return directory, '{} {} {}.pdf'.format(self.abbr, ' '.join(name).replace('/', ' '), year), year
 
 
 if __name__ == '__main__':
@@ -41,7 +41,7 @@ if __name__ == '__main__':
             entity_type = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'unitType\' }"]', root=row)
             entity_name = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'unitName\' }"]', root=row)
             year = crawler.get_text('td[ng-class="{ \'active\': $ctrl.criteria.sortColumn === \'endDate\' }"]', root=row).split('-')[-1]
-            filename = '{}|{}|{}.pdf'.format(entity_type, entity_name, year).replace('/', ' ')
+            filename = '{}@#{}@#{}.pdf'.format(entity_type, entity_name, year).replace('/', ' ')
             crawler.download(url, filename)
             crawler.upload_to_ftp(filename)
         try:

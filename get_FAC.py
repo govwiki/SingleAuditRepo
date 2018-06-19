@@ -389,7 +389,7 @@ def upload_to_file_storage():
                 try:
                     path = os.path.join(dir_pdfs, rpdffile)
                     print('Uploading {}'.format(path))
-                    remote_filename = self._get_remote_filename(filename)
+                    remote_filename = rpdffile
                     if not remote_filename:
                         return
                     if len(self.file_storage_dir)>0:

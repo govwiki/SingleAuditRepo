@@ -6,13 +6,13 @@ class Crawler(CoreCrawler):
     abbr = 'AZ'
 
     def _get_remote_filename(self, local_filename):
-        entity_name, entity_type, year = local_filename[:-4].split('|')
+        entity_name, entity_type, year = local_filename[:-4].split('@#')
         if entity_type == 'County':
             directory = 'General Purpose'
         else:
             directory = 'Community College Districts'
         filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -33,8 +33,8 @@ if __name__ == '__main__':
                     else:
                         text = crawler.get_text('.views-field.views-field-field-community-college', root=row)
                     year = crawler.get_text('span[datatype="xsd:dateTime"]', root=row)[-4:]
-                    crawler.download(url, '{}|{}|{}.pdf'.format(text, entity_type, year))
-                    crawler.upload_to_ftp('{}|{}|{}.pdf'.format(text, entity_type, year))
+                    crawler.download(url, '{}@#{}@#{}.pdf'.format(text, entity_type, year))
+                    crawler.upload_to_ftp('{}@#{}@#{}.pdf'.format(text, entity_type, year))
             try:
                 crawler.get(crawler.get_attr('.next a', 'href'))
             except Exception:

@@ -285,7 +285,7 @@ class Crawler:
                 if not self.file_service.exists(self.file_storage_share, directory_name=directory):
                     self.file_service.create_directory(self.file_storage_share, directory)
                 if year:
-                    directory = self.file_storage_dir + '/' + year
+                    directory += '/' + year
                     if not self.file_service.exists(self.file_storage_share, directory_name=directory):
                         self.file_service.create_directory(self.file_storage_share, directory)
                 if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):

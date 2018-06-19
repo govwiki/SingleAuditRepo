@@ -9,7 +9,7 @@ class Crawler(CoreCrawler):
     abbr = 'GA'
 
     def _get_remote_filename(self, local_filename):
-        name, year = local_filename[:-4].split('|')
+        name, year = local_filename[:-4].split('@#')
         entity_type, entity_name = name.split(': ')
         if entity_type == 'City':
             directory = 'General Purpose'
@@ -26,7 +26,7 @@ class Crawler(CoreCrawler):
             directory = 'General Purpose'
             name = 'State of {}'.format(entity_name)
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -63,8 +63,8 @@ if __name__ == '__main__':
                 url = crawler.get_attr('.file a', 'href', root=row)
                 name = crawler.get_text('a', root=row)
                 year = crawler.get_text('.date-display-single', root=row)
-                crawler.download(url, '{}|{}.pdf'.format(name, year))
-                crawler.upload_to_ftp('{}|{}.pdf'.format(name, year))
+                crawler.download(url, '{}@#{}.pdf'.format(name, year))
+                crawler.upload_to_ftp('{}@#{}.pdf'.format(name, year))
             try:
                 crawler.click('.pager-next a')
             except Exception:

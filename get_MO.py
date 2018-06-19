@@ -6,13 +6,15 @@ import re
 import PyPDF2
 import requests
 from utils import Crawler as CoreCrawler
+import re
 
 
 class Crawler(CoreCrawler):
     abbr = 'MO'
 
     def _get_remote_filename(self, local_filename):
-        return 'General Purpose', '{} {}'.format(self.abbr, local_filename)
+        year = re.match('.*((?:19|20)\d{2}).pdf', local_filename).group(1)
+        return 'General Purpose', '{} {}'.format(self.abbr, local_filename), year
 
 
 if __name__ == '__main__':
@@ -77,6 +79,7 @@ if __name__ == '__main__':
             print('Manual Calc')
 
         updated_filename = '{} {}.pdf'.format(name, updated_year)
+        pdfFileObj.close()
         os.rename(downloaded_file_name, downloads_path + 'MO/' + updated_filename)
         print('Updated filename as ' + updated_filename)
 

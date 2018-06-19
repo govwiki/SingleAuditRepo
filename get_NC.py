@@ -6,10 +6,10 @@ class Crawler(CoreCrawler):
     abbr = 'NC'
 
     def _get_remote_filename(self, local_filename):
-        year, name = local_filename[:-4].split('|')
+        year, name = local_filename[:-4].split('#$')
         directory = 'Public Higher Education'
         filename = '{} {} {}.pdf'.format(self.abbr, '-'.join(name.split('-')[:-1]).strip(), year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -26,7 +26,7 @@ if __name__ == '__main__':
             if 'university' in name.lower():
                 url = crawler.get_attr('a[target="_blank"]', 'href', root=row)
                 year = crawler.get_text('td:last-child', root=row).split('/')[-1]
-                filename = '{}|{}.pdf'.format(year, name)
+                filename = '{}#${}.pdf'.format(year, name)
                 crawler.download(url, filename)
                 crawler.upload_to_ftp(filename)
         try:

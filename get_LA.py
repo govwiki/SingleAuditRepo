@@ -1,11 +1,14 @@
 import configparser
 from utils import Crawler as CoreCrawler
+import re
 
 
 class Crawler(CoreCrawler):
     abbr = 'LA'
 
     def _get_remote_filename(self, local_filename):
+        year = re.match('.*((?:19|20)\d{2}).pdf', local_filename).group(1)
+        
         if local_filename.startswith('City of '):
             directory = 'General Purpose'
             name = local_filename.replace('City of ', '')
@@ -16,7 +19,7 @@ class Crawler(CoreCrawler):
                 directory = 'Special District'
             name = local_filename
         filename = '{} {}'.format(self.abbr, name)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':

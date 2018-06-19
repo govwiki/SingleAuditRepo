@@ -8,7 +8,7 @@ class Crawler(CoreCrawler):
     abbr = 'MI'
 
     def _get_remote_filename(self, local_filename):
-        entity_name, entity_type, year = local_filename[:-4].split('|')
+        entity_name, entity_type, year = local_filename[:-4].split('#$')
         if (entity_type == 'County') or (entity_type == 'City') or \
                 (entity_type == 'Township') or (entity_type == 'Village'):
             directory = 'General Purpose'
@@ -17,7 +17,7 @@ class Crawler(CoreCrawler):
         else:
             directory = 'Special District'
         filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
-        return directory, filename
+        return directory, filename, year
 
 
 if __name__ == '__main__':
@@ -64,7 +64,7 @@ if __name__ == '__main__':
                 else:
                     name = '{} {} ({} County)'.format(name, entity_type, county.split('-')[0].title())
 
-            crawler.download(url, '{}|{}|{}.pdf'.format(name, entity_type, year))
-            crawler.upload_to_ftp('{}|{}|{}.pdf'.format(name, entity_type, year))
+            crawler.download(url, '{}#${}#${}.pdf'.format(name, entity_type, year))
+            crawler.upload_to_ftp('{}#${}#${}.pdf'.format(name, entity_type, year))
 
     crawler.close()
