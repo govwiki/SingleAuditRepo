@@ -560,10 +560,10 @@ if __name__ == '__main__':
     error_message = ""
     
     try:
-        #if todownload:
-            #download()
-        #extract_and_rename()
-        #calculate_time()
+        if todownload:
+            download()
+        extract_and_rename()
+        calculate_time()
         upload_to_file_storage()
         print('Done.')
     except Exception as e:
