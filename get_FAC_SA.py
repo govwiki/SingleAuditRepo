@@ -512,6 +512,7 @@ def upload_to_file_storage():
             if (dir + '\\') == dir_upload or (dir + '/')== dir_upload:
                 destinationdir ='Unclassified'
             else:
+                dir, year = ntpath.split(dir)
                 dir, destinationdir = ntpath.split(dir) 
             
             retries = 0
@@ -525,6 +526,9 @@ def upload_to_file_storage():
                         return
                     if len(file_storage_dir)>0:
                         directory = file_storage_dir+'/'+destinationdir
+                    if not file_service.exists(file_storage_share,directory_name=directory):
+                        file_service.create_directory(file_storage_share,directory)
+                    directory += '/' + year
                     if not file_service.exists(file_storage_share,directory_name=directory):
                         file_service.create_directory(file_storage_share,directory)
                     print('Checking if {}/{} already exists'.format(directory, remote_filename))
@@ -556,11 +560,11 @@ if __name__ == '__main__':
     error_message = ""
     
     try:
-        if todownload:
-            download()
-        extract_and_rename()
-        calculate_time()
-        #upload_to_file_storage()
+        #if todownload:
+            #download()
+        #extract_and_rename()
+        #calculate_time()
+        upload_to_file_storage()
         print('Done.')
     except Exception as e:
         result = 0
