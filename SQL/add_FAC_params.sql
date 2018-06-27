@@ -1,0 +1,21 @@
+INSERT INTO script_mapping (name,executable,param_categories) VALUES ('get_FAC_SA.py', 'TZ="America/Los_Angeles" /home/sibers/python_scripts/SingleAuditRepo/get_FAC.sh', 'fac');
+
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'operating_system', 'linux', 'please enter one of the following keywords - windows, mac or linux');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'path_to_chromedriver', '/usr/local/bin/chromedriver', 'where chrome driver executable is located');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'path_to_script', '/tmp/fac/', 'base folder where files will be stored');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'url', 'https://harvester.census.gov/facdissem/SearchA133.aspx', 'link to the site, where the documents are to be downloaded from');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'headlessMode', '1', 'integer headlessMode can be 1 or 0, for invisible or visible firefox');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'rangefrom', '05/18/2018', 'FAC Release Date (MM/DD/YYYY)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'rangeto', '05/20/2018', 'FAC Release Date (MM/DD/YYYY)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'dir_in', '/tmp/fac/IN/', 'forlder for log files');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'dir_downloads', '/tmp/fac/Downloads/', 'temp folder for downloaded files');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'dir_pdfs', '/tmp/fac/PDFS/', 'temp folder for extracted files');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'dir_upload', '/tmp/fac/upload/', 'folder for renamed files, ready for upload');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'usemarionette', '0', 'integer 0 will use default firefox, 1 will use geckodriver if properly installed');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'todownload', '1', 'in case for 0, it will process zip files stored in dir_downloads');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'sleeptime', '30', 'integer, this will be used while donwloading files (in cycles) also giving time for os.rename to be executed');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_server', 'https://cafr.file.core.windows.net', 'File Storage URL');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_username', 'cafr', 'File Storage username');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_share', 'cafr', 'File Storage share name');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_directory_prefix', 'test_fac', 'File Storage base folder for uploads (leave blank to upload to upload to general storage)');

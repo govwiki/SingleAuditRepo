@@ -12,7 +12,6 @@ from selenium.webdriver.support.ui import Select
 from fileinput import filename
 from email._header_value_parser import Section
 import mysql.connector
-from _sqlite3 import connect
 
 
 class Crawler:
@@ -306,7 +305,7 @@ class Crawler:
                 retries += 1
 
                 
-class Logger:
+class DbCommunicator:
 
     def __init__(self, config):
         self.db_url = config.get('sql', 'url', fallback='127.0.0.1')
@@ -346,6 +345,27 @@ class Logger:
             print("Error wringing log to database:", e)
         finally:
             statement.close()
+            
+    def readProps(self, category):
+        props = {}
+        statement = None
+        try:
+            statement = self.connection.cursor()
+        except mysql.connector.InterfaceError as e:
+            print("Error accessing database, trying to reconnect")
+            self.connect()
+        try:
+            query = ("SELECT `key`, value FROM script_parameters "
+                   "WHERE category = %s")
+            data = (category,)
+            statement.execute(query, data)
+            for (key,value) in statement:
+                props[key]=value
+        except Exception as e:
+            print("Error reading from database:", e)
+        finally:
+            statement.close()
+        return props
         
     def close(self):
         try:

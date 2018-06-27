@@ -32,11 +32,29 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from azure.storage.file import FileService, ContentSettings
-from utils import Logger as dbLog
+from utils import DbCommunicator as db
 from datetime import datetime
 
-with open('FAC_parms.txt', 'r') as fp: 
-    dparameters = json.load(fp)
+#collect data for logs
+start_time = datetime.utcnow()
+
+#read config from db
+script_name = "get_FAC_SA.py"
+config = configparser.ConfigParser()
+config.read('conf.ini')
+db = db(config)
+dparameters = {}
+try:
+    dparameters = db.readProps('fac')
+finally:
+    db.close()
+
+result = 1
+config_file = str(dparameters)
+error_message = ""
+
+#with open('FAC_parms.txt', 'r') as fp: 
+#    dparameters = json.load(fp)
 
 
 global general_purpose
@@ -71,12 +89,10 @@ dir_in = dparameters["dir_in"]
 dir_downloads = dparameters["dir_downloads"]
 dir_upload = dparameters["dir_upload"]
 dir_pdfs = dparameters["dir_pdfs"]
-fileshortnames = dparameters["fileshortnames"]
-sheetShortName = dparameters["sheetShortName"]
-headlessMode = dparameters["headlessMode"]
-todownload = dparameters["todownload"]
-sleeptime = dparameters["sleeptime"]
-usemarionette = dparameters["usemarionette"]
+headlessMode = int(dparameters["headlessMode"])
+todownload = int(dparameters["todownload"])
+sleeptime = int(dparameters["sleeptime"])
+usemarionette = int(dparameters["usemarionette"])
 
 #make dirs
 os.makedirs(dir_in,exist_ok=True)
@@ -552,13 +568,6 @@ def upload_to_file_storage():
 ######
 
 if __name__ == '__main__':
-    #collect data for logs
-    start_time = datetime.utcnow()
-    script_name = "get_FAC_SA.py"
-    result = 1
-    config_file = str(dparameters)
-    error_message = ""
-    
     try:
         if todownload:
             download()
@@ -571,11 +580,9 @@ if __name__ == '__main__':
         error_message = str(e)
     end_time = datetime.utcnow()
     
-    config = configparser.ConfigParser()
-    config.read('conf.ini')
-    log = dbLog(config)
     try:
-        log.log(script_name, start_time, end_time, config_file, result, error_message)
+        db.connect()
+        db.log(script_name, start_time, end_time, config_file, result, error_message)
     finally:
-        log.close()
+        db.close()
     
