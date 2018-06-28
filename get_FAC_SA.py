@@ -320,7 +320,6 @@ def classify_doc():
     process_summary_report()
     process_cross_ref_file()
 
-    dbkeys = [refs[rec]['DBkey'] for rec in refs]
     classify = {'general_purpose': ['000', '100', '200', '300', '710', '700'], 'school_district': ['005', '105', '205', '305', '505', '605', '705', '715'], 'public_higher_education': ['004', '104', '204', '304', '504', '604', '704', '714', '904'], 'special_district': ['001', '002', '003', '006', '007', '009', '101', '102', '103', '106', '107', '109', '201', '202', '203', '206', '207', '209', '301', '302', '303', '306', '307', '309', '401', '402', '403', '406', '407', '409', '600', '602', '603', '606', '607', '609', '701', '702', '703', '706', '707', '709', '711', '712', '713', '716', '717', '719'], 'non_profit': ['901', '902', '903', '905', '906', '907', '908', '909'], 'unclassified': ['808', '888']}
     states = [['AL', 'Alabama'], ['AK', 'Alaska'], ['AS', 'America Samoa'], ['AZ', 'Arizona'], ['AR', 'Arkansas'], ['CA', 'California'], ['CO', 'Colorado'], ['CT', 'Connecticut'], ['DE', 'Delaware'], ['DC', 'District of Columbia'], ['FM', 'Micronesia1'], ['FL', 'Florida'], ['GA', 'Georgia'], ['GU', 'Guam'], ['HI', 'Hawaii'], ['ID', 'Idaho'], ['IL', 'Illinois'], ['IN', 'Indiana'], ['IA', 'Iowa'], ['KS', 'Kansas'], ['KY', 'Kentucky'], ['LA', 'Louisiana'], ['ME', 'Maine'], ['MH', 'Islands1'], ['MD', 'Maryland'], ['MA', 'Massachusetts'], ['MI', 'Michigan'], ['MN', 'Minnesota'], ['MS', 'Mississippi'], ['MO', 'Missouri'], ['MT', 'Montana'], ['NE', 'Nebraska'], ['NV', 'Nevada'], ['NH', 'New Hampshire'], ['NJ', 'New Jersey'], ['NM', 'New Mexico'], ['NY', 'New York'], ['NC', 'North Carolina'], ['ND', 'North Dakota'], ['OH', 'Ohio'], ['OK', 'Oklahoma'], ['OR', 'Oregon'], ['PW', 'Palau'], ['PA', 'Pennsylvania'], ['PR', 'Puerto Rico'], ['RI', 'Rhode Island'], ['SC', 'South Carolina'], ['SD', 'South Dakota'], ['TN', 'Tennessee'], ['TX', 'Texas'], ['UT', 'Utah'], ['VT', 'Vermont'], ['VI', 'Virgin Island'], ['VA', 'Virginia'], ['WA', 'Washington'], ['WV', 'West Virginia'], ['WI', 'Wisconsin'], ['WY', 'Wyoming']]
     codes = ['AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY']
@@ -329,10 +328,10 @@ def classify_doc():
 
     for k, record in enumerate(cross_items):
         dbkey = int(cross_items['cross_item_' + str(k)]['dbkey'])
-        num1 = dbkeys.index(dbkey)
-        part_1 = refs['item_' + str(num1)]
+        part_1 = next((refs[item] for item in refs if refs[item]['DBkey'] == dbkey), -1)
         part_2 = cross_items[record]
         part_2.update(part_1)
+        print(part_2)
         del part_2['DBkey']
         del part_2['EIN']
         entity_code = part_2['entity_code']
