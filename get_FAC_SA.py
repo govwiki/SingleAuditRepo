@@ -35,6 +35,17 @@ from azure.storage.file import FileService, ContentSettings
 from utils import DbCommunicator as db
 from datetime import datetime
 
+#parse command line args
+rangefrom = ""
+rangeto = ""
+if len(sys.argv)>=3:
+    date_from = sys.argv[1] 
+    date_to = sys.argv[2]
+    date_pattern = re.compile(r"\d\d/\d\d/\d\d\d\d")
+    if (date_pattern.match(date_from) and date_pattern.match(date_to)):
+        rangefrom = date_from
+        rangeto = date_to
+
 #collect data for logs
 start_time = datetime.utcnow()
 
@@ -74,11 +85,13 @@ unclassified = r"Unclassified"
 
 
 url = dparameters["url"]
-rangefrom = dparameters["rangefrom"]
+if rangefrom == "":
+    rangefrom = dparameters["rangefrom"]
 if rangefrom == "99/99/9999":
     prevdaystr = str(date.today() - timedelta(days=2))
     rangefrom = prevdaystr[5:7] + "/" + prevdaystr[8:10] + "/" + prevdaystr[0:4]
-rangeto = dparameters["rangeto"]
+if rangeto == "":
+    rangeto = dparameters["rangeto"]
 if rangeto == "99/99/9999":
     todaystr = str(date.today())
     rangeto = todaystr[5:7] + "/" + todaystr[8:10] + "/" + todaystr[0:4]
@@ -327,17 +340,17 @@ def classify_doc():
     classify_file = {}
 
     for k, record in enumerate(cross_items):
-        dbkey = int(cross_items['cross_item_' + str(k)]['dbkey'])
-        part_1 = next((refs[item] for item in refs if refs[item]['DBkey'] == dbkey), -1)
+        dbkey = int(cross_items[record]['dbkey'])
+        part_1 = next((refs[item] for item in refs if refs[item]['DBkey'] == dbkey), None)
         part_2 = cross_items[record]
         part_2.update(part_1)
-        print(part_2)
         del part_2['DBkey']
         del part_2['EIN']
         entity_code = part_2['entity_code']
         folder = [e for e in classify if entity_code in classify[e]][0]
         part_2['folder'] = folder
         classify_file['record_' + str(k)] = part_2
+
 
     classify_general = [['State', 'State-Wide', '000'], ['County', 'County-General Purpose Government', '100'], ['Municipality', 'Municipality-General Purpose Government', '200'], ['Township', 'Township-General Purpose Government', '300'], ['Territory Local', 'Territory Local General Purpose Government', '710'], ['Territory', 'Territory-Wide', '700']]
     general = ['000', '100', '200', '300', '710', '700']
