@@ -1,6 +1,6 @@
 #get current date
-TODAY = `date +%m/%d/%Y`
-YESTERDAY = `date +%m/%d/%Y "yesterday"`
+TODAY=`date +%m/%d/%Y`
+YESTERDAY=`date +%m/%d/%Y -d yesterday`
 
 #change working folder
 cd /home/sibers/python_scripts/SingleAuditRepo
