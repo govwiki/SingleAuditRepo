@@ -554,6 +554,8 @@ def upload_to_file_storage():
                         return
                     if len(file_storage_dir)>0:
                         directory = file_storage_dir+'/'+destinationdir
+                    else:
+                        directory = destinationdir
                     if not file_service.exists(file_storage_share,directory_name=directory):
                         file_service.create_directory(file_storage_share,directory)
                     directory += '/' + year
