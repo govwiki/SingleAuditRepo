@@ -3,6 +3,7 @@ import ssl
 import sys
 import time
 import urllib.request
+#import urllib.parse
 from azure.storage.file import FileService, ContentSettings
 from ftplib import FTP, error_perm
 from pyvirtualdisplay import Display
@@ -12,6 +13,7 @@ from selenium.webdriver.support.ui import Select
 from fileinput import filename
 from email._header_value_parser import Section
 import mysql.connector
+import re
 
 
 class Crawler:
@@ -372,3 +374,69 @@ class DbCommunicator:
             self.connection.close()
         except:
             pass
+        
+class FilenameManager:
+    
+    def __init__(self):
+        #Directory and file component names must be no more than 255 characters in length.
+        self.azure_max_length = 255
+        
+        #Directory names cannot end with the forward slash character (/). If provided, it will be automatically removed.
+        #File names must not end with the forward slash character (/).
+        self.azure_forbid_in_end = ['/',]
+        
+        #Reserved URL characters must be properly escaped.
+        self.azure_escape = [';', '/', '?', ':', '@', '=', '&',]
+        
+        #The following characters are not allowed: " \ / : | < > * ?        
+        self.azure_forbid_symbol = ['"', '\\', ':', '|', '<', '>', '*', '?',]
+        
+        #The following file names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..).
+        self.azure_forbid_filename = ['LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'PRN', 'AUX', 'NUL', 'CON', 'CLOCK$', '.', '..',]        
+
+    def azure_check_length(self, name):
+        new_name = name
+        if len(name)>self.azure_max_length:
+            start = name[:self.max_length-9]
+            end = name[-8:]
+            new_name = start+" "+end
+        return new_name
+    
+    def azure_check_unicode(self, name):
+        #Illegal URL path characters not allowed. Code points like \uE000, while valid in NTFS filenames, are not valid Unicode characters. In addition, some ASCII or Unicode characters, like control characters (0x00 to 0x1F, \u0081, etc.), are also not allowed. For rules governing Unicode strings in HTTP/1.1 see RFC 2616, Section 2.2: Basic Rules and RFC 3987.
+        new_name = re.sub("U\+00\d(\d|[A-F])","", name)
+        return new_name
+    
+    def azure_check_forbidden_symbols(self,name):
+        new_name = self.azure_check_unicode(name)
+        for item in self.azure_forbid_symbol:
+            new_name = new_name.replace(item,"_")
+        return new_name
+
+    def azure_check_forbidden_names(self,name):
+        new_name = name
+        if name in self.azure_forbid_filename:
+            new_name = name+'_1.pdf'
+        return new_name
+            
+    def azure_check_ending(self, name):
+        new_name = name
+        if name[-1:] in self.azure_forbid_in_end:
+            new_name = name[:-1]
+        return new_name
+    
+    def azure_escape_reserved_symbols(self,name):
+        #new_name = urllib.parse.quote(name)
+        # it turns out Azure doesn't transform escaped sequences back to symbols, thus we just remove them
+        new_name = name
+        for item in self.azure_escape:
+            new_name = new_name.replace(item,"_")
+        return new_name
+    
+    def azure_validate_filename(self,name):
+        new_name = self.azure_check_forbidden_symbols(name)
+        new_name = self.azure_check_ending(new_name)
+        new_name = self.azure_escape_reserved_symbols(new_name)
+        new_name = self.azure_check_length(new_name)
+        new_name = self.azure_check_forbidden_names(new_name)
+        return new_name

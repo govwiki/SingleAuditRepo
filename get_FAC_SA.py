@@ -33,6 +33,7 @@ from selenium.webdriver.support.ui import Select
 from bs4 import BeautifulSoup
 from azure.storage.file import FileService, ContentSettings
 from utils import DbCommunicator as db
+from utils import FilenameManager
 from datetime import datetime
 
 #parse command line args
@@ -504,6 +505,9 @@ def calculate_time():
 #######    
 # a function to upload files to Azure services
 def upload_to_file_storage():
+    #init file manager
+    fnm = FilenameManager()
+    
     # get a list of pdf files in dir_pdfs
     template = dir_upload + "**"
     if operating_system == 'mac' or operating_system == 'linux':
@@ -549,7 +553,7 @@ def upload_to_file_storage():
                     path = pdffile
                     print('Uploading {}'.format(path))
                     filename = pdffile
-                    remote_filename = rpdffile
+                    remote_filename = fnm.azure_validate_filename(rpdffile)
                     if not remote_filename:
                         return
                     if len(file_storage_dir)>0:
