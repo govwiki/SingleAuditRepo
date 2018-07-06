@@ -62,6 +62,10 @@ finally:
     db.close()
 
 result = 1
+if rangefrom != "":
+    dparameters["rangefrom"] = rangefrom
+if rangeto != "":
+    dparameters["rangeto"] = rangeto
 config_file = str(dparameters)
 error_message = ""
 
