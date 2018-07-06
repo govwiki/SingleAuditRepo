@@ -389,7 +389,7 @@ class FilenameManager:
         self.azure_escape = [';', '/', '?', ':', '@', '=', '&',]
         
         #The following characters are not allowed: " \ / : | < > * ?        
-        self.azure_forbid_symbol = ['"', '\\', ':', '|', '<', '>', '*', '?',]
+        self.azure_forbid_symbol = ['"', '\\', ':', '|', '<', '>', '*', '?', '\a', '\b', '\cx', '\e', '\f', '\M-\C-x', '\n', '\r', '\t', '\v',]
         
         #The following file names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..).
         self.azure_forbid_filename = ['LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'PRN', 'AUX', 'NUL', 'CON', 'CLOCK$', '.', '..',]        
