@@ -369,6 +369,107 @@ class DbCommunicator:
             statement.close()
         return props
         
+    def saveFileStatus(self, **kwargs):
+        result = None
+        if kwargs is not None:
+            statement = None
+            try:
+                statement = self.connection.cursor()
+            except mysql.connector.InterfaceError as e:
+                print("Error accessing database, trying to reconnect")
+                self.connect()
+            query = None
+            data = None 
+            if "id" in kwargs:
+                query = "UPDATE script_file_status SET "
+                i = 0
+                for key in kwargs:
+                    if key == "id":
+                        pass
+                    elif i == 0:
+                        query += key+" = %s"
+                        data = (kwargs[key],)
+                        i+=1
+                    else:
+                          query += ", " + key + " = %s"
+                          data += (kwargs[key],)
+                          i+=1
+                if i > 0:
+                    query += " WHERE id = %s"
+                    data += (kwargs["id"],)
+                else:
+                    query = None
+                    data = None
+            else:
+                query = "INSERT INTO script_file_status ("
+                data = None
+                query_values = "("
+                i = 0
+                for key in kwargs:
+                    if i == 0:
+                        query += key
+                        query_values +="%s"
+                        data = (kwargs[key],)
+                        i+=1
+                    else:
+                        query += ", "+key
+                        query_values +=",%s"
+                        data += (kwargs[key],)
+                        i+=1
+                if i>0:
+                    query += ") VALUES " + query_values + ")"
+                else:
+                    query = None
+                    data = None
+            if query is not None:
+                try:
+                    statement.execute(query, data)
+                    if "id" in kwargs:
+                        result = kwargs["id"]
+                    else:
+                        result = statement.lastrowid
+                    self.connection.commit()
+                except Exception as e:
+                    print("Error reading from database:", e)
+                finally:
+                    statement.close()
+        return result
+    
+    def readFileStatus(self, **kwargs):
+        result = None
+        if kwargs is not None:
+            statement = None
+            try:
+                statement = self.connection.cursor()
+            except mysql.connector.InterfaceError as e:
+                print("Error accessing database, trying to reconnect")
+                self.connect()
+            query = "SELECT * FROM script_file_status WHERE "
+            data = None
+            i = 0
+            for key in kwargs:
+                if i == 0:
+                    query += key +" = %s"
+                    data = (kwargs[key],)
+                    i+=1
+                else:
+                    query += " AND "+key+" = %s"
+                    data += (kwargs[key],)
+                    i+=1
+            if i == 0:
+                query = None
+            if query is not None:
+                try:
+                    statement.execute(query, data)
+                    for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status) in statement:
+                        result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name, 'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name, 'file_status': file_status}
+                        break
+                except Exception as e:
+                    print("Error reading from database:", e)
+                finally:
+                    statement.close()
+        return result
+    
     def close(self):
         try:
             self.connection.close()
