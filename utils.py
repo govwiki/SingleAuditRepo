@@ -18,15 +18,30 @@ import re
 
 class Crawler:
 
-    def __init__(self, config, section):
+    def __init__(self, config, section, script_name = ''):
+        self.script_name = script_name
+        self.db = DbCommunicator(config)
         self.section = section
-        self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
+        self.dbparams = self.db.readProps(section)
+        self.dbparams.update(self.db.readProps('general'))
+        if self.dbparams is not None and 'downloads_path' in self.dbparams:
+            self.downloads_path = self.dbparams['downloads_path']
+        else:
+            self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
+        if self.dbparams is not None and 'overwrite_remote_files' in self.dbparams:
+            self.overwrite_remote_files = self.dbparams['overwrite_remote_files']=='True'
+        else:
+            self.overwrite_remote_files = config.getboolean(self.section, 'overwrite_remote_files', fallback=False)
         if not os.path.exists(self.downloads_path):
             os.makedirs(self.downloads_path)
         elif not os.path.isdir(self.downloads_path):
             print('ERROR:{} downloads_path parameter points to file!'.format(section))
             sys.exit(1)
-        if config.getboolean('general', 'headless_mode', fallback=False):
+        if self.dbparams is not None and 'headless_mode' in self.dbparams:
+            self.headless_mode = self.dbparams['headless_mode']=='True'
+        else:
+            self.headless_mode = config.getboolean('general', 'headless_mode', fallback=False)
+        if self.headless_mode:
             display = Display(visible=0, size=(1920, 1080))
             display.start()
         self.config = config
@@ -46,11 +61,26 @@ class Crawler:
         self.file_storage_connect()
         
     def file_storage_connect(self):
-        self.file_storage_url = self.config.get('general', 'fs_server').strip()
-        self.file_storage_user = self.config.get('general', 'fs_username')
-        self.file_storage_pwd = self.config.get('general', 'fs_password')
-        self.file_storage_share = self.config.get('general', 'fs_share')
-        self.file_storage_dir = self.config.get('general', 'fs_directory_prefix')
+        if self.dbparams is not None and 'fs_server' in self.dbparams:
+            self.file_storage_url = self.dbparams['fs_server']
+        else:
+            self.file_storage_url = self.config.get('general', 'fs_server').strip()
+        if self.dbparams is not None and 'fs_username' in self.dbparams:
+            self.file_storage_user = self.dbparams['fs_username']
+        else:
+            self.file_storage_user = self.config.get('general', 'fs_username')
+        if self.dbparams is not None and 'fs_password' in self.dbparams:
+            self.file_storage_pwd = self.dbparams['fs_password']
+        else:
+            self.file_storage_pwd = self.config.get('general', 'fs_password')
+        if self.dbparams is not None and 'fs_share' in self.dbparams:
+            self.file_storage_share = self.dbparams['fs_share']
+        else:
+            self.file_storage_share = self.config.get('general', 'fs_share')
+        if self.dbparams is not None and 'fs_directory_prefix' in self.dbparams:
+            self.file_storage_dir = self.dbparams['fs_directory_prefix']
+        else:
+            self.file_storage_dir = self.config.get('general', 'fs_directory_prefix')
         self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
         try:
             if self.file_service.exists(self.file_storage_share):
@@ -170,6 +200,7 @@ class Crawler:
 
     def close(self):
         self.browser.quit()
+        self.db.close()
         # self.ftp.quit()
 
     def download(self, url, filename):
@@ -202,7 +233,11 @@ class Crawler:
                 try:  
                     os.remove(file_name)
                 except OSError:
-                    pass 
+                    pass
+        if file_size == content_length:
+            self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
+        else:
+            self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'None')
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
@@ -233,7 +268,7 @@ class Crawler:
                 except Exception:
                     self.ftp.mkd('/{}'.format(directory))
                     self.ftp.cwd('/{}'.format(directory))
-                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                if not self.overwrite_remote_files:
                     # print('Checking if {}/{} already exists'.format(directory, filename))
                     try:
                         self.ftp.retrbinary('RETR {}'.format(filename), lambda x: x)
@@ -269,18 +304,28 @@ class Crawler:
             print(str(e))
             
     def upload_to_file_storage(self, filename):
+        fnm = FilenameManager()
         retries = 0
         while retries < 3:
             try:
                 path = os.path.join(self.downloads_path, filename)
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Uploaded')
+                if file_details is not None:
+                    print('File {} was already uploaded before'.format(filename))
+                    retries = 3
+                    break
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Downloaded')
                 print('Uploading {}'.format(path))
                 remote_filename = self._get_remote_filename(filename)
+                old_filename = filename
+                directory = None
                 if not remote_filename:
                     return
                 try:
                     directory, filename, year = remote_filename
                 except:
                     directory, filename = remote_filename
+                filename = fnm.azure_validate_filename(filename)
                 if len(self.file_storage_dir) > 0:
                     directory = self.file_storage_dir + '/' + directory
                 if not self.file_service.exists(self.file_storage_share, directory_name=directory):
@@ -289,7 +334,7 @@ class Crawler:
                     directory += '/' + year
                     if not self.file_service.exists(self.file_storage_share, directory_name=directory):
                         self.file_service.create_directory(self.file_storage_share, directory)
-                if not self.config.getboolean(self.section, 'overwrite_remote_files', fallback=False):
+                if not self.overwrite_remote_files:
                     print('Checking if {}/{} already exists'.format(directory, filename))
                     if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
                         print('{}/{} already exists'.format(directory, filename))
@@ -299,7 +344,11 @@ class Crawler:
                     directory,
                     filename,
                     path,
-                    content_settings=ContentSettings(content_type='application/pdf'))    
+                    content_settings=ContentSettings(content_type='application/pdf'))
+                if file_details is None:
+                    self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                else:
+                    self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
                 print('{} uploaded'.format(path))
                 retries = 3
             except Exception as e:
@@ -453,7 +502,7 @@ class DbCommunicator:
                     data = (kwargs[key],)
                     i+=1
                 else:
-                    query += " AND "+key+" = %s"
+                    query += " AND "+key+" = %s LIMIT 1"
                     data += (kwargs[key],)
                     i+=1
             if i == 0:
@@ -463,7 +512,6 @@ class DbCommunicator:
                     statement.execute(query, data)
                     for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status) in statement:
                         result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name, 'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name, 'file_status': file_status}
-                        break
                 except Exception as e:
                     print("Error reading from database:", e)
                 finally:
