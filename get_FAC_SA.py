@@ -585,6 +585,7 @@ try:
                                     db.saveFileStatus(script_name = script_name, file_original_name = pdffile, file_upload_path=directory, file_upload_name=remote_filename, file_status='Uploaded')
                                 else:
                                     db.saveFileStatus(id=file_details["id"], file_upload_path=directory,file_upload_name=remote_filename,file_status='Uploaded')
+                                os.remove(pdffile)
                                 break
                             file_service.create_file_from_path(
                                 file_storage_share,
