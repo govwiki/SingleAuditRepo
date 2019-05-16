@@ -598,11 +598,13 @@ try:
                                 db.saveFileStatus(id=file_details["id"], file_upload_path=directory,file_upload_name=remote_filename,file_status='Uploaded')
                             print('{}/{} uploaded'.format(directory, remote_filename))
                             retries =3
+                            os.remove(pdffile)
                         except Exception as e:
                             print('Error uploading to Asure file storage,', str(e))
                             retries+=1
                 else:
                     print('File {} was uploaded before'.format(file_details["file_original_name"]))
+                    os.remove(pdffile)
         except Exception as e:
             print(str(e))
             logging.critical(str(e))
