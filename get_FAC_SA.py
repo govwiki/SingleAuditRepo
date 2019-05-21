@@ -639,6 +639,7 @@ try:
         except Exception as e:
             result = 0
             error_message = str(e)
+            print(error_message)
         end_time = datetime.utcnow()
         
         db.log(script_name, start_time, end_time, config_file, result, error_message)
