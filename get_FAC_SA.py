@@ -38,6 +38,8 @@ from datetime import datetime
 
 global db
 
+global file_index
+
 #parse command line args
 rangefrom = ""
 rangeto = ""
@@ -234,8 +236,9 @@ try:
         audit_reports_innerHTML = driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
         innersoup = BeautifulSoup(audit_reports_innerHTML, "html.parser")
         laudit_tags = innersoup.findAll("option")
-        laudit = []
-    
+        laudit = []    
+        
+        
         for option in laudit_tags:
             if option["value"].startswith("Audit Reports"):
                 laudit.append(option["value"])
@@ -247,18 +250,27 @@ try:
     
         if bnum:
             # in this for loop we are selecting by groups of 100
-            for audit in laudit:
-                del audit_reports_select
-                audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
-                audit_reports_select.select_by_visible_text(audit)
-                # now we click on Download Audits button
-                open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
-                print('Downloading ' + audit)
+            size = len(laudit)
+            if file_index >= size:
+                file_index = -1
+            else:
+                file_index += 1
+                i = 0
+                
+                for audit in laudit:
+                    i += 1
+                    if i==file_index:
+                        del audit_reports_select
+                        audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
+                        audit_reports_select.select_by_visible_text(audit)
+                        # now we click on Download Audits button
+                        open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
+                        print('Downloading ' + audit)
+                        is_download_completed()
+                # download summary report
+                open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
+                print('Downloading Summary Report')
                 is_download_completed()
-        # download summary report
-        open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
-        print('Downloading Summary Report')
-        is_download_completed()
     
         driver.close()
         if headlessMode:
@@ -614,11 +626,13 @@ try:
     
     if __name__ == '__main__':
         try:
-            if todownload:
-                download()
-            extract_and_rename()
-            calculate_time()
-            upload_to_file_storage()
+            file_index = 0
+            while file_index >= 0:
+                if todownload:
+                    download()
+                extract_and_rename()
+                calculate_time()
+                upload_to_file_storage()
             print('Done.')
         except Exception as e:
             result = 0
