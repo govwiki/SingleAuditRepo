@@ -251,14 +251,10 @@ try:
         if bnum:
             # in this for loop we are selecting by groups of 100
             size = len(laudit)
-            if file_index >= size:
-                file_index = -1
-            else:
-                file_index += 1
+            global file_index
+            if file_index < size:
                 i = 0
-                
                 for audit in laudit:
-                    i += 1
                     if i==file_index:
                         del audit_reports_select
                         audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
@@ -267,10 +263,15 @@ try:
                         open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
                         print('Downloading ' + audit)
                         is_download_completed()
-                # download summary report
-                open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
-                print('Downloading Summary Report')
-                is_download_completed()
+                    i += 1
+                if file_index < size - 1:
+                    file_index += 1
+                else:
+                    file_index = -1
+            # download summary report
+            open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
+            print('Downloading Summary Report')
+            is_download_completed()
     
         driver.close()
         if headlessMode:
@@ -626,6 +627,7 @@ try:
     
     if __name__ == '__main__':
         try:
+            global file_index
             file_index = 0
             while file_index >= 0:
                 if todownload:
