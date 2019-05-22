@@ -180,102 +180,112 @@ try:
             
         if usemarionette:
             capabilities["marionette"] = True
-    
-        driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
-        #driver = webdriver.Chrome(chrome_options=options)
         
-        driver.implicitly_wait(timeout)
-    
-        print('loading: ' + url)
-        try:
-            driver.get(url)
-        except Exception as e:
-            logging.debug(str(e))
-            print(str(e))
-            sys.exit()
-    
-        st = html.unescape(driver.page_source)
-        open_tag('#ui-id-1') # click on GENERAL INFORMATION
-        time.sleep(0.5)
-    
-        # unselect All Years
-        open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_0')
-        # click on 2016
-        open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_1')
-        # click on 2017
-        open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_2')
-        # Fill ranges
-        enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_FromDate', rangefrom) #rangefrom
-        enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_ToDate', rangeto) #rangeto
-        print(rangefrom + ' ' + rangeto)
-        # click on Search button
-        open_tag('#MainContent_UcSearchFilters_btnSearch_top')
-        
-        # click through new PII and Native Tribe information disclosure screen added April 2017
-        open_tag("#chkAgree")
-        open_tag("#btnIAgree")
-        
-        # give info how many results are found
-        num_of_results = driver.find_element_by_css_selector('.resultsText').text
-        print(num_of_results + ' RECORD(S)')
-        logging.debug(num_of_results + ' RECORD(S)')
-        try:
-            inum_of_results = int(num_of_results)
-            bnum = True
-            if inum_of_results == 0:
-                logging.info("0 results are found")
-                print("0 results are found")
-                bnum = False
-        except:
-            logging.critical("num_of_results is not produced")
-            print("num_of_results is not produced")
-            bnum = False
-    
-        # examine Selected Audit Reports
-        audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
-        audit_reports_innerHTML = driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
-        innersoup = BeautifulSoup(audit_reports_innerHTML, "html.parser")
-        laudit_tags = innersoup.findAll("option")
-        laudit = []    
-        
-        
-        for option in laudit_tags:
-            if option["value"].startswith("Audit Reports"):
-                laudit.append(option["value"])
-        if len(laudit) == 0:
-            logging.critical("audit reports list is not produced")
-            print("audit reports list is not produced")
-            bnum = False
-        time.sleep(2)
-    
-        if bnum:
-            # in this for loop we are selecting by groups of 100
-            size = len(laudit)
-            global file_index
-            if file_index < size:
-                i = 0
-                for audit in laudit:
-                    if i==file_index:
-                        del audit_reports_select
-                        audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
-                        audit_reports_select.select_by_visible_text(audit)
-                        # now we click on Download Audits button
-                        open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
-                        print('Downloading ' + audit)
-                        is_download_completed()
-                    i += 1
-                if file_index < size - 1:
-                    file_index += 1
-                else:
-                    file_index = -1
-            # download summary report
-            open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
-            print('Downloading Summary Report')
-            is_download_completed()
-    
-        driver.close()
-        if headlessMode:
-            display.stop()
+        maxcounter=5
+        counter = 0
+        success = false
+        while not success and counter<maxcounter:
+            try:
+                driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
+                success = true
+                #driver = webdriver.Chrome(chrome_options=options)
+                
+                driver.implicitly_wait(timeout)
+            
+                print('loading: ' + url)
+                try:
+                    driver.get(url)
+                except Exception as e:
+                    logging.debug(str(e))
+                    print(str(e))
+                    sys.exit()
+            
+                st = html.unescape(driver.page_source)
+                open_tag('#ui-id-1') # click on GENERAL INFORMATION
+                time.sleep(0.5)
+            
+                # unselect All Years
+                open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_0')
+                # click on 2016
+                open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_1')
+                # click on 2017
+                open_tag('#MainContent_UcSearchFilters_FYear_CheckableItems_2')
+                # Fill ranges
+                enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_FromDate', rangefrom) #rangefrom
+                enter_in_tag('#MainContent_UcSearchFilters_DateProcessedControl_ToDate', rangeto) #rangeto
+                print(rangefrom + ' ' + rangeto)
+                # click on Search button
+                open_tag('#MainContent_UcSearchFilters_btnSearch_top')
+                
+                # click through new PII and Native Tribe information disclosure screen added April 2017
+                open_tag("#chkAgree")
+                open_tag("#btnIAgree")
+                
+                # give info how many results are found
+                num_of_results = driver.find_element_by_css_selector('.resultsText').text
+                print(num_of_results + ' RECORD(S)')
+                logging.debug(num_of_results + ' RECORD(S)')
+                try:
+                    inum_of_results = int(num_of_results)
+                    bnum = True
+                    if inum_of_results == 0:
+                        logging.info("0 results are found")
+                        print("0 results are found")
+                        bnum = False
+                except:
+                    logging.critical("num_of_results is not produced")
+                    print("num_of_results is not produced")
+                    bnum = False
+            
+                # examine Selected Audit Reports
+                audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
+                audit_reports_innerHTML = driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop').get_attribute("innerHTML")
+                innersoup = BeautifulSoup(audit_reports_innerHTML, "html.parser")
+                laudit_tags = innersoup.findAll("option")
+                laudit = []    
+                
+                
+                for option in laudit_tags:
+                    if option["value"].startswith("Audit Reports"):
+                        laudit.append(option["value"])
+                if len(laudit) == 0:
+                    logging.critical("audit reports list is not produced")
+                    print("audit reports list is not produced")
+                    bnum = False
+                time.sleep(2)
+            
+                if bnum:
+                    # in this for loop we are selecting by groups of 100
+                    size = len(laudit)
+                    global file_index
+                    if file_index < size:
+                        i = 0
+                        for audit in laudit:
+                            if i==file_index:
+                                del audit_reports_select
+                                audit_reports_select = Select(driver.find_element_by_css_selector('#MainContent_ucA133SearchResults_ddlAvailZipTop'))
+                                audit_reports_select.select_by_visible_text(audit)
+                                # now we click on Download Audits button
+                                open_tag('#MainContent_ucA133SearchResults_btnDownloadZipTop')
+                                print('Downloading ' + audit)
+                                is_download_completed()
+                            i += 1
+                        if file_index < size - 1:
+                            file_index += 1
+                        else:
+                            file_index = -1
+                    # download summary report
+                    open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
+                    print('Downloading Summary Report')
+                    is_download_completed()
+            except WebDriverException as e:
+                print("RETRYING INITIALIZATION OF WEBDRIVER! Error: %s" % str(e))
+                time.sleep(10)
+                counter +=1
+            finally:
+                driver.close()
+                if headlessMode:
+                    display.stop()
     
     def remove_non_ascii(text):
         return ''.join([i if ord(i) < 128 else ' ' for i in text])
