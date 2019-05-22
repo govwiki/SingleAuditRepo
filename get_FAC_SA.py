@@ -162,6 +162,7 @@ try:
         global url
         global rangefrom
         global rangeto
+        global driver
         url = url.strip()
         rangefrom = rangefrom.strip()
         rangeto = rangeto.strip()
@@ -183,11 +184,11 @@ try:
         
         maxcounter=5
         counter = 0
-        success = false
+        success = False
         while not success and counter<maxcounter:
             try:
                 driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
-                success = true
+                success = True
                 #driver = webdriver.Chrome(chrome_options=options)
                 
                 driver.implicitly_wait(timeout)
