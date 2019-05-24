@@ -188,7 +188,6 @@ try:
         while not success and counter<maxcounter:
             try:
                 driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
-                success = True
                 #driver = webdriver.Chrome(chrome_options=options)
                 
                 driver.implicitly_wait(timeout)
@@ -279,12 +278,16 @@ try:
                     open_tag('#MainContent_ucA133SearchResults_lnkDownloadSummary')
                     print('Downloading Summary Report')
                     is_download_completed()
-            except WebDriverException as e:
+                    success = True
+            except Exception as e:
                 print("RETRYING INITIALIZATION OF WEBDRIVER! Error: %s" % str(e))
                 time.sleep(10)
                 counter +=1
             finally:
-                driver.close()
+                try:
+                    driver.close()
+                except:
+                    pass
                 if headlessMode:
                     display.stop()
     
