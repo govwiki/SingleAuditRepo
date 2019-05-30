@@ -127,10 +127,6 @@ try:
     
     timeout = 10        # timeout for openning web page
     
-    if headlessMode:
-        display = Display(visible=0, size=(1024, 768))
-        display.start()
-    
     # if log file become large, you can change filemode='w' for logging only individual sessons
     os.makedirs(dir_in, exist_ok = True)
     logging.basicConfig(filename=dir_in + 'get_FAClog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -187,6 +183,10 @@ try:
         success = False
         while not success and counter<maxcounter:
             try:
+                if headlessMode:
+                    display = Display(visible=0, size=(1024, 768))
+                    display.start()
+                
                 driver = webdriver.Chrome(executable_path= path_to_chromedriver, chrome_options=options)
                 #driver = webdriver.Chrome(chrome_options=options)
                 
