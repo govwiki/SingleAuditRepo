@@ -44,10 +44,7 @@ if __name__ == '__main__':
     config_file = str(crawler.dbparams)
     try:
         urls = None
-        if crawler.dbparams is not None and 'urls' in crawler.dbparams:
-            urls = crawler.dbparams['urls'].split('\n')
-        else:
-            urls = config.get('florida', 'urls').split('\n')
+        urls = crawler.get_property('urls','florida').split('\n')
         for url in urls:
             crawler.get(url.strip())
             entity_type = crawler.get_text('h1:not(.text-right)')

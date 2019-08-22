@@ -15,7 +15,6 @@ from email._header_value_parser import Section
 import mysql.connector
 import re
 
-
 class Crawler:
 
     def __init__(self, config, section, script_name = ''):
@@ -24,23 +23,14 @@ class Crawler:
         self.section = section
         self.dbparams = self.db.readProps(section)
         self.dbparams.update(self.db.readProps('general'))
-        if self.dbparams is not None and 'downloads_path' in self.dbparams:
-            self.downloads_path = self.dbparams['downloads_path']
-        else:
-            self.downloads_path = config.get(section, 'downloads_path', fallback='/tmp/downloads/')
-        if self.dbparams is not None and 'overwrite_remote_files' in self.dbparams:
-            self.overwrite_remote_files = self.dbparams['overwrite_remote_files']=='True'
-        else:
-            self.overwrite_remote_files = config.getboolean(self.section, 'overwrite_remote_files', fallback=False)
+        self.downloads_path = self.get_property('downloads_path', section)
+        self.overwrite_remote_files = self.get_property('overwrite_remote_files', section, 'bool')
         if not os.path.exists(self.downloads_path):
             os.makedirs(self.downloads_path)
         elif not os.path.isdir(self.downloads_path):
             print('ERROR:{} downloads_path parameter points to file!'.format(section))
             sys.exit(1)
-        if self.dbparams is not None and 'headless_mode' in self.dbparams:
-            self.headless_mode = self.dbparams['headless_mode']=='True'
-        else:
-            self.headless_mode = config.getboolean('general', 'headless_mode', fallback=False)
+        self.headless_mode = self.get_property('headless_mode', 'general', 'bool')
         if self.headless_mode:
             display = Display(visible=0, size=(1920, 1080))
             display.start()
@@ -60,33 +50,35 @@ class Crawler:
         # self.ftp_connect()
         self.file_storage_connect()
         
+    def get_property(self, prop, section, type='str'):
+        if type=='str':
+            if self.dbparams is not None and prop in self.dbparams:
+                return self.dbparams[prop]
+            else:
+                return self.config.get(section, prop).strip()
+        elif type=='bool':
+            if self.dbparams is not None and prop in self.dbparams:
+                return self.dbparams[prop]=='True'
+            else:
+                return config.getboolean(section, prop, fallback=False)
+        
     def file_storage_connect(self):
-        if self.dbparams is not None and 'fs_server' in self.dbparams:
-            self.file_storage_url = self.dbparams['fs_server']
-        else:
-            self.file_storage_url = self.config.get('general', 'fs_server').strip()
-        if self.dbparams is not None and 'fs_username' in self.dbparams:
-            self.file_storage_user = self.dbparams['fs_username']
-        else:
-            self.file_storage_user = self.config.get('general', 'fs_username')
-        if self.dbparams is not None and 'fs_password' in self.dbparams:
-            self.file_storage_pwd = self.dbparams['fs_password']
-        else:
-            self.file_storage_pwd = self.config.get('general', 'fs_password')
-        if self.dbparams is not None and 'fs_share' in self.dbparams:
-            self.file_storage_share = self.dbparams['fs_share']
-        else:
-            self.file_storage_share = self.config.get('general', 'fs_share')
-        if self.dbparams is not None and 'fs_directory_prefix' in self.dbparams:
-            self.file_storage_dir = self.dbparams['fs_directory_prefix']
-        else:
-            self.file_storage_dir = self.config.get('general', 'fs_directory_prefix')
+        self.file_storage_url = self.get_property('fs_server', 'general')
+        self.file_storage_user = self.get_property('fs_username', 'general')
+        self.file_storage_pwd = self.get_property('fs_password', 'general')
+        self.file_storage_share = self.get_property('fs_share', 'general')
+        self.file_storage_dir = self.get_property('fs_directory_prefix', 'general')
         self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
         try:
             if self.file_service.exists(self.file_storage_share):
                 print('Connection to Azure file storage successfully established...')
                 if len(self.file_storage_dir) > 0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
-                    self.file_service.create_directory(self.file_storage_share, self.file_storage_dir)
+                    subdirs = self.file_storage_dir.split('/')
+                    subdirfull=""
+                    for subdir in subdirs:
+                        subdirfull+=subdir
+                        self.file_service.create_directory(self.file_storage_share, subdirfull)
+                        subdirfull+="/"
                     print('Created directory:' + self.file_storage_dir)
             else:
                 print('Filaed to connect to Asure file storage, share does not exist: ' + self.file_storage_share)
@@ -382,7 +374,7 @@ class DbCommunicator:
         statement = None
         try:
             statement = self.connection.cursor()
-        except mysql.connector.InterfaceError as e:
+        except (mysql.connector.InterfaceError, mysql.connector.errors.OperationalError) as e:
             print("Error accessing database, trying to reconnect")
             self.connect()
         try:
