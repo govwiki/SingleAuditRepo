@@ -12,8 +12,8 @@ source ./demoenv/bin/activate
 echo virtualenv activated
 
 # run the script
-echo running get_CT.py $YESTERDAY
-python get_CT.py $YESTERDAY
+echo running get_CT.py --year $YESTERDAY
+python get_CT.py --year $YESTERDAY
 
 #deactivate virtualenv
 deactivate
