@@ -19,10 +19,11 @@ class Crawler:
 
     def __init__(self, config, section, script_name = ''):
         self.script_name = script_name
+        self.config = config
         self.db = DbCommunicator(config)
         self.section = section
-        self.dbparams = self.db.readProps(section)
-        self.dbparams.update(self.db.readProps('general'))
+        self.dbparams = self.db.readProps('general')
+        self.dbparams.update(self.db.readProps(section))
         self.downloads_path = self.get_property('downloads_path', section)
         self.overwrite_remote_files = self.get_property('overwrite_remote_files', section, 'bool')
         if not os.path.exists(self.downloads_path):
@@ -34,7 +35,6 @@ class Crawler:
         if self.headless_mode:
             display = Display(visible=0, size=(1920, 1080))
             display.start()
-        self.config = config
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
         prefs = {
@@ -60,7 +60,7 @@ class Crawler:
             if self.dbparams is not None and prop in self.dbparams:
                 return self.dbparams[prop]=='True'
             else:
-                return config.getboolean(section, prop, fallback=False)
+                return self.config.getboolean(section, prop, fallback=False)
         
     def file_storage_connect(self):
         self.file_storage_url = self.get_property('fs_server', 'general')
@@ -195,7 +195,7 @@ class Crawler:
         self.db.close()
         # self.ftp.quit()
 
-    def download(self, url, filename):
+    def download(self, url, filename, file_db_id=None):
         # print('Downloading', filename, self._get_remote_filename(filename))
         # return
         if url.startswith('https'):
@@ -227,9 +227,15 @@ class Crawler:
                 except OSError:
                     pass
         if file_size == content_length:
-            self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
+            if file_db_id:
+                self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
+            else:
+                self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
         else:
-            self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'None')
+            if file_db_id:
+                self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'None')
+            else:
+                self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'None')
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
@@ -330,6 +336,10 @@ class Crawler:
                     print('Checking if {}/{} already exists'.format(directory, filename))
                     if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
                         print('{}/{} already exists'.format(directory, filename))
+                        if file_details is None:
+                            self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        else:
+                            self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
                         return
                 self.file_service.create_file_from_path(
                     self.file_storage_share,
