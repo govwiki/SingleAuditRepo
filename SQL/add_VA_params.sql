@@ -1,4 +1,4 @@
-INSERT INTO script_mapping (name,executable,param_categories) VALUES ('get_CT.py', 'TZ="America/Los_Angeles" /home/sibers/python_scripts/SingleAuditRepo/get_VA.sh', 'virginia');
+INSERT INTO script_mapping (name,executable,param_categories) VALUES ('get_VA.py', 'TZ="America/Los_Angeles" /home/sibers/python_scripts/SingleAuditRepo/get_VA.sh', 'virginia');
 
 -- general
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('virginia', 'headless_mode', 'True', 'for invisible (True) or visible (False) firefox');
