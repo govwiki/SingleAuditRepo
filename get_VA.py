@@ -51,6 +51,9 @@ if __name__ == '__main__':
         download_complete = False
         while not download_complete:
             urls = crawler.get_attr('a.blacklink', 'href', single=False)
+            if len(urls)<=0:
+                print("nothing to download")
+                download_complete = True
             for url in urls:
                 if url in urls_downloaded:
                     download_complete = True

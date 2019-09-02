@@ -67,18 +67,17 @@ if __name__ == '__main__':
                 items = crawler.get_elements('td', root=row)
                 name = items[2].text
                 items[0].click()
-            
-            counter = 10000
-            finished = False
-            while not finished and counter > 0:
+                counter = 10000
+                finished = False
+                while not finished and counter > 0:
+                    sleep(3)
+                    finished = True
+                    for filename in os.listdir(downloads_path):
+                        if filename.endswith(".crdownload") or filename.endswith(".tmp"):
+                            print('waiting for file ' + filename)
+                            counter-=1
+                            finished = False
                 sleep(3)
-                finished = True
-                for filename in os.listdir(downloads_path):
-                    if filename.endswith(".crdownload") or filename.endswith(".tmp"):
-                        print('waiting for file ' + filename)
-                        counter-=1
-                        finished = False
-            sleep(3)
             print("All files downloaded for {}".format(entity_type))
             path = downloads_path 
             file_names = os.listdir(path)

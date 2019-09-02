@@ -28,7 +28,7 @@ import urllib
 import posixpath
 import platform
 
-with open('illinois_parameters.txt', 'r') as fp:
+with open('IL_parms.txt', 'r') as fp:
     dparameters = json.load(fp)
 
 ftpurl = dparameters["ftpurl"]
@@ -47,6 +47,10 @@ logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=loggi
 logging.debug('Started')
 
 time1 = time.time()
+try:
+    os.makedirs(dir_pdfs)
+except:
+    pass
 os.chdir(dir_pdfs)
 
 def ftp_dir(ftp):

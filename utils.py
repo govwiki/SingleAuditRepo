@@ -387,6 +387,7 @@ class DbCommunicator:
         except (mysql.connector.InterfaceError, mysql.connector.errors.OperationalError) as e:
             print("Error accessing database, trying to reconnect")
             self.connect()
+            statement = self.connection.cursor()
         try:
             query = ("INSERT INTO script_execution_log "
                    "(name, start_time, end_time, config_file, result, error_message) "
@@ -397,7 +398,8 @@ class DbCommunicator:
         except mysql.connector.InterfaceError as e:
             print("Error wringing log to database:", e)
         finally:
-            statement.close()
+            if statement:
+                statement.close()
             
     def readProps(self, category):
         props = {}
@@ -407,6 +409,7 @@ class DbCommunicator:
         except mysql.connector.InterfaceError as e:
             print("Error accessing database, trying to reconnect")
             self.connect()
+            statement = self.connection.cursor()
         try:
             query = ("SELECT `key`, value FROM script_parameters "
                    "WHERE category = %s")
@@ -417,7 +420,8 @@ class DbCommunicator:
         except Exception as e:
             print("Error reading from database:", e)
         finally:
-            statement.close()
+            if statement:
+                statement.close()
         return props
         
     def saveFileStatus(self, **kwargs):
@@ -429,6 +433,7 @@ class DbCommunicator:
             except mysql.connector.InterfaceError as e:
                 print("Error accessing database, trying to reconnect")
                 self.connect()
+                statement = self.connection.cursor()
             query = None
             data = None 
             if "id" in kwargs:
@@ -483,7 +488,8 @@ class DbCommunicator:
                 except Exception as e:
                     print("Error reading from database:", e)
                 finally:
-                    statement.close()
+                    if statement:
+                        statement.close()
         return result
     
     def readFileStatus(self, **kwargs):
@@ -495,6 +501,7 @@ class DbCommunicator:
             except mysql.connector.InterfaceError as e:
                 print("Error accessing database, trying to reconnect")
                 self.connect()
+                statement = self.connection.cursor()
             query = "SELECT * FROM script_file_status WHERE "
             data = None
             i = 0
@@ -517,7 +524,8 @@ class DbCommunicator:
                 except Exception as e:
                     print("Error reading from database:", e)
                 finally:
-                    statement.close()
+                    if statement:
+                        statement.close()
         return result
     
     def close(self):
