@@ -27,26 +27,24 @@ import ntpath
 import urllib
 import posixpath
 import platform
+from utils import DbCommunicator as db
+from utils import FilenameManager
+from azure.storage.file import fileservice
+from azure.storage.file.fileservice import FileService
 
-with open('IL_parms.txt', 'r') as fp:
-    dparameters = json.load(fp)
+global db
+global dbparameters
+global file_service
+global file_storage_dir
 
-ftpurl = dparameters["ftpurl"]
-url = urllib.parse.urlparse(ftpurl)
-start_from = dparameters["start_from"]
-year = dparameters["year"]
-dir_in = dparameters["dir_in"]
-dir_pdfs = dparameters["dir_pdfs"]
-illinois_entities_xlsx_file = dparameters["illinois_entities_xlsx_file"]
-illinois_entities_sheet = dparameters["illinois_entities_sheet"]
-
+start_time = datetime.utcnow()
+script_name = "get_IL.py"
 
 # if log file become large, you can change filemode='w' for logging only individual sessons
 logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.debug('Started')
 
-time1 = time.time()
 try:
     os.makedirs(dir_pdfs)
 except:
@@ -65,7 +63,20 @@ def ftp_dir(ftp):
     ftp.dir(lambda x: dir_listing.append(x))
     return [(line[0].upper() == 'D', line.rsplit()[-1]) for line in dir_listing]
 
+def getGategory(entity):
+    if not entity:
+        return r"Unclassified"
+    if entity == "City" or entity == "County" or entity == "Town" or entity == "Township" or entity == "Village":
+        return r"General Purpose"
+    if entity == "School District":
+        return r"School District"
+    if entity == "Community College":
+        return r"Community College District"
+    else:
+        return r"Special District"
+
 def main():
+    file_storage_connect()
     ''' connect to public ftp function '''
     ftp = ftplib.FTP(url.netloc)
     ftp.login()
@@ -90,7 +101,8 @@ def main():
     print('Creating connection with ' + illinois_entities_xlsx_file)
     wbShort = openpyxl.load_workbook(dir_in + illinois_entities_xlsx_file.strip())
     sheetShort = wbShort.get_sheet_by_name(illinois_entities_sheet.strip())
-    dshort = {}
+    excel_name = {}
+    excel_category = {}
     row = 2
     scrolldown = True
 
@@ -100,7 +112,8 @@ def main():
             key = '00' + key
         elif len(key) == 7:
             key = '0' + key
-        dshort[key] = sheetShort['B' + str(row)].value.strip()
+        excel_name[key] = sheetShort['B' + str(row)].value.strip()
+        excel_category[key] = getGategory(sheetShort['J' + str(row)].value.strip())
             
         row += 1
         if sheetShort['A' + str(row)].value == None:
@@ -114,7 +127,7 @@ def main():
         # example of path structure /LocGovAudits/FY2015/00100000
         parseddir = udir.split('/')[-1].strip()
         try:
-            preparename = 'IL ' + dshort[parseddir] + ' ' + year + '.pdf'
+            preparename = 'IL@#' + excel_category[parseddir] + '@#' + excel_name[parseddir] + '@#' + year + '.pdf'
         except:
             preparename = parseddir + '.pdf'
         preparename = preparename.replace('/', '')
@@ -178,6 +191,10 @@ def main():
         if len(files) > 1 and bOK:
             for f in files:
                 os.remove(dir_pdfs + str(f).strip())
+        file_details = db.readFileStatus(file_original_name=preparename)
+        if file_details is None:
+            file_details = db.saveFileStatus(file_original_name=filename, file_status = 'Downloaded')
+        upload_to_file_storage(preparename)
 
 def ftp_upload_pdfs():
     ''' function for uploading pdf files to FTP server 
@@ -212,15 +229,115 @@ def ftp_upload_pdfs():
     except Exception as e:
         print(str(e))
         logging.critical(str(e))
-        
-def calculate_time():
-    time2 = time.time()
-    hours = int((time2-time1)/3600)
-    minutes = int((time2-time1 - hours * 3600)/60)
-    sec = time2 - time1 - hours * 3600 - minutes * 60
-    print("processed in %dh:%dm:%ds" % (hours, minutes, sec))    
 
+def file_storage_connect():
+    file_storage_url = dbparameters['fs_server'].strip()
+    file_storage_user = dbparameters['fs_username'].strip()
+    file_storage_pwd = dbparameters['fs_password'].strip()
+    file_storage_share = dbparameters['fs_share'].strip()
+    file_storage_dir = dbparameters['fs_directory_prefix'].strip()
+    file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd) 
+    try:
+        if file_service.exists(self.file_storage_share):
+            print('Connection to Azure file storage successfully established...')
+            if len(file_storage_dir) > 0 and not file_service.exists(file_storage_share, directory_name=file_storage_dir):
+                subdirs = file_storage_dir.split('/')
+                subdirfull=""
+                for subdir in subdirs:
+                    subdirfull+=subdir
+                    file_service.create_directory(file_storage_share, subdirfull)
+                    subdirfull+="/"
+                print('Created directory:' + file_storage_dir)
+        else:
+            print('Filaed to connect to Asure file storage, share does not exist: ' + file_storage_share)
+    except Exception as ex:
+        print('Error connecting to Azure file storage: ', ex)
+
+def _get_remote_filename(self, local_filename):
+        abbr, directory, entity_name, year = local_filename[:-4].split('@#')
+        filename = '{} {} {}.pdf'.format(abbr, entity_name, year)
+        return directory, filename, year
+
+def upload_to_file_storage(filename):
+    downloads_path = dir_pdfs
+    fnm = FilenameManager()
+    retries = 0
+    while retries < 3:
+        try:
+            path = os.path.join(downloads_path, filename)
+            file_details = db.readFileStatus(file_original_name=filename, file_status = 'Uploaded')
+            if file_details is not None:
+                print('File {} was already uploaded before'.format(filename))
+                retries = 3
+                break
+            file_details = db.readFileStatus(file_original_name=filename, file_status = 'Downloaded')
+            print('Uploading {}'.format(path))
+            remote_filename = _get_remote_filename(filename)
+            old_filename = filename
+            directory = None
+            if not remote_filename:
+                return
+            try:
+                directory, filename, year = remote_filename
+            except:
+                directory, filename = remote_filename
+            filename = fnm.azure_validate_filename(filename)
+            if len(file_storage_dir) > 0:
+                directory = file_storage_dir + '/' + directory
+            if not self.file_service.exists(self.file_storage_share, directory_name=directory):
+                self.file_service.create_directory(self.file_storage_share, directory)
+            if year:
+                directory += '/' + year
+                if not self.file_service.exists(self.file_storage_share, directory_name=directory):
+                    self.file_service.create_directory(self.file_storage_share, directory)
+            if not self.overwrite_remote_files:
+                print('Checking if {}/{} already exists'.format(directory, filename))
+                if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
+                    print('{}/{} already exists'.format(directory, filename))
+                    if file_details is None:
+                        self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                    else:
+                        self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                    return
+            self.file_service.create_file_from_path(
+                self.file_storage_share,
+                directory,
+                filename,
+                path,
+                content_settings=ContentSettings(content_type='application/pdf'))
+            if file_details is None:
+                self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+            else:
+                self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
+            print('{} uploaded'.format(path))
+            retries = 3
+        except Exception as e:
+            print('Error uploading to Asure file storage,', str(e))
+            retries += 1
+                
 if __name__ == '__main__':
-    main()
-    calculate_time()
-    print('Done.')
+    config = configparser.ConfigParser()
+    config.read('conf.ini')
+    try:
+        db = db(config)
+        dbparameters = db.readProps('illinois')
+        with open('IL_parms.txt', 'r') as fp:
+            dparameters = json.load(fp)
+        ftpurl = dbparameters["url"] or dparameters["ftpurl"]
+        url = urllib.parse.urlparse(ftpurl)
+        start_from = dbparameters["start_from"] or dparameters["start_from"]
+        year = dbparameters["year"] or dparameters["year"]
+        dir_in = dbparameters["dir_in"] or dparameters["dir_in"]
+        dir_pdfs = dbparameters["dir_pdfs"] or dparameters["dir_pdfs"]
+        illinois_entities_xlsx_file = dbparameters["illinois_entities_xlsx_file"] or dparameters["illinois_entities_xlsx_file"]
+        illinois_entities_sheet = dbparameters["illinois_entities_sheet"] or dparameters["illinois_entities_sheet"]
+        main()
+    except:
+        result = 0
+        error_message = str(e)
+        print(error_message)
+    finally:
+        db.close()
+        end_time = datetime.utcnow()
+        db.log(script_name, start_time, end_time, config_file, result, error_message)            
+        print('Done.')
