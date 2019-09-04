@@ -430,7 +430,7 @@ class DbCommunicator:
             statement = None
             try:
                 statement = self.connection.cursor()
-            except mysql.connector.InterfaceError as e:
+            except Exception as e:
                 print("Error accessing database, trying to reconnect")
                 self.connect()
                 statement = self.connection.cursor()
