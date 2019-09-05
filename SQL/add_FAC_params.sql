@@ -18,4 +18,4 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_username', 'cafr', 'File Storage username');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_share', 'cafr', 'File Storage share name');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_directory_prefix', 'test_fac', 'File Storage base folder for uploads (leave blank to upload to upload to general storage)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_directory_prefix', 'test_fac', 'File Storage base folder for uploads (leave blank to upload to general storage)');

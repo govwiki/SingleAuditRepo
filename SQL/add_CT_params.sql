@@ -6,7 +6,7 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('con
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'fs_username', 'cafr', 'File Storage username');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'fs_share', 'cafr', 'File Storage share name');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'fs_directory_prefix', 'Unclassified/test_ct', 'File Storage base folder for uploads (leave blank to upload to upload to general storage)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'fs_directory_prefix', 'Unclassified/test_ct', 'File Storage base folder for uploads (leave blank to upload to general storage)');
 
 -- connecticut
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('connecticut', 'url', 'https://www.appsvcs.opm.ct.gov/Auditing/Public/Report.aspx', 'target url');

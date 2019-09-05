@@ -5,7 +5,7 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('ill
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'fs_username', 'cafr', 'File Storage username');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'fs_share', 'cafr', 'File Storage share name');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'fs_directory_prefix', 'Unclassified/test_ct', 'File Storage base folder for uploads (leave blank to upload to upload to general storage)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'fs_directory_prefix', 'Unclassified/test_il', 'File Storage base folder for uploads (leave blank to upload to general storage)');
 
 -- illinois
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('illinois', 'url', 'ftp://ftp.illinoiscomptroller.com/LocGovAudits/FY2015/', 'target url');

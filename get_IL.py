@@ -11,7 +11,7 @@
 # testing example in dir_pdfs via terminal on windows pdftk.exe file1.pdf file2.pdf cat output newfile.pdf
 # 2017 February 22
 
-import datetime
+from datetime import datetime
 import time
 import os
 import sys
@@ -27,6 +27,7 @@ import ntpath
 import urllib
 import posixpath
 import platform
+import configparser
 from utils import DbCommunicator as db
 from utils import FilenameManager
 from azure.storage.file import fileservice
@@ -36,20 +37,19 @@ global db
 global dbparameters
 global file_service
 global file_storage_dir
+global ftpurl
+global url
+global start_from
+global year
+global dir_in
+global dir_pdfs
+global illinois_entities_xlsx_file
+global illinois_entities_sheet
 
 start_time = datetime.utcnow()
 script_name = "get_IL.py"
-
-# if log file become large, you can change filemode='w' for logging only individual sessons
-logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-logging.debug('Started')
-
-try:
-    os.makedirs(dir_pdfs)
-except:
-    pass
-os.chdir(dir_pdfs)
+result = 1
+error_message = ""
 
 def ftp_dir(ftp):
     """
@@ -331,8 +331,18 @@ if __name__ == '__main__':
         dir_pdfs = dbparameters["dir_pdfs"] or dparameters["dir_pdfs"]
         illinois_entities_xlsx_file = dbparameters["illinois_entities_xlsx_file"] or dparameters["illinois_entities_xlsx_file"]
         illinois_entities_sheet = dbparameters["illinois_entities_sheet"] or dparameters["illinois_entities_sheet"]
+        # if log file become large, you can change filemode='w' for logging only individual sessons
+        logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+        logging.debug('Started')
+        
+        try:
+            os.makedirs(dir_pdfs)
+        except:
+            pass
+        os.chdir(dir_pdfs)
         main()
-    except:
+    except Exception as e:
         result = 0
         error_message = str(e)
         print(error_message)
