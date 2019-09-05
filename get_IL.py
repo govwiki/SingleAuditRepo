@@ -196,41 +196,9 @@ def main():
             file_details = db.saveFileStatus(file_original_name=preparename, file_status = 'Downloaded')
         upload_to_file_storage(preparename)
 
-def ftp_upload_pdfs():
-    ''' function for uploading pdf files to FTP server 
-    Since they can be over 10000, it's recommended to not use this function
-    but to use some strategical method via filezilla'''
-    # get a list of pdf files in dir_pdfs
-    lpdfs = glob.glob(dir_pdfs + "*.pdf")
-    lpdfs.sort()
-    os.chdir(dir_pdfs) # needed for ftp.storbinary('STOR command work not with paths but with filenames
-    
-    # connect to FTP server and upload files
-    try:
-        ftpup = FTP()
-        # ftpup = FTP_TLS()
-        ftpup.connect(dparameters["server"].strip(), dparameters["port"])
-        ftpup.login(user = dparameters["username"].strip(), passwd = dparameters["password"].strip())
-        # ftpup.prot_p() if using FTP_TLS uncomment this line
-        print("Connection to ftp successfully established...")
-        #ftpup.cwd('path_to_destination_directory_if_needed_on_server')
-        for pdffile in lpdfs:
-
-            rpdffile = ntpath.basename(pdffile)
-            print('uploading ' + rpdffile)
-            logging.info('uploading ' + rpdffile)
-            ffile = open(pdffile, 'rb')
-            ftpup.storbinary('STOR ' + rpdffile, ffile)
-            ffile.close()
-            # file uploaded delete it now
-            # os.remove(pdffile)
-
-        ftp.quit()
-    except Exception as e:
-        print(str(e))
-        logging.critical(str(e))
-
 def file_storage_connect():
+    global file_service
+    global file_storage_dir
     file_storage_url = dbparameters['fs_server'].strip()
     file_storage_user = dbparameters['fs_username'].strip()
     file_storage_pwd = dbparameters['fs_password'].strip()
@@ -316,6 +284,18 @@ def upload_to_file_storage(filename):
             retries += 1
                 
 if __name__ == '__main__':
+    global db
+    global dbparameters
+    global file_service
+    global file_storage_dir
+    global ftpurl
+    global url
+    global start_from
+    global year
+    global dir_in
+    global dir_pdfs
+    global illinois_entities_xlsx_file
+    global illinois_entities_sheet
     config = configparser.ConfigParser()
     config.read('conf.ini')
     try:
