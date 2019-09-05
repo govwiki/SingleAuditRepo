@@ -30,8 +30,7 @@ import platform
 import configparser
 from utils import DbCommunicator as db
 from utils import FilenameManager
-from azure.storage.file import fileservice
-from azure.storage.file.fileservice import FileService
+from azure.storage.file import FileService, ContentSettings
 
 global db
 global dbparameters
