@@ -238,7 +238,7 @@ def file_storage_connect():
     file_storage_dir = dbparameters['fs_directory_prefix'].strip()
     file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd) 
     try:
-        if file_service.exists(self.file_storage_share):
+        if file_service.exists(file_storage_share):
             print('Connection to Azure file storage successfully established...')
             if len(file_storage_dir) > 0 and not file_service.exists(file_storage_share, directory_name=file_storage_dir):
                 subdirs = file_storage_dir.split('/')
@@ -253,7 +253,7 @@ def file_storage_connect():
     except Exception as ex:
         print('Error connecting to Azure file storage: ', ex)
 
-def _get_remote_filename(self, local_filename):
+def _get_remote_filename(local_filename):
         abbr, directory, entity_name, year = local_filename[:-4].split('@#')
         filename = '{} {} {}.pdf'.format(abbr, entity_name, year)
         return directory, filename, year
@@ -284,31 +284,31 @@ def upload_to_file_storage(filename):
             filename = fnm.azure_validate_filename(filename)
             if len(file_storage_dir) > 0:
                 directory = file_storage_dir + '/' + directory
-            if not self.file_service.exists(self.file_storage_share, directory_name=directory):
-                self.file_service.create_directory(self.file_storage_share, directory)
+            if not file_service.exists(file_storage_share, directory_name=directory):
+                file_service.create_directory(file_storage_share, directory)
             if year:
                 directory += '/' + year
-                if not self.file_service.exists(self.file_storage_share, directory_name=directory):
-                    self.file_service.create_directory(self.file_storage_share, directory)
-            if not self.overwrite_remote_files:
+                if not file_service.exists(file_storage_share, directory_name=directory):
+                    file_service.create_directory(file_storage_share, directory)
+            if not overwrite_remote_files:
                 print('Checking if {}/{} already exists'.format(directory, filename))
-                if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
+                if file_service.exists(file_storage_share, directory_name=directory, file_name=filename):
                     print('{}/{} already exists'.format(directory, filename))
                     if file_details is None:
-                        self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
                     else:
-                        self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
                     return
-            self.file_service.create_file_from_path(
-                self.file_storage_share,
+            file_service.create_file_from_path(
+                file_storage_share,
                 directory,
                 filename,
                 path,
                 content_settings=ContentSettings(content_type='application/pdf'))
             if file_details is None:
-                self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
             else:
-                self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
+                db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
             print('{} uploaded'.format(path))
             retries = 3
         except Exception as e:
@@ -321,6 +321,7 @@ if __name__ == '__main__':
     try:
         db = db(config)
         dbparameters = db.readProps('illinois')
+        config_file = str(dbparameters)
         with open('IL_parms.txt', 'r') as fp:
             dparameters = json.load(fp)
         ftpurl = dbparameters["url"] or dparameters["ftpurl"]
