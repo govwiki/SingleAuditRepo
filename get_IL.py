@@ -193,7 +193,7 @@ def main():
                 os.remove(dir_pdfs + str(f).strip())
         file_details = db.readFileStatus(file_original_name=preparename)
         if file_details is None:
-            file_details = db.saveFileStatus(file_original_name=filename, file_status = 'Downloaded')
+            file_details = db.saveFileStatus(file_original_name=preparename, file_status = 'Downloaded')
         upload_to_file_storage(preparename)
 
 def ftp_upload_pdfs():
@@ -259,21 +259,21 @@ def _get_remote_filename(local_filename):
         return directory, filename, year
 
 def upload_to_file_storage(filename):
+    old_filename = filename
     downloads_path = dir_pdfs
     fnm = FilenameManager()
     retries = 0
     while retries < 3:
         try:
-            path = os.path.join(downloads_path, filename)
-            file_details = db.readFileStatus(file_original_name=filename, file_status = 'Uploaded')
+            path = os.path.join(downloads_path, old_filename)
+            file_details = db.readFileStatus(file_original_name=old_filename, file_status = 'Uploaded')
             if file_details is not None:
-                print('File {} was already uploaded before'.format(filename))
+                print('File {} was already uploaded before'.format(old_filename))
                 retries = 3
                 break
-            file_details = db.readFileStatus(file_original_name=filename, file_status = 'Downloaded')
+            file_details = db.readFileStatus(file_original_name=old_filename, file_status = 'Downloaded')
             print('Uploading {}'.format(path))
-            remote_filename = _get_remote_filename(filename)
-            old_filename = filename
+            remote_filename = _get_remote_filename(old_filename)
             directory = None
             if not remote_filename:
                 return
