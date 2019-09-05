@@ -37,6 +37,7 @@ global db
 global dbparameters
 global file_service
 global file_storage_dir
+global file_storage_share
 global ftpurl
 global url
 global start_from
@@ -199,6 +200,7 @@ def main():
 def file_storage_connect():
     global file_service
     global file_storage_dir
+    global file_storage_share
     file_storage_url = dbparameters['fs_server'].strip()
     file_storage_user = dbparameters['fs_username'].strip()
     file_storage_pwd = dbparameters['fs_password'].strip()
@@ -288,6 +290,7 @@ if __name__ == '__main__':
     global dbparameters
     global file_service
     global file_storage_dir
+    global file_storage_share
     global ftpurl
     global url
     global start_from
