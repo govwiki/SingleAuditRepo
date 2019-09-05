@@ -48,6 +48,7 @@ global illinois_entities_xlsx_file
 global illinois_entities_sheet
 
 start_time = datetime.utcnow()
+global script_name
 script_name = "get_IL.py"
 result = 1
 error_message = ""
@@ -194,8 +195,9 @@ def main():
                 os.remove(dir_pdfs + str(f).strip())
         file_details = db.readFileStatus(file_original_name=preparename)
         if file_details is None:
-            file_details = db.saveFileStatus(file_original_name=preparename, file_status = 'Downloaded')
+            file_details = db.saveFileStatus(script_name = script_name, file_original_name=preparename, file_status = 'Downloaded')
         upload_to_file_storage(preparename)
+        os.remove(preparename)
 
 def file_storage_connect():
     global file_service
@@ -231,6 +233,7 @@ def _get_remote_filename(local_filename):
         return directory, filename, year
 
 def upload_to_file_storage(filename):
+    global script_name
     old_filename = filename
     downloads_path = dir_pdfs
     fnm = FilenameManager()
@@ -269,7 +272,7 @@ def upload_to_file_storage(filename):
                     if file_details is None:
                         db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
                     else:
-                        db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        db.saveFileStatus(id = file_details['id'], script_name = script_name, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
                     return
             file_service.create_file_from_path(
                 file_storage_share,
@@ -280,7 +283,7 @@ def upload_to_file_storage(filename):
             if file_details is None:
                 db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
             else:
-                db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
+                db.saveFileStatus(id = file_details['id'], script_name = script_name, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
             print('{} uploaded'.format(path))
             retries = 3
         except Exception as e:
@@ -302,6 +305,7 @@ if __name__ == '__main__':
     global dir_pdfs
     global illinois_entities_xlsx_file
     global illinois_entities_sheet
+    global script_name
     config = configparser.ConfigParser()
     config.read('conf.ini')
     try:
