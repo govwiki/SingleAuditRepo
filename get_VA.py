@@ -16,8 +16,10 @@ class Crawler(CoreCrawler):
     def _get_remote_filename(self, local_filename):
         directory = 'School District' if 'Schools' in local_filename else 'General Purpose'
         filename = '{} {}'.format(
-            self.abbr, local_filename.replace(' CAFR', '').replace(' reissue', '')
+            self.abbr, local_filename.replace(' CAFR', '').replace(' reissue', '').replace(' Single Audit', ''),replace(' Town', '')
         )
+        if not re.search("Gate City", filename, re.IGNORECASE) and not re.search("Chase City", filename, re.IGNORECASE):
+            filename.replace(' City', '')
         r = re.compile(".*(\d{4})\s*\..{3}")
         year = r.search(local_filename).group(1)
         return directory, filename, year
