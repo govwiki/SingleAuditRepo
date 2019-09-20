@@ -55,7 +55,6 @@ if __name__ == '__main__':
             crawler.click('#ob_iDdlddlCategoriesTB')
             crawler.click_xpath('//div[@id="ob_iDdlddlCategoriesItemsContainer"]//ul[@class="ob_iDdlICBC"]//li/b[text() = "{}"]/..'.format(args.category))
     
-        urls_downloaded = []
         download_complete = False
         while not download_complete:
             urls = crawler.get_attr('a.blacklink', 'href', single=False)
@@ -63,12 +62,8 @@ if __name__ == '__main__':
                 print("nothing to download")
                 download_complete = True
             for url in urls:
-                if url in urls_downloaded:
-                    download_complete = True
-                    break
                 file = urllib.parse.unquote(url).split('/')[-1]
                 if ' CAFR' not in file or ' memo ' in file:
-                    urls_downloaded.append(url)
                     continue
                 file_db_record = crawler.db.readFileStatus(script_name=script_name,file_original_name=file)
                 if file_db_record and file_db_record["file_status"] == 'Uploaded':
@@ -85,8 +80,13 @@ if __name__ == '__main__':
                         os.remove(file_path)
                     if not os.path.exists(file_path):
                         print('Removed {}'.format(file_path))
-                urls_downloaded.append(url)
-            crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
+            try:
+                crawler.assert_exists("img[src*='next_disabled.gif']")
+                download_complete = True
+            except:
+                crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
+            
+                
     except Exception as e:
             result = 0
             error_message = str(e)
