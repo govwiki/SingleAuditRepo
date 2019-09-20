@@ -85,8 +85,9 @@ if __name__ == '__main__':
                     else:
                         name = '{} {} ({} County)'.format(name, entity_type, county.split('-')[0].title())
     
-                crawler.download(url, '{}#${}#${}.pdf'.format(name, entity_type, year))
-                crawler.upload_to_ftp('{}#${}#${}.pdf'.format(name, entity_type, year))
+                downloaded = crawler.download(url, '{}#${}#${}.pdf'.format(name, entity_type, year))
+                if downloaded:
+                    crawler.upload_to_ftp('{}#${}#${}.pdf'.format(name, entity_type, year))
     except Exception as e:
             result = 0
             error_message = str(e)

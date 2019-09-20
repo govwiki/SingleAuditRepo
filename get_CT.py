@@ -95,7 +95,8 @@ if __name__ == '__main__':
                 crawler.db.saveFileStatus(id = file_id, script_name = script_name, file_original_name = new_file_name, file_status = 'Downloaded')
                 print("Renamed {} to {}".format(filename, new_file_name))
                 crawler.upload_to_file_storage(new_file_name)
-                os.remove(os.path.join(path, new_file_name))
+                if os.path.exists(os.path.join(path, new_file_name)):
+                    os.remove(os.path.join(path, new_file_name))
                 if not os.path.exists(os.path.join(path, new_file_name)):
                     print('Removed {}'.format(new_file_name))
     except Exception as e:

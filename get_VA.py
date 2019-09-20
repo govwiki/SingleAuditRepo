@@ -77,13 +77,15 @@ if __name__ == '__main__':
                 file_id = None
                 if file_db_record:
                     file_id = file_db_record["id"]
-                crawler.download(url, file,file_id)
-                crawler.upload_to_file_storage(file)
+                downloaded = crawler.download(url, file,file_id)
+                if downloaded:
+                    crawler.upload_to_file_storage(file)
+                    file_path = os.path.join(crawler.get_property('downloads_path', 'virginia'),file)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    if not os.path.exists(file_path):
+                        print('Removed {}'.format(file_path))
                 urls_downloaded.append(url)
-                file_path = os.path.join(crawler.get_property('downloads_path', 'virginia'),file)
-                os.remove(file_path)
-                if not os.path.exists(file_path):
-                    print('Removed {}'.format(file_path))
             crawler.click_xpath('//div[@class="ob_gPBC"]/img[contains(@src, "next")]/..')
     except Exception as e:
             result = 0

@@ -290,6 +290,7 @@ def upload_to_file_storage(filename):
             retries = 3
         except Exception as e:
             print('Error uploading to Asure file storage,', str(e))
+            filename = old_filename
             retries += 1
 
                 

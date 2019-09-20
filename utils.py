@@ -204,6 +204,7 @@ class Crawler:
     def download(self, url, filename, file_db_id=None):
         # print('Downloading', filename, self._get_remote_filename(filename))
         # return
+        downloaded = False
         if url.startswith('https'):
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
@@ -233,6 +234,7 @@ class Crawler:
                 except OSError:
                     pass
         if file_size == content_length:
+            downloaded = True
             if file_db_id:
                 self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
             else:
@@ -242,6 +244,7 @@ class Crawler:
                 self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'None')
             else:
                 self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'None')
+        return downloaded
 
     def _get_remote_filename(self, local_filename):
         raise NotImplemented
@@ -364,6 +367,7 @@ class Crawler:
                 retries = 3
             except Exception as e:
                 print('Error uploading to Asure file storage,', str(e))
+                filename = old_filename
                 retries += 1
 
                 

@@ -71,12 +71,15 @@ if __name__ == '__main__':
                         urls[year].append(url)
                 for year in urls:
                     filenames = []
+                    all_downloaded = True
                     for url in urls[year]:
                         filename = '{}@#{}'.format(
                             entity_type,
                             urllib.parse.unquote(url).split('/')[-1]
                         )
-                        crawler.download(url, filename)
+                        downloaded = crawler.download(url, filename)
+                        if not downloaded:
+                            all_downloaded = False
                         filenames.append(filename)
                     if len(filenames) > 1:
                         if not all(['part' in filename.lower() for filename in filenames]):
@@ -87,7 +90,7 @@ if __name__ == '__main__':
                             filename = crawler.merge_files(filenames).replace(' -', '')
                     else:
                         filename = filenames[0]
-                    if filename:
+                    if filename and all_downloaded:
                         crawler.upload_to_ftp(filename)
     except Exception as e:
             result = 0
