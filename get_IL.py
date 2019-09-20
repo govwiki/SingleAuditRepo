@@ -349,7 +349,7 @@ if __name__ == '__main__':
         error_message = str(e)
         print(error_message)
     finally:
-        db.close()
         end_time = datetime.utcnow()
-        db.log(script_name, start_time, end_time, config_file, result, error_message)            
+        db.log(script_name, start_time, end_time, config_file, result, error_message)
+        db.close()            
         print('Done.')

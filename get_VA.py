@@ -14,6 +14,8 @@ class Crawler(CoreCrawler):
     abbr = 'VA'
 
     def _get_remote_filename(self, local_filename):
+        if local_filename == "Virginia Beach CAFR.pdf":
+            local_filename = "Virginia Beach CAFR 2017.pdf"
         directory = 'School District' if 'Schools' in local_filename else 'General Purpose'
         local_filename = re.sub(r'(\s*-?\s*reissue.*)\.pdf','.pdf',local_filename)
         filename = '{} {}'.format(
@@ -22,8 +24,6 @@ class Crawler(CoreCrawler):
         if not re.search("Gate City", filename, re.IGNORECASE) and not re.search("Chase City", filename, re.IGNORECASE):
             filename.replace(' City', '')
         r = re.compile(".*(\d{4})\s*\..{3}")
-        if local_filename == "IL Virginia Beach.pdf":
-            local_filename = "IL Virginia Beach 2017.pdf"
         year = r.search(local_filename).group(1)
         return directory, filename, year
 
