@@ -3,6 +3,7 @@ import configparser
 import urllib.parse
 from utils import Crawler as CoreCrawler
 from datetime import datetime
+import re
 
 
 class Crawler(CoreCrawler):
@@ -10,6 +11,14 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, local_filename = local_filename.split('@#')
+        if entity_type == 'MUNICIPALITIES' or entity_type == 'COUNTIES':
+            local_filename = local_filename.replace(' state financial assistance report','').replace(' - management response','').replace(' management letter addendum','').replace('  independent accountants report','').replace(' mda and financial statements','').replace(' notes, rsi, si, statistics','').replace(' single audit and compliance reports','')
+            local_filename = re.sub(r'(\s*-?\s*at.*)\.pdf','.pdf',local_filename)
+            local_filename = re.sub(r'(\s*-?\s*independent.*)\.pdf','.pdf',local_filename)
+            local_filename = re.sub(r'(\s*-?\s*financial.*)\.pdf','.pdf',local_filename)
+            local_filename = re.sub(r'(\s*-?\s*rsi.*)\.pdf','.pdf',local_filename)
+        local_filename = re.sub(r'(\s*-?\s*revised.*)\.pdf','.pdf',local_filename)
+        local_filename = re.sub(r'(\s*-?\s*addendum.*)\.pdf','.pdf',local_filename)
         parts = local_filename[:-4].split(' ')
         year = parts[0]
         name = ' '.join([p.capitalize() for p in parts[1:]])
@@ -32,17 +41,19 @@ if __name__ == '__main__':
     start_time = datetime.utcnow()
     result = 1
     error_message = ""
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("start_year")
-    argparser.add_argument("end_year")
-    args = argparser.parse_args()
-    years_range = range(int(args.start_year), int(args.end_year) + 1)
-
+    config_file = ""
+    
     config = configparser.ConfigParser()
     config.read('conf.ini')
     crawler = Crawler(config, 'florida', script_name)
-    config_file = str(crawler.dbparams)
     try:
+        argparser = argparse.ArgumentParser()
+        argparser.add_argument("start_year")
+        argparser.add_argument("end_year")
+        args = argparser.parse_args()
+        years_range = range(int(args.start_year), int(args.end_year) + 1)
+        config_file = str(crawler.dbparams)
+
         urls = None
         urls = crawler.get_property('urls','florida').split('\n')
         for url in urls:

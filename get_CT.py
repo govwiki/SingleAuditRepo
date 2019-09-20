@@ -35,17 +35,18 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'connecticut')
-    config_file = str(crawler.dbparams)
-    crawler.script_name = script_name
-    
-    downloads_path = crawler.get_property('downloads_path', 'connecticut')
-    if not os.path.exists(downloads_path):
-        os.makedirs(downloads_path)
-    elif not os.path.isdir(downloads_path):
-        print('ERROR: downloads_path parameter points to file!')
-        sys.exit(1)
-    
     try:
+        config_file = str(crawler.dbparams)
+        crawler.script_name = script_name
+        
+        downloads_path = crawler.get_property('downloads_path', 'connecticut')
+        if not os.path.exists(downloads_path):
+            os.makedirs(downloads_path)
+        elif not os.path.isdir(downloads_path):
+            print('ERROR: downloads_path parameter points to file!')
+            sys.exit(1)
+    
+
         url = crawler.get_property('url','connecticut')
         crawler.get(url)
 

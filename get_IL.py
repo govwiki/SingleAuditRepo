@@ -46,12 +46,8 @@ global dir_in
 global dir_pdfs
 global illinois_entities_xlsx_file
 global illinois_entities_sheet
-
-start_time = datetime.utcnow()
 global script_name
-script_name = "get_IL.py"
-result = 1
-error_message = ""
+
 
 def ftp_dir(ftp):
     """
@@ -65,6 +61,7 @@ def ftp_dir(ftp):
     ftp.dir(lambda x: dir_listing.append(x))
     return [(line[0].upper() == 'D', line.rsplit()[-1]) for line in dir_listing]
 
+
 def getGategory(entity):
     if not entity:
         return r"Unclassified"
@@ -76,6 +73,7 @@ def getGategory(entity):
         return r"Community College District"
     else:
         return r"Special District"
+
 
 def main():
     file_storage_connect()
@@ -119,7 +117,7 @@ def main():
             
         row += 1
         if sheetShort['A' + str(row)].value == None:
-            scrolldown = False # when finding empty row parsing of Shortnames xlsx will stop    
+            scrolldown = False  # when finding empty row parsing of Shortnames xlsx will stop    
     
     for udir in dirs:
         print('-' * 20)
@@ -187,7 +185,7 @@ def main():
                 logging.info(preparename + ' generated')
             else:
                 print('no files in ' + udir)
-                logging.info('no files in ' + udir) #this most probably will never occure
+                logging.info('no files in ' + udir)  # this most probably will never occure
         
         # delete original pdf files if more then one, since if one only, with renaming it is deleted
         if len(files) > 1 and bOK:
@@ -195,9 +193,10 @@ def main():
                 os.remove(dir_pdfs + str(f).strip())
         file_details = db.readFileStatus(file_original_name=preparename)
         if file_details is None:
-            file_details = db.saveFileStatus(script_name = script_name, file_original_name=preparename, file_status = 'Downloaded')
+            file_details = db.saveFileStatus(script_name=script_name, file_original_name=preparename, file_status='Downloaded')
         upload_to_file_storage(preparename)
         os.remove(preparename)
+
 
 def file_storage_connect():
     global file_service
@@ -216,21 +215,23 @@ def file_storage_connect():
             print('Connection to Azure file storage successfully established...')
             if len(file_storage_dir) > 0 and not file_service.exists(file_storage_share, directory_name=file_storage_dir):
                 subdirs = file_storage_dir.split('/')
-                subdirfull=""
+                subdirfull = ""
                 for subdir in subdirs:
-                    subdirfull+=subdir
+                    subdirfull += subdir
                     file_service.create_directory(file_storage_share, subdirfull)
-                    subdirfull+="/"
+                    subdirfull += "/"
                 print('Created directory:' + file_storage_dir)
         else:
             print('Filaed to connect to Asure file storage, share does not exist: ' + file_storage_share)
     except Exception as ex:
         print('Error connecting to Azure file storage: ', ex)
 
+
 def _get_remote_filename(local_filename):
         abbr, directory, entity_name, year = local_filename[:-4].split('@#')
         filename = '{} {} {}.pdf'.format(abbr, entity_name, year)
         return directory, filename, year
+
 
 def upload_to_file_storage(filename):
     global script_name
@@ -241,12 +242,12 @@ def upload_to_file_storage(filename):
     while retries < 3:
         try:
             path = os.path.join(downloads_path, old_filename)
-            file_details = db.readFileStatus(file_original_name=old_filename, file_status = 'Uploaded')
+            file_details = db.readFileStatus(file_original_name=old_filename, file_status='Uploaded')
             if file_details is not None:
                 print('File {} was already uploaded before'.format(old_filename))
                 retries = 3
                 break
-            file_details = db.readFileStatus(file_original_name=old_filename, file_status = 'Downloaded')
+            file_details = db.readFileStatus(file_original_name=old_filename, file_status='Downloaded')
             print('Uploading {}'.format(path))
             remote_filename = _get_remote_filename(old_filename)
             directory = None
@@ -270,9 +271,9 @@ def upload_to_file_storage(filename):
                 if file_service.exists(file_storage_share, directory_name=directory, file_name=filename):
                     print('{}/{} already exists'.format(directory, filename))
                     if file_details is None:
-                        db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        db.saveFileStatus(script_name=script_name, file_original_name=old_filename, file_upload_path=directory, file_upload_name=filename, file_status='Uploaded')
                     else:
-                        db.saveFileStatus(id = file_details['id'], script_name = script_name, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                        db.saveFileStatus(id=file_details['id'], script_name=script_name, file_upload_path=directory, file_upload_name=filename, file_status='Uploaded')
                     return
             file_service.create_file_from_path(
                 file_storage_share,
@@ -281,14 +282,15 @@ def upload_to_file_storage(filename):
                 path,
                 content_settings=ContentSettings(content_type='application/pdf'))
             if file_details is None:
-                db.saveFileStatus(script_name = script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                db.saveFileStatus(script_name=script_name, file_original_name=old_filename, file_upload_path=directory, file_upload_name=filename, file_status='Uploaded')
             else:
-                db.saveFileStatus(id = file_details['id'], script_name = script_name, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
+                db.saveFileStatus(id=file_details['id'], script_name=script_name, file_upload_path=directory, file_upload_name=filename, file_status='Uploaded')     
             print('{} uploaded'.format(path))
             retries = 3
         except Exception as e:
             print('Error uploading to Asure file storage,', str(e))
             retries += 1
+
                 
 if __name__ == '__main__':
     global db
@@ -306,10 +308,17 @@ if __name__ == '__main__':
     global illinois_entities_xlsx_file
     global illinois_entities_sheet
     global script_name
+    start_time = datetime.utcnow()
+    script_name = "get_IL.py"
+    result = 1
+    error_message = ""
+    config_file = ""
+
+    
     config = configparser.ConfigParser()
     config.read('conf.ini')
+    db = db(config)
     try:
-        db = db(config)
         dbparameters = db.readProps('illinois')
         config_file = str(dbparameters)
         with open('IL_parms.txt', 'r') as fp:
@@ -324,7 +333,7 @@ if __name__ == '__main__':
         illinois_entities_sheet = dbparameters["illinois_entities_sheet"] or dparameters["illinois_entities_sheet"]
         # if log file become large, you can change filemode='w' for logging only individual sessons
         logging.basicConfig(filename=dir_in + 'get_ILlog.txt', filemode='a', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
+    
         logging.debug('Started')
         
         try:

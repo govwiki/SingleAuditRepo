@@ -30,17 +30,20 @@ if __name__ == '__main__':
     start_time = datetime.utcnow()
     result = 1
     error_message = ""
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("--year")
-    argparser.add_argument("--category")
-    args = argparser.parse_args()
+    config_file = ""
 
     config = configparser.ConfigParser()
     config.read('conf.ini')
-
+    
     crawler = Crawler(config, 'virginia', script_name)
-    config_file = str(crawler.dbparams)
     try:
+        argparser = argparse.ArgumentParser()
+        argparser.add_argument("--year")
+        argparser.add_argument("--category")
+        args = argparser.parse_args()
+    
+        config_file = str(crawler.dbparams)
+
         crawler.get(crawler.get_property('url','virginia'))
         
         if args.year:

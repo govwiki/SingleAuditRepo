@@ -17,38 +17,42 @@ import re
 
 class Crawler:
 
-    def __init__(self, config, section, script_name = ''):
+    def __init__(self, config, section, script_name = None, error_message = None):
         self.script_name = script_name
         self.config = config
         self.db = DbCommunicator(config)
-        self.section = section
-        self.dbparams = self.db.readProps('general')
-        self.dbparams.update(self.db.readProps(section))
-        self.downloads_path = self.get_property('downloads_path', section)
-        self.overwrite_remote_files = self.get_property('overwrite_remote_files', section, 'bool')
-        if not os.path.exists(self.downloads_path):
-            os.makedirs(self.downloads_path)
-        elif not os.path.isdir(self.downloads_path):
-            print('ERROR:{} downloads_path parameter points to file!'.format(section))
-            sys.exit(1)
-        self.headless_mode = self.get_property('headless_mode', 'general', 'bool')
-        if self.headless_mode:
-            display = Display(visible=0, size=(1920, 1080))
-            display.start()
-        options = webdriver.ChromeOptions()
-        options.add_argument("--no-sandbox")
-        prefs = {
-            'download.default_directory': self.downloads_path,
-            'download.prompt_for_download': False,
-            'download.directory_upgrade': True,
-            'plugins.always_open_pdf_externally': True,
-        }
-        options.add_experimental_option("prefs", prefs)
-        self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
-        self.browser.implicitly_wait(10)
-
-        # self.ftp_connect()
-        self.file_storage_connect()
+        self.error_message = error_message
+        try:
+            self.section = section
+            self.dbparams = self.db.readProps('general')
+            self.dbparams.update(self.db.readProps(section))
+            self.downloads_path = self.get_property('downloads_path', section)
+            self.overwrite_remote_files = self.get_property('overwrite_remote_files', section, 'bool')
+            if not os.path.exists(self.downloads_path):
+                os.makedirs(self.downloads_path)
+            elif not os.path.isdir(self.downloads_path):
+                print('ERROR:{} downloads_path parameter points to file!'.format(section))
+                sys.exit(1)
+            self.headless_mode = self.get_property('headless_mode', 'general', 'bool')
+            if self.headless_mode:
+                display = Display(visible=0, size=(1920, 1080))
+                display.start()
+            options = webdriver.ChromeOptions()
+            options.add_argument("--no-sandbox")
+            prefs = {
+                'download.default_directory': self.downloads_path,
+                'download.prompt_for_download': False,
+                'download.directory_upgrade': True,
+                'plugins.always_open_pdf_externally': True,
+            }
+            options.add_experimental_option("prefs", prefs)
+            self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
+            self.browser.implicitly_wait(10)
+        
+            # self.ftp_connect()
+            self.file_storage_connect()
+        except Exception as e:
+            self.error_message = str(e)
         
     def get_property(self, prop, section, type='str'):
         if type=='str':
@@ -191,8 +195,10 @@ class Crawler:
         time.sleep(3)
 
     def close(self):
-        self.browser.quit()
-        self.db.close()
+        if hasattr(self,'browser'):
+            self.browser.quit()
+        if hasattr(self,'db'):
+            self.db.close()
         # self.ftp.quit()
 
     def download(self, url, filename, file_db_id=None):
@@ -310,8 +316,11 @@ class Crawler:
                 file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Uploaded')
                 if file_details is not None:
                     print('File {} was already uploaded before'.format(filename))
-                    retries = 3
-                    break
+                    return
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Other', notes = 'Uplodaed Before')
+                if file_details is not None:
+                    print('File {} was already uploaded before'.format(filename))
+                    return
                 file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Downloaded')
                 print('Uploading {}'.format(path))
                 remote_filename = self._get_remote_filename(filename)
@@ -337,9 +346,9 @@ class Crawler:
                     if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
                         print('{}/{} already exists'.format(directory, filename))
                         if file_details is None:
-                            self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                            self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Other', notes = 'Uplodaed Before')
                         else:
-                            self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                            self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Other', notes = 'Uplodaed Before')
                         return
                 self.file_service.create_file_from_path(
                     self.file_storage_share,
@@ -511,16 +520,17 @@ class DbCommunicator:
                     data = (kwargs[key],)
                     i+=1
                 else:
-                    query += " AND "+key+" = %s LIMIT 1"
+                    query += " AND "+key+" = %s"
                     data += (kwargs[key],)
                     i+=1
+            query +=" LIMIT 1"
             if i == 0:
                 query = None
             if query is not None:
                 try:
                     statement.execute(query, data)
-                    for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status) in statement:
-                        result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name, 'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name, 'file_status': file_status}
+                    for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status, notes) in statement:
+                        result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name, 'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name, 'file_status': file_status, 'notes': notes}
                 except Exception as e:
                     print("Error reading from database:", e)
                 finally:
