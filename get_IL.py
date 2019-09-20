@@ -191,11 +191,12 @@ def main():
         if len(files) > 1 and bOK:
             for f in files:
                 os.remove(dir_pdfs + str(f).strip())
-        file_details = db.readFileStatus(file_original_name=preparename)
-        if file_details is None:
-            file_details = db.saveFileStatus(script_name=script_name, file_original_name=preparename, file_status='Downloaded')
-        upload_to_file_storage(preparename)
-        os.remove(preparename)
+        if len(files) > 0:
+            file_details = db.readFileStatus(file_original_name=preparename)
+            if file_details is None:
+                file_details = db.saveFileStatus(script_name=script_name, file_original_name=preparename, file_status='Downloaded')
+            upload_to_file_storage(preparename)
+            os.remove(preparename)
 
 
 def file_storage_connect():

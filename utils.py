@@ -393,7 +393,7 @@ class DbCommunicator:
         statement = None
         try:
             statement = self.connection.cursor()
-        except (mysql.connector.InterfaceError, mysql.connector.errors.OperationalError) as e:
+        except Exception as e:
             print("Error accessing database, trying to reconnect")
             self.connect()
             statement = self.connection.cursor()
@@ -415,7 +415,7 @@ class DbCommunicator:
         statement = None
         try:
             statement = self.connection.cursor()
-        except mysql.connector.InterfaceError as e:
+        except Exception as e:
             print("Error accessing database, trying to reconnect")
             self.connect()
             statement = self.connection.cursor()
@@ -507,7 +507,7 @@ class DbCommunicator:
             statement = None
             try:
                 statement = self.connection.cursor()
-            except mysql.connector.InterfaceError as e:
+            except Exception as e:
                 print("Error accessing database, trying to reconnect")
                 self.connect()
                 statement = self.connection.cursor()
