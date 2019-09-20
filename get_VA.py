@@ -17,7 +17,7 @@ class Crawler(CoreCrawler):
         directory = 'School District' if 'Schools' in local_filename else 'General Purpose'
         local_filename = re.sub(r'(\s*-?\s*reissue.*)\.pdf','.pdf',local_filename)
         filename = '{} {}'.format(
-            self.abbr, local_filename.replace(' CAFR', '').replace(' Single Audit', ''),replace(' Town', '')
+            self.abbr, local_filename.replace(' CAFR', '').replace(' Single Audit', '').replace(' Town', '')
         )
         if not re.search("Gate City", filename, re.IGNORECASE) and not re.search("Chase City", filename, re.IGNORECASE):
             filename.replace(' City', '')
