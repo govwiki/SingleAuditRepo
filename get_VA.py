@@ -22,9 +22,9 @@ class Crawler(CoreCrawler):
             self.abbr, local_filename.replace(' CAFR', '').replace(' Single Audit', '').replace(' Town', '')
         )
         if not re.search("Gate City", filename, re.IGNORECASE) and not re.search("Chase City", filename, re.IGNORECASE):
-            filename.replace(' City', '')
+            filename = filename.replace(' City', '')
         r = re.compile(".*(\d{4})\s*\..{3}")
-        year = r.search(local_filename).group(1)
+        year = r.search(filename).group(1)
         return directory, filename, year
 
 
