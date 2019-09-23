@@ -93,9 +93,10 @@ if __name__ == '__main__':
                                 if not os.path.exists(file_path):
                                     print('Removed {}'.format(file_path))
                         else:
-                            filename = crawler.merge_files(filenames).replace(' -', '')
-                            for file in filenames:
-                                file_path = os.path.join(crawler.get_property('downloads_path', 'florida'),file)
+                            filepaths = [os.path.join(crawler.get_property('downloads_path', 'florida'),file) for file in filenames]
+                            filepath = crawler.merge_files(filenames).replace(' -', '')
+                            filename = os.path.basename(filepath)
+                            for file_path in filepaths:
                                 if os.path.exists(file_path):
                                     os.remove(file_path)
                                 if not os.path.exists(file_path):
