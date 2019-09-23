@@ -250,8 +250,8 @@ class Crawler:
         raise NotImplemented
 
     def merge_files(self, filenames):
-        pdfline = ' '.join(filenames)
-        res_filename = filenames[0].split(' part')[0] + '.pdf'
+        pdfline = '"' + '" "'.join(filenames) + '"'
+        res_filename = '"'+filenames[0].split(' part')[0] + '.pdf"'
         command = 'pdftk ' + pdfline + ' cat output ' + res_filename
         os.system(command)
         return res_filename

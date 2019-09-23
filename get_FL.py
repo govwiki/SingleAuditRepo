@@ -4,6 +4,7 @@ import urllib.parse
 from utils import Crawler as CoreCrawler
 from datetime import datetime
 import re
+import os
 
 
 class Crawler(CoreCrawler):
@@ -86,12 +87,28 @@ if __name__ == '__main__':
                             filename = None
                             for filename in filenames:
                                 crawler.upload_to_ftp(filename)
+                                file_path = os.path.join(crawler.get_property('downloads_path', 'florida'),filename)
+                                if os.path.exists(file_path):
+                                    os.remove(file_path)
+                                if not os.path.exists(file_path):
+                                    print('Removed {}'.format(file_path))
                         else:
                             filename = crawler.merge_files(filenames).replace(' -', '')
+                            for file in filenames:
+                                file_path = os.path.join(crawler.get_property('downloads_path', 'florida'),file)
+                                if os.path.exists(file_path):
+                                    os.remove(file_path)
+                                if not os.path.exists(file_path):
+                                    print('Removed {}'.format(file_path))
                     else:
                         filename = filenames[0]
                     if filename and all_downloaded:
                         crawler.upload_to_ftp(filename)
+                        file_path = os.path.join(crawler.get_property('downloads_path', 'florida'),filename)
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                        if not os.path.exists(file_path):
+                            print('Removed {}'.format(file_path))
     except Exception as e:
             result = 0
             error_message = str(e)
