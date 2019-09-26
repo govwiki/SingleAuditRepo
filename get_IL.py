@@ -139,7 +139,7 @@ def main():
         
         try:
             files = ftp.nlst()
-            files = [f for f in files if "Del" in f]
+            files = [f for f in files if not "Del" in f]
             files.sort()
         except Exception as e:
             if str(e) == "550 No files found":
