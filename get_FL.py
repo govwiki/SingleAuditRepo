@@ -94,7 +94,7 @@ if __name__ == '__main__':
                                     print('Removed {}'.format(file_path))
                         else:
                             filepaths = [os.path.join(crawler.get_property('downloads_path', 'florida'),file) for file in filenames]
-                            filepath = crawler.merge_files(filenames).replace(' -', '')
+                            filepath = crawler.merge_files(filepaths).replace(' -', '')
                             filename = os.path.basename(filepath)
                             for file_path in filepaths:
                                 if os.path.exists(file_path):

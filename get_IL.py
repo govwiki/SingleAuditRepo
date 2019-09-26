@@ -156,6 +156,7 @@ def main():
                 
         # if more then one pdf in ftp directory merge them
         if len(files) > 1:
+            files = [f for f in files if "Del" in f]
             pdfline = ' '.join(files)
             if platform.system() == "Linux":
                 command = 'pdftk ' + pdfline + ' cat output temp.pdf'
