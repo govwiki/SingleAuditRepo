@@ -194,6 +194,14 @@ class Crawler:
         self.browser.back()
         time.sleep(3)
 
+    def close_dialog(self):
+        try:
+            alert = self.browser.switch_to.alert
+            alert.dismiss()
+            #alert.accept()
+        except Exception as e:
+            pass
+
     def close(self):
         if hasattr(self,'browser'):
             self.browser.quit()

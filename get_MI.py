@@ -4,6 +4,7 @@ import sys
 from utils import Crawler as CoreCrawler
 from datetime import datetime
 import argparse
+from time import sleep
 
 
 class Crawler(CoreCrawler):
@@ -67,13 +68,16 @@ if __name__ == '__main__':
                 crawler.send_keys('#txtYear', args.year)
     
             crawler.click('#btnSearch')
+            
+            sleep(1)
+            crawler.close_dialog()
     
             for row in crawler.get_elements('#dgWEB_MF_DOC tr'):
                 items = crawler.get_elements('td', root=row)
                 year = items[0].text
                 if year == 'Year':
                     continue
-                name = items[1].text
+                name = items[1].text.replace("/","-")
                 entity_type = items[2].text
                 url = crawler.get_attr('a', 'href', root=items[3])
     
