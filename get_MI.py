@@ -52,7 +52,7 @@ if __name__ == '__main__':
             sys.exit(1)
         
         
-        crawler.get(config.get('michigan', 'url'))
+        crawler.get(crawler.get_property('url','michigan'))
     
         county_list = []
         for county in crawler.get_elements('#ddlCounty option'):
@@ -89,9 +89,11 @@ if __name__ == '__main__':
                     else:
                         name = '{} {} ({} County)'.format(name, entity_type, county.split('-')[0].title())
     
-                downloaded = crawler.download(url, '{}#${}#${}.pdf'.format(name, entity_type, year))
+                file_name = '{}#${}#${}.pdf'.format(name, entity_type, year)
+                downloaded = crawler.download(url, file_name)
                 if downloaded:
-                    crawler.upload_to_ftp('{}#${}#${}.pdf'.format(name, entity_type, year))
+                    crawler.upload_to_ftp(file_name)
+                file_path = os.path.join(crawler.get_property('downloads_path', 'michigan'),file_name)
                 if os.path.exists(file_path):
                     os.remove(file_path)
                     if not os.path.exists(file_path):
