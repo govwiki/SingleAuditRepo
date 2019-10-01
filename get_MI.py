@@ -92,6 +92,10 @@ if __name__ == '__main__':
                 downloaded = crawler.download(url, '{}#${}#${}.pdf'.format(name, entity_type, year))
                 if downloaded:
                     crawler.upload_to_ftp('{}#${}#${}.pdf'.format(name, entity_type, year))
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    if not os.path.exists(file_path):
+                        print('Removed {}'.format(file_path))
     except Exception as e:
             result = 0
             error_message = str(e)
