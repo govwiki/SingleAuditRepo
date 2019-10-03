@@ -5,6 +5,7 @@ from utils import Crawler as CoreCrawler
 from datetime import datetime
 import argparse
 from time import sleep
+import re
 
 
 class Crawler(CoreCrawler):
@@ -19,6 +20,7 @@ class Crawler(CoreCrawler):
             directory = 'Community College District'
         else:
             directory = 'Special District'
+        entity_name = re.sub(r"(\s*\(.*\))","",entity_name)
         filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
         return directory, filename, year
 
