@@ -211,6 +211,7 @@ def file_storage_connect():
     file_storage_share = dbparameters['fs_share'].strip()
     file_storage_dir = dbparameters['fs_directory_prefix'].strip()
     overwrite_remote_files = dbparameters['overwrite_remote_files'].strip()
+
     file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd) 
     try:
         if file_service.exists(file_storage_share):
