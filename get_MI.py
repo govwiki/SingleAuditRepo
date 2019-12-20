@@ -35,7 +35,7 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--year", default = None, required = False)
     args = argparser.parse_args()
-        
+
     config = configparser.ConfigParser()
     config.read('conf.ini')
 
@@ -45,35 +45,34 @@ if __name__ == '__main__':
         if error_message!="":
             raise Exception(error_message)
         config_file = str(crawler.dbparams)
-        
+
         downloads_path = crawler.get_property('downloads_path', 'michigan')
         if not os.path.exists(downloads_path):
             os.makedirs(downloads_path)
         elif not os.path.isdir(downloads_path):
             print('ERROR: downloads_path parameter points to file!')
             sys.exit(1)
-        
-        
+
+
         crawler.get(crawler.get_property('url','michigan'))
-    
         county_list = []
         for county in crawler.get_elements('#ddlCounty option'):
             if 'Select County' in county.text:
                 continue
             county_list.append(county.text)
-    
+
         for county in county_list:
             print('Current Selected County:{}'.format(county))
             crawler.select_option('#ddlCounty', county)
             crawler.select_option('#ddlDocument', 'Audit-Financial Report')
             if args.year:
                 crawler.send_keys('#txtYear', args.year)
-    
+
             crawler.click('#btnSearch')
-            
+
             sleep(1)
             crawler.close_dialog()
-    
+
             for row in crawler.get_elements('#dgWEB_MF_DOC tr'):
                 items = crawler.get_elements('td', root=row)
                 year = items[0].text
@@ -82,7 +81,7 @@ if __name__ == '__main__':
                 name = items[1].text.replace("/","-")
                 entity_type = items[2].text
                 url = crawler.get_attr('a', 'href', root=items[3])
-    
+
                 if (entity_type not in name) and (entity_type == 'County' or entity_type == 'Village' or entity_type == 'Charter Township'):
                     name = '{} {}'.format(name, entity_type)
                 if entity_type == 'Township':
@@ -90,7 +89,7 @@ if __name__ == '__main__':
                         name = '{} ({} County)'.format(name, county.split('-')[0].title())
                     else:
                         name = '{} {} ({} County)'.format(name, entity_type, county.split('-')[0].title())
-    
+
                 file_name = '{}#${}#${}.pdf'.format(name, entity_type, year)
                 downloaded = crawler.download(url, file_name)
                 if downloaded:

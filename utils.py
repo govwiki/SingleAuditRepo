@@ -1,23 +1,23 @@
 import os
+import re
 import ssl
 import sys
 import time
 import urllib.request
-#import urllib.parse
-from azure.storage.file import FileService, ContentSettings
+from errno import errorcode
 from ftplib import FTP, error_perm
+
+import mysql.connector
+# import urllib.parse
+from azure.storage.file import FileService, ContentSettings
 from pyvirtualdisplay import Display
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-from fileinput import filename
-from email._header_value_parser import Section
-import mysql.connector
-import re
+
 
 class Crawler:
 
-    def __init__(self, config, section, script_name = None, error_message = None):
+    def __init__(self, config, section, script_name=None, error_message=None):
         self.script_name = script_name
         self.config = config
         self.db = DbCommunicator(config)
@@ -46,49 +46,51 @@ class Crawler:
                 'plugins.always_open_pdf_externally': True,
             }
             options.add_experimental_option("prefs", prefs)
-            self.browser = webdriver.Chrome(chrome_options=options, service_args=["--verbose", "--log-path=/tmp/selenium.log"])
+            self.browser = webdriver.Chrome(chrome_options=options,
+                                            service_args=["--verbose", "--log-path=/tmp/selenium.log"])
             self.browser.implicitly_wait(10)
-        
+
             # self.ftp_connect()
             self.file_storage_connect()
         except Exception as e:
             self.error_message = str(e)
-        
+
     def get_property(self, prop, section, type='str'):
-        if type=='str':
+        if type == 'str':
             if self.dbparams is not None and prop in self.dbparams:
                 return self.dbparams[prop]
             else:
                 return self.config.get(section, prop).strip()
-        elif type=='bool':
+        elif type == 'bool':
             if self.dbparams is not None and prop in self.dbparams:
-                return self.dbparams[prop]=='True'
+                return self.dbparams[prop] == 'True'
             else:
                 return self.config.getboolean(section, prop, fallback=False)
-        
+
     def file_storage_connect(self):
         self.file_storage_url = self.get_property('fs_server', 'general')
         self.file_storage_user = self.get_property('fs_username', 'general')
         self.file_storage_pwd = self.get_property('fs_password', 'general')
         self.file_storage_share = self.get_property('fs_share', 'general')
         self.file_storage_dir = self.get_property('fs_directory_prefix', 'general')
-        self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd) 
+        self.file_service = FileService(account_name=self.file_storage_user, account_key=self.file_storage_pwd)
         try:
             if self.file_service.exists(self.file_storage_share):
                 print('Connection to Azure file storage successfully established...')
-                if len(self.file_storage_dir) > 0 and not self.file_service.exists(self.file_storage_share, directory_name=self.file_storage_dir):
+                if len(self.file_storage_dir) > 0 and not self.file_service.exists(self.file_storage_share,
+                                                                                   directory_name=self.file_storage_dir):
                     subdirs = self.file_storage_dir.split('/')
-                    subdirfull=""
+                    subdirfull = ""
                     for subdir in subdirs:
-                        subdirfull+=subdir
+                        subdirfull += subdir
                         self.file_service.create_directory(self.file_storage_share, subdirfull)
-                        subdirfull+="/"
+                        subdirfull += "/"
                     print('Created directory:' + self.file_storage_dir)
             else:
                 print('Filaed to connect to Asure file storage, share does not exist: ' + self.file_storage_share)
         except Exception as ex:
             print('Error connecting to Azure file storage: ', ex)
-        
+
     def ftp_connect(self):
         self.ftp = FTP()
         self.ftp.connect(
@@ -198,14 +200,14 @@ class Crawler:
         try:
             alert = self.browser.switch_to.alert
             alert.dismiss()
-            #alert.accept()
+            # alert.accept()
         except Exception as e:
             pass
 
     def close(self):
-        if hasattr(self,'browser'):
+        if hasattr(self, 'browser'):
             self.browser.quit()
-        if hasattr(self,'db'):
+        if hasattr(self, 'db'):
             self.db.close()
         # self.ftp.quit()
 
@@ -219,7 +221,7 @@ class Crawler:
             ctx.verify_mode = ssl.CERT_NONE
         else:
             ctx = None
-        
+
         content_length = 1
         retry = 0
         file_size = 0
@@ -237,21 +239,24 @@ class Crawler:
             except Exception as e:
                 retry += 1
                 print('Attempt', retry, 'ERROR: Downloading failed!', url, str(e))
-                try:  
+                try:
                     os.remove(file_name)
                 except OSError:
                     pass
         if file_size == content_length:
             downloaded = True
             if file_db_id:
-                self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
+                self.db.saveFileStatus(id=file_db_id, script_name=self.script_name, file_original_name=filename,
+                                       file_status='Downloaded')
             else:
-                self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'Downloaded')
+                self.db.saveFileStatus(script_name=self.script_name, file_original_name=filename,
+                                       file_status='Downloaded')
         else:
             if file_db_id:
-                self.db.saveFileStatus(id = file_db_id, script_name = self.script_name, file_original_name = filename, file_status = 'None')
+                self.db.saveFileStatus(id=file_db_id, script_name=self.script_name, file_original_name=filename,
+                                       file_status='None')
             else:
-                self.db.saveFileStatus(script_name = self.script_name, file_original_name = filename, file_status = 'None')
+                self.db.saveFileStatus(script_name=self.script_name, file_original_name=filename, file_status='None')
         return downloaded
 
     def _get_remote_filename(self, local_filename):
@@ -259,7 +264,7 @@ class Crawler:
 
     def merge_files(self, filenames):
         pdfline = '"' + '" "'.join(filenames) + '"'
-        res_filename = '"'+filenames[0].split(' part')[0] + '.pdf"'
+        res_filename = '"' + filenames[0].split(' part')[0] + '.pdf"'
         command = 'pdftk ' + pdfline + ' cat output ' + res_filename
         os.system(command)
         return res_filename
@@ -290,7 +295,7 @@ class Crawler:
                         return
                     except error_perm:
                         pass
-    
+
                 self.ftp.storbinary('STOR {}'.format(filename), pdf_file)
                 # print('{} uploaded'.format(path))
                 pdf_file.close()
@@ -317,22 +322,23 @@ class Crawler:
             print('Moved {} to {}'.format(server_filename, directory))
         except Exception as e:
             print(str(e))
-            
+
     def upload_to_file_storage(self, filename):
         fnm = FilenameManager()
         retries = 0
         while retries < 3:
             try:
                 path = os.path.join(self.downloads_path, filename)
-                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Uploaded')
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status='Uploaded')
                 if file_details is not None:
                     print('File {} was already uploaded before'.format(filename))
                     return
-                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Other', notes = 'Uplodaed Before')
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status='Other',
+                                                      notes='Uplodaed Before')
                 if file_details is not None:
                     print('File {} was already uploaded before'.format(filename))
                     return
-                file_details = self.db.readFileStatus(file_original_name=filename, file_status = 'Downloaded')
+                file_details = self.db.readFileStatus(file_original_name=filename, file_status='Downloaded')
                 print('Uploading {}'.format(path))
                 remote_filename = self._get_remote_filename(filename)
                 old_filename = filename
@@ -357,9 +363,13 @@ class Crawler:
                     if self.file_service.exists(self.file_storage_share, directory_name=directory, file_name=filename):
                         print('{}/{} already exists'.format(directory, filename))
                         if file_details is None:
-                            self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Other', notes = 'Uplodaed Before')
+                            self.db.saveFileStatus(script_name=self.script_name, file_original_name=old_filename,
+                                                   file_upload_path=directory, file_upload_name=filename,
+                                                   file_status='Other', notes='Uplodaed Before')
                         else:
-                            self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Other', notes = 'Uplodaed Before')
+                            self.db.saveFileStatus(id=file_details['id'], file_upload_path=directory,
+                                                   file_upload_name=filename, file_status='Other',
+                                                   notes='Uplodaed Before')
                         return
                 self.file_service.create_file_from_path(
                     self.file_storage_share,
@@ -368,9 +378,12 @@ class Crawler:
                     path,
                     content_settings=ContentSettings(content_type='application/pdf'))
                 if file_details is None:
-                    self.db.saveFileStatus(script_name = self.script_name, file_original_name=old_filename, file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')
+                    self.db.saveFileStatus(script_name=self.script_name, file_original_name=old_filename,
+                                           file_upload_path=directory, file_upload_name=filename,
+                                           file_status='Uploaded')
                 else:
-                    self.db.saveFileStatus(id = file_details['id'], file_upload_path = directory, file_upload_name = filename, file_status = 'Uploaded')     
+                    self.db.saveFileStatus(id=file_details['id'], file_upload_path=directory, file_upload_name=filename,
+                                           file_status='Uploaded')
                 print('{} uploaded'.format(path))
                 retries = 3
             except Exception as e:
@@ -378,7 +391,7 @@ class Crawler:
                 filename = old_filename
                 retries += 1
 
-                
+
 class DbCommunicator:
 
     def __init__(self, config):
@@ -387,12 +400,12 @@ class DbCommunicator:
         self.db_password = config.get('sql', 'password', fallback='test123')
         self.db_name = config.get('sql', 'name', fallback='govwiki_production')
         self.connect()
-        
+
     def connect(self):
         try:
             self.connection = mysql.connector.connect(user=self.db_user, password=self.db_password,
-                              host=self.db_url,
-                              database=self.db_name) 
+                                                      host=self.db_url,
+                                                      database=self.db_name)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Failed to connect to database: wrong credentials")
@@ -400,7 +413,7 @@ class DbCommunicator:
                 print("Failed to connect to database: Database does not exist ", self.db_name)
             else:
                 print("Failed to connect to database:", err)
-        
+
     def log(self, name, start, end, config, result, error):
         statement = None
         try:
@@ -411,8 +424,8 @@ class DbCommunicator:
             statement = self.connection.cursor()
         try:
             query = ("INSERT INTO script_execution_log "
-                   "(name, start_time, end_time, config_file, result, error_message) "
-                   "VALUES (%s, %s, %s, %s, %s, %s)")
+                     "(name, start_time, end_time, config_file, result, error_message) "
+                     "VALUES (%s, %s, %s, %s, %s, %s)")
             data = (name, start, end, config, result, error)
             statement.execute(query, data)
             self.connection.commit()
@@ -421,7 +434,7 @@ class DbCommunicator:
         finally:
             if statement:
                 statement.close()
-            
+
     def readProps(self, category):
         props = {}
         statement = None
@@ -433,18 +446,18 @@ class DbCommunicator:
             statement = self.connection.cursor()
         try:
             query = ("SELECT `key`, value FROM script_parameters "
-                   "WHERE category = %s")
+                     "WHERE category = %s")
             data = (category,)
             statement.execute(query, data)
-            for (key,value) in statement:
-                props[key]=value
+            for (key, value) in statement:
+                props[key] = value
         except Exception as e:
             print("Error reading from database:", e)
         finally:
             if statement:
                 statement.close()
         return props
-        
+
     def saveFileStatus(self, **kwargs):
         result = None
         if kwargs is not None:
@@ -456,7 +469,7 @@ class DbCommunicator:
                 self.connect()
                 statement = self.connection.cursor()
             query = None
-            data = None 
+            data = None
             if "id" in kwargs:
                 query = "UPDATE script_file_status SET "
                 i = 0
@@ -464,13 +477,13 @@ class DbCommunicator:
                     if key == "id":
                         pass
                     elif i == 0:
-                        query += key+" = %s"
+                        query += key + " = %s"
                         data = (kwargs[key],)
-                        i+=1
+                        i += 1
                     else:
-                          query += ", " + key + " = %s"
-                          data += (kwargs[key],)
-                          i+=1
+                        query += ", " + key + " = %s"
+                        data += (kwargs[key],)
+                        i += 1
                 if i > 0:
                     query += " WHERE id = %s"
                     data += (kwargs["id"],)
@@ -485,15 +498,15 @@ class DbCommunicator:
                 for key in kwargs:
                     if i == 0:
                         query += key
-                        query_values +="%s"
+                        query_values += "%s"
                         data = (kwargs[key],)
-                        i+=1
+                        i += 1
                     else:
-                        query += ", "+key
-                        query_values +=",%s"
+                        query += ", " + key
+                        query_values += ",%s"
                         data += (kwargs[key],)
-                        i+=1
-                if i>0:
+                        i += 1
+                if i > 0:
                     query += ") VALUES " + query_values + ")"
                 else:
                     query = None
@@ -512,7 +525,7 @@ class DbCommunicator:
                     if statement:
                         statement.close()
         return result
-    
+
     def readFileStatus(self, **kwargs):
         result = None
         if kwargs is not None:
@@ -528,93 +541,100 @@ class DbCommunicator:
             i = 0
             for key in kwargs:
                 if i == 0:
-                    query += key +" = %s"
+                    query += key + " = %s"
                     data = (kwargs[key],)
-                    i+=1
+                    i += 1
                 else:
-                    query += " AND "+key+" = %s"
+                    query += " AND " + key + " = %s"
                     data += (kwargs[key],)
-                    i+=1
-            query +=" LIMIT 1"
+                    i += 1
+            query += " LIMIT 1"
             if i == 0:
                 query = None
             if query is not None:
                 try:
                     statement.execute(query, data)
-                    for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status, notes) in statement:
-                        result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name, 'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name, 'file_status': file_status, 'notes': notes}
+                    for (id, script_name, file_original_name, file_upload_path, file_upload_name, file_status,
+                         notes) in statement:
+                        result = {'id': id, 'script_name': script_name, 'file_original_name': file_original_name,
+                                  'file_upload_path': file_upload_path, 'file_upload_name': file_upload_name,
+                                  'file_status': file_status, 'notes': notes}
                 except Exception as e:
                     print("Error reading from database:", e)
                 finally:
                     if statement:
                         statement.close()
         return result
-    
+
     def close(self):
         try:
             self.connection.close()
         except:
             pass
-        
+
+
 class FilenameManager:
-    
+
     def __init__(self):
-        #Directory and file component names must be no more than 255 characters in length.
+        # Directory and file component names must be no more than 255 characters in length.
         self.azure_max_length = 255
-        
-        #Directory names cannot end with the forward slash character (/). If provided, it will be automatically removed.
-        #File names must not end with the forward slash character (/).
-        self.azure_forbid_in_end = ['/',]
-        
-        #Reserved URL characters must be properly escaped.
-        self.azure_escape = [';', '/', '?', ':', '@', '=', '&',]
-        
-        #The following characters are not allowed: " \ / : | < > * ?        
-        self.azure_forbid_symbol = ['"', '\\', ':', '|', '<', '>', '*', '?', '\a', '\b', '\cx', '\e', '\f', '\M-\C-x', '\n', '\r', '\t', '\v',]
-        
-        #The following file names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..).
-        self.azure_forbid_filename = ['LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'PRN', 'AUX', 'NUL', 'CON', 'CLOCK$', '.', '..',]        
+
+        # Directory names cannot end with the forward slash character (/). If provided, it will be automatically removed.
+        # File names must not end with the forward slash character (/).
+        self.azure_forbid_in_end = ['/', ]
+
+        # Reserved URL characters must be properly escaped.
+        self.azure_escape = [';', '/', '?', ':', '@', '=', '&', ]
+
+        # The following characters are not allowed: " \ / : | < > * ?
+        self.azure_forbid_symbol = ['"', '\\', ':', '|', '<', '>', '*', '?', '\a', '\b', '\cx', '\e', '\f', '\M-\C-x',
+                                    '\n', '\r', '\t', '\v', ]
+
+        # The following file names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..).
+        self.azure_forbid_filename = ['LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9', 'COM1',
+                                      'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'PRN', 'AUX',
+                                      'NUL', 'CON', 'CLOCK$', '.', '..', ]
 
     def azure_check_length(self, name):
         new_name = name
-        if len(name)>self.azure_max_length:
-            start = name[:self.max_length-9]
+        if len(name) > self.azure_max_length:
+            start = name[:self.max_length - 9]
             end = name[-8:]
-            new_name = start+" "+end
-        return new_name
-    
-    def azure_check_unicode(self, name):
-        #Illegal URL path characters not allowed. Code points like \uE000, while valid in NTFS filenames, are not valid Unicode characters. In addition, some ASCII or Unicode characters, like control characters (0x00 to 0x1F, \u0081, etc.), are also not allowed. For rules governing Unicode strings in HTTP/1.1 see RFC 2616, Section 2.2: Basic Rules and RFC 3987.
-        new_name = re.sub("U\+00\d(\d|[A-F])","", name)
-        return new_name
-    
-    def azure_check_forbidden_symbols(self,name):
-        new_name = self.azure_check_unicode(name)
-        for item in self.azure_forbid_symbol:
-            new_name = new_name.replace(item,"_")
+            new_name = start + " " + end
         return new_name
 
-    def azure_check_forbidden_names(self,name):
+    def azure_check_unicode(self, name):
+        # Illegal URL path characters not allowed. Code points like \uE000, while valid in NTFS filenames, are not valid Unicode characters. In addition, some ASCII or Unicode characters, like control characters (0x00 to 0x1F, \u0081, etc.), are also not allowed. For rules governing Unicode strings in HTTP/1.1 see RFC 2616, Section 2.2: Basic Rules and RFC 3987.
+        new_name = re.sub("U\+00\d(\d|[A-F])", "", name)
+        return new_name
+
+    def azure_check_forbidden_symbols(self, name):
+        new_name = self.azure_check_unicode(name)
+        for item in self.azure_forbid_symbol:
+            new_name = new_name.replace(item, "_")
+        return new_name
+
+    def azure_check_forbidden_names(self, name):
         new_name = name
         if name in self.azure_forbid_filename:
-            new_name = name+'_1.pdf'
+            new_name = name + '_1.pdf'
         return new_name
-            
+
     def azure_check_ending(self, name):
         new_name = name
         if name[-1:] in self.azure_forbid_in_end:
             new_name = name[:-1]
         return new_name
-    
-    def azure_escape_reserved_symbols(self,name):
-        #new_name = urllib.parse.quote(name)
+
+    def azure_escape_reserved_symbols(self, name):
+        # new_name = urllib.parse.quote(name)
         # it turns out Azure doesn't transform escaped sequences back to symbols, thus we just remove them
         new_name = name
         for item in self.azure_escape:
-            new_name = new_name.replace(item,"_")
+            new_name = new_name.replace(item, "_")
         return new_name
-    
-    def azure_validate_filename(self,name):
+
+    def azure_validate_filename(self, name):
         new_name = self.azure_check_forbidden_symbols(name)
         new_name = self.azure_check_ending(new_name)
         new_name = self.azure_escape_reserved_symbols(new_name)
