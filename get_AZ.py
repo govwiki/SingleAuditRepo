@@ -11,7 +11,7 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, year = local_filename[:-4].split('@#')
-        directory = 'Unclassified'
+        directory = ''
         filename = '{} {} {}.pdf'.format(self.abbr, entity_type, year)
         return directory, filename, year
 
