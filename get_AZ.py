@@ -51,16 +51,19 @@ if __name__ == '__main__':
             a.click()
             files = crawler.get_elements('span.file')
             url_a = files[0].find_element_by_tag_name('a')
+            type = url_a.text
             url = url_a.get_attribute('href')
+            if type == 'Highlights':
+                pass
+            else:
+                downloaded = crawler.download(url, '{}@#{}.pdf'.format(file_name[:re.search('June',
+                                                                                            file_name).start()].replace(
+                    ' ', ''), year))
+                if downloaded:
+                    crawler.upload_to_file_storage(
+                        '{}@#{}.pdf'.format(file_name[:re.search('June',
+                                                                 file_name).start()].replace(' ', ''), year))
             crawler.back()
-            downloaded = crawler.download(url, '{}@#{}.pdf'.format(file_name[:re.search('June',
-                                                                                        file_name).start()].replace(
-                ' ', ''), year))
-            if downloaded:
-                crawler.upload_to_file_storage(
-                    '{}@#{}.pdf'.format(file_name[:re.search('June',
-                                                             file_name).start()].replace(
-                        ' ', ''), year))
     except Exception as e:
         result = 0
         error_message = str(e)
