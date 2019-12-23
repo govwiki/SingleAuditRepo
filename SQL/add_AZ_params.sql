@@ -12,4 +12,3 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('ari
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('arizona', 'url', 'http://portal.sao.wa.gov/ReportSearch', 'target url');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('arizona', 'downloads_path', '/tmp/downloads/AZ/', 'temp (local) folder for file downloads');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('arizona', 'overwrite_remote_files', 'False', 'Overwrite remote files if they already exist');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('arizona', 'upload_date', '12/20/2019', 'Documents uploaded after this date');

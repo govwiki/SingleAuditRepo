@@ -12,4 +12,3 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('geo
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('georgia', 'url', 'https://ted.cviog.uga.edu/financial-documents/financial-reports', 'target url');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('georgia', 'downloads_path', '/tmp/downloads/GA/', 'temp (local) folder for file downloads');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('georgia', 'overwrite_remote_files', 'False', 'Overwrite remote files if they already exist');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('georgia', 'upload_date', '12/20/2019', 'Documents uploaded after this date');
