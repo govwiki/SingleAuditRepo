@@ -45,16 +45,12 @@ if __name__ == '__main__':
         crawler.select_option('#ddlReportType', 'Financial Audit')
         crawler.click('#btnSubmitSearch')
         urls = []
-        cou = 0
         for row in crawler.get_elements('#dgResults tr'):
             if (row.text != 'Entity Name County Report Type Entity Type Report Period Release Date'):
                 a = row.find_element_by_tag_name('a')
                 attribute = a.get_attribute('href')
                 print(attribute)
                 urls.append(attribute)
-                cou = cou + 1
-                if cou == 3:
-                    break
         for url in urls:
             crawler.get(url)
             pdf_url = crawler.get_elements('#hlReport')
