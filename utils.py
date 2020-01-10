@@ -4,12 +4,12 @@ import ssl
 import sys
 import time
 import urllib.request
+from errno import errorcode
 from ftplib import FTP, error_perm
 
 import mysql.connector
 # import urllib.parse
 from azure.storage.file import FileService, ContentSettings
-from mysql.connector import errorcode
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -35,7 +35,7 @@ class Crawler:
                 sys.exit(1)
             self.headless_mode = self.get_property('headless_mode', 'general', 'bool')
             if self.headless_mode:
-                display = Display(visible=1, size=(1024, 768))
+                display = Display(visible=1, size=(1920, 1080))
                 display.start()
             options = webdriver.ChromeOptions()
             options.add_argument("--no-sandbox")
@@ -46,7 +46,7 @@ class Crawler:
                 'plugins.always_open_pdf_externally': True,
             }
             options.add_experimental_option("prefs", prefs)
-            self.browser = webdriver.Chrome(executable_path='/usr/lib/chromium-browser/chromedriver',chrome_options=options,
+            self.browser = webdriver.Chrome(chrome_options=options,
                                             service_args=["--verbose", "--log-path=/tmp/selenium.log"])
             self.browser.implicitly_wait(10)
             self.browser.set_page_load_timeout(999999999999)

@@ -77,10 +77,7 @@ if __name__ == '__main__':
                                                 file_status='Downloaded')
             year = re.findall(r'[0-9]+', filename)
             real_name = filename.replace('_', '').split(year[0])[0]
-            if len(year) > 1:
-                year = '20' + year[0] + '-' + '20' + year[1]
-            else:
-                year = '20' + year[0]
+            year = '20' + year[0]
             new_file_name = '{}@#{}.pdf'.format(real_name, year)
             os.rename(os.path.join(path, filename),
                       os.path.join(path, new_file_name))
