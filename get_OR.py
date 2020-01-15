@@ -30,10 +30,10 @@ PATH = '/home/seraphina/Documents/CONTRACTS/UPWORK/PDF_CRAWLING/oregon_scraper_v
 # get start time
 startTime = datetime.now()
 
-with open('OR_params.txt', 'r') as fp: 
+with open('OR_params.txt', 'r') as fp:
     dparameters = json.load(fp)
 
-#year range
+# year range
 rangeFrom = dparameters["rangeFrom"]
 rangeTo = dparameters["rangeTo"]
 
@@ -45,7 +45,17 @@ print("testing years...", years)
 ### DEFINE DOCUMENT CATEGORIES ###
 schools = ['CHARTER SCHOOLS', ' SCHOOL DISTRICTS + ESD']
 colleges = ['COMMUNITY COLLEGES']
-special_districts = ['AIR POLLUTION AUTHORITY', 'AIRPORT DISTRICTS', 'CEMETERY DISTRICTS', 'DIKING DISTRICTS', 'DRAINAGE DISTRICTS', 'EMERGENCY COMMUNICATION DIST', 'FLOOD CONTROL DISTRICTS', 'GEOTHERMAL HEATING DISTRICTS', 'HOSPITAL DISTRICTS', 'HOSPITAL FACILITIES AUTHORITY', 'INSECT/HERBICIDE CONTROL DIST', 'IRRIGATION DISTRICTS', 'LIBRARY DISTRICTS', 'LIGHTING DISTRICTS', 'LIVESTOCK DISTRICTS', 'MASS TRANSIT DISTRICTS', 'METROPOLITAN SERVICE DISTRICTS', 'PARKS AND RECREATION DISTRICTS', 'PORT DISTRICTS', 'PUBLIC HOUSING AUTHORITY', 'PUBLIC UTILITY DISTRICTS', 'REGIONAL PLANNING DISTRICTS', 'ROAD ASSESSMENT DISTRICTS', 'RURAL FIRE PROTECTION DISTRICT', 'SANITARY DISTRICTS', 'SOIL WATER CONSERVATION DIST', 'TRANSLATOR DISTRICTS', 'URBAN RENEWAL AGENCIES', 'VECTOR CONTROL DISTRICTS', 'WATER CONTROL DISTRICTS', 'WATER DISTRICTS', 'WATER IMPROVEMENT DISTRICTS', 'WEATHER MODIFICATION DISTRICTS', 'WEED CONTROL DISTRICTS']
+special_districts = ['AIR POLLUTION AUTHORITY', 'AIRPORT DISTRICTS', 'CEMETERY DISTRICTS', 'DIKING DISTRICTS',
+                     'DRAINAGE DISTRICTS', 'EMERGENCY COMMUNICATION DIST', 'FLOOD CONTROL DISTRICTS',
+                     'GEOTHERMAL HEATING DISTRICTS', 'HOSPITAL DISTRICTS', 'HOSPITAL FACILITIES AUTHORITY',
+                     'INSECT/HERBICIDE CONTROL DIST', 'IRRIGATION DISTRICTS', 'LIBRARY DISTRICTS', 'LIGHTING DISTRICTS',
+                     'LIVESTOCK DISTRICTS', 'MASS TRANSIT DISTRICTS', 'METROPOLITAN SERVICE DISTRICTS',
+                     'PARKS AND RECREATION DISTRICTS', 'PORT DISTRICTS', 'PUBLIC HOUSING AUTHORITY',
+                     'PUBLIC UTILITY DISTRICTS', 'REGIONAL PLANNING DISTRICTS', 'ROAD ASSESSMENT DISTRICTS',
+                     'RURAL FIRE PROTECTION DISTRICT', 'SANITARY DISTRICTS', 'SOIL WATER CONSERVATION DIST',
+                     'TRANSLATOR DISTRICTS', 'URBAN RENEWAL AGENCIES', 'VECTOR CONTROL DISTRICTS',
+                     'WATER CONTROL DISTRICTS', 'WATER DISTRICTS', 'WATER IMPROVEMENT DISTRICTS',
+                     'WEATHER MODIFICATION DISTRICTS', 'WEED CONTROL DISTRICTS']
 general_purpose = ['CITIES', 'COUNTIES', 'CITY UTILITY BOARDS', 'COUNCIL OF GOVERNMENTS']
 
 
@@ -57,8 +67,8 @@ def init_driver():
     driver.wait = WebDriverWait(driver, 5)
     return driver
 
-def scrape(driver):
 
+def scrape(driver):
     global dump
     global pdf
     global year
@@ -79,13 +89,16 @@ def scrape(driver):
         get_html = [e.get_attribute('innerHTML') for e in get_html]
         split_results = get_html[0].split('<hr>')
         clean = [record for record in split_results if 'resultDisplyForm' in record]
-        
+
         # integrate this into a function
-        doc_types = [re.match('(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e).group(1) if re.match('(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e) else '' for e in clean]
+        doc_types = [
+            re.match('(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e).group(1) if re.match(
+                '(?:.*\n)*.*?<tbody><tr>\n*.*?<td.*?>Type</td>\n*.*?<td.*?>(.*?)<\/td>.*', e) else '' for e in clean]
         doc_types = [e for e in doc_types if not re.match('.*?(?:(\d+\s+)+\s*>>|<<\s*\d+(\s+\d+)+).*', e)]
         print("doc_types", len(doc_types), doc_types)
         # get doc title
-        doc_titles = [re.match('(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e).group(1) if re.match('(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e) else '' for e in clean]
+        doc_titles = [re.match('(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e).group(1) if re.match(
+            '(?:.*\n)*.*?<strong>(.*?)<\/strong>.*', e) else '' for e in clean]
         doc_titles = [e for e in doc_titles if not re.match('.*?(?:(\d+\s+)+\s*>>|<<\s*\d+(\s+\d+)+).*', e)]
         print("doc_titles", len(doc_titles), doc_titles)
         # get doc year
@@ -95,14 +108,14 @@ def scrape(driver):
         print("get_year", len(get_year), get_year)
         ###GET DOCUMENT ID###
         ids = driver.find_elements_by_css_selector('#content > strong + table + form > input:nth-child(2)')
-        get_ids = [re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick")).group(1) for e in ids if re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick"))]
+        get_ids = [re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick")).group(1) for e in ids
+                   if re.match('this\.form\.doc_rsn\.value\=\'(\d+)\'', e.get_attribute("onclick"))]
         # make list of links for pdfs
         pdfs = ['https://secure.sos.state.or.us/muni/report.do?doc_rsn=' + code for code in get_ids]
         # print("get_ids", len(get_ids), get_ids)
         return doc_types, doc_titles, get_year, pdfs
 
-        
-    ### create function - process pdf file names ###   
+    ### create function - process pdf file names ###
     def process_files():
         extract_data()
         ### PROCESS DOC TITLE ###
@@ -141,7 +154,7 @@ def scrape(driver):
             GENERAL_PURPOSE = 'General_Purpose/'
             # test for Rule I
             if doc_types[i] == 'COUNTIES':
-                # i.e. CA Alameda County 2017.pdf 
+                # i.e. CA Alameda County 2017.pdf
                 new_name = 'OR ' + str(doc_titles[i]) + ' ' + 'County ' + str(get_year[i]) + '.pdf'
                 print(new_name)
                 if new_name not in unique_pdfs:
@@ -183,7 +196,6 @@ def scrape(driver):
             shutil.copyfileobj(dump, location)
         del dump
 
-
     ### set options ###
     fiscal_year = Select(driver.find_element_by_id("fiscalYr"))
     county_options = Select(driver.find_element_by_id("county"))
@@ -207,7 +219,6 @@ def scrape(driver):
             if "No results for search criteria" not in search_results:
                 print("content element matches!")
 
-                
                 ### PROCESS FIRST PAGE (I) ###
                 # DOWNLOAD AND RENAME FILES
                 extract_data()
@@ -219,7 +230,7 @@ def scrape(driver):
                 # test and click next page
                 while True:
                     ###TEST FOR NEXT PAGE (II) ###
-                    try: 
+                    try:
                         next = driver.find_element_by_link_text('>>')
                         next.click()
 
@@ -239,6 +250,7 @@ def scrape(driver):
                         county_options = county.options
                         options = [e.text for e in county_options if '\n' not in e.text]
                         break
+
 
 if __name__ == "__main__":
     driver = init_driver()
