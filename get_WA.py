@@ -106,12 +106,12 @@ if __name__ == '__main__':
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
-                    # crawler.upload_to_ftp(new_file_name)
+                    crawler.upload_to_ftp(new_file_name)
                     # ----------------Files deleting
-                    # if os.path.exists(os.path.join(downloads_path, new_file_name)):
-                    #     os.remove(os.path.join(downloads_path, new_file_name))
-                    # if not os.path.exists(os.path.join(downloads_path, new_file_name)):
-                    #     print('Removed {}'.format(new_file_name))
+                    if os.path.exists(os.path.join(downloads_path, new_file_name)):
+                        os.remove(os.path.join(downloads_path, new_file_name))
+                    if not os.path.exists(os.path.join(downloads_path, new_file_name)):
+                        print('Removed {}'.format(new_file_name))
             try:
                 crawler.browser.find_element_by_css_selector(
                     '#grid > div.k-pager-wrap.k-grid-pager.k-widget.k-floatwrap > a:nth-child(4) > span').click()
