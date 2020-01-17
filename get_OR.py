@@ -241,14 +241,12 @@ def scrape(driver, download_path):
                     save_file()
                     process_files()
                     sleep(5)
-                    break
                     # test and click next page
                 while True:
                     ###TEST FOR NEXT PAGE (II) ###
                     try:
                         next = driver.find_element_by_link_text('>>')
                         next.click()
-                        break
                         # DOWNLOAD AND RENAME FILES
                         extract_data()
                         for i, pdf in enumerate(pdfs):
@@ -265,8 +263,6 @@ def scrape(driver, download_path):
                         county_options = county.options
                         options = [e.text for e in county_options if '\n' not in e.text]
                         break
-            break
-        break
 
 
 if __name__ == "__main__":
