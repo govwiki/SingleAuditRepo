@@ -10,9 +10,12 @@ class Crawler(CoreCrawler):
     abbr = 'AZ'
 
     def _get_remote_filename(self, local_filename):
-        entity_type, year = local_filename[:-4].split('@#')
-        directory = ''
-        filename = '{} {} {}.pdf'.format(self.abbr, entity_type, year)
+        entity_name, year = local_filename[:-4].split('@#')
+        if re.search(r'County', entity_name):
+            directory = 'General Purpose'
+        else:
+            directory = 'Community College Districts'
+        filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
         return directory, filename, year
 
 
