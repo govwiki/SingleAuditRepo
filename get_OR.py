@@ -196,10 +196,7 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        proxies = {
-            "https": "68.183.201.206:3128",
-        }
-        file = requests.get(pdf, stream=True, proxies=proxies)
+        file = requests.get(pdf, stream=True)
         dump = file.raw
 
     # method for saving and changing name of files
@@ -280,10 +277,10 @@ if __name__ == "__main__":
     config.read('conf.ini')
     crawler = Crawler(config, 'oregon', script_name, error_message)
     error_message = crawler.error_message
+    config_file = str(crawler.dbparams)
     try:
         if error_message != "":
             raise Exception(error_message)
-        config_file = str(crawler.dbparams)
         downloads_path = crawler.get_property('downloads_path', 'oregon')
         if not os.path.exists(downloads_path):
             os.makedirs(downloads_path)
