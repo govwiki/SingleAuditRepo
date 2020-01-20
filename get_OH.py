@@ -1,20 +1,54 @@
 import configparser
 import os
-import re
+import shutil
 import sys
 from datetime import datetime
 from time import sleep
 
 from utils import Crawler as CoreCrawler
 
+schools = ['STEM School District', 'School', 'Community School District']
+colleges = ['Universities, Colleges, Tech Schools']
+special_districts = ['Insurance Pool', 'Metropolitan Housing Authority',
+                     'Special Improvement District', 'Library/Law Library',
+                     'Police/Fire/EMS/Ambulance District', 'Cemetery', 'Family and Children First Council',
+                     'Community Improvement Corporation / Land Reutilization Corporation', 'Landfill',
+                     'Retirement System', 'Airport/Transit/Port Authority/Convention Facilities / Financial Auth',
+                     'Transportation Improvement District/Regional Project',
+                     'Board of Health', 'State Agency', 'Visitor and Convention Bureau',
+                     'Water/Sewer/Sanitary District', 'Workforce Development Area Agency',
+                     'Soil/Water Conservation District/Joint Board',
+                     'Community Based/Multi-County/Juvenile Correctional Facility',
+                     'JEDD/JEDZ– Joint Economic Development District/Zone', 'Hospital', 'Agricultural Society',
+                     'Child support', 'Conservancy District', 'County Board of Developmental Disabilities', 'Court',
+                     'Developmental Disabilities Council', 'Educational Service Center/District',
+                     'Emergency Management/Planning Agency', 'Medicaid Program', 'Medicaid Provider',
+                     'Park/Recreation District', 'Political Party', 'Public Assistance',
+                     'Regional Planning Commission / Organization', 'Solid Waste District']
+general_purpose = ['Township', 'City', 'County', 'Village']
+
 
 class Crawler(CoreCrawler):
     abbr = 'OH'
 
     def _get_remote_filename(self, local_filename):
-        entity_name, year = local_filename[:-4].split('@#')
-        directory = 'FinancialAudit'
-        filename = '{} {} {}.pdf'.format(self.abbr, entity_name, year)
+        entity_type, entity_name, year = local_filename[:-4].split('|')
+        if entity_type in general_purpose:
+            name = entity_name
+            directory = 'General Purpose'
+        elif entity_type in special_districts:
+            name = entity_name
+            directory = 'Special District'
+        elif entity_type in schools:
+            name = entity_name
+            directory = 'School District'
+        elif entity_type in colleges:
+            name = entity_name
+            directory = 'Community College Districts'
+        else:
+            name = entity_name
+            directory = 'NonProfit'
+        filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename, year
 
 
@@ -34,7 +68,6 @@ if __name__ == '__main__':
         if error_message != "":
             raise Exception(error_message)
         config_file = str(crawler.dbparams)
-
         downloads_path = crawler.get_property('downloads_path', 'ohio')
         if not os.path.exists(downloads_path):
             os.makedirs(downloads_path)
@@ -45,6 +78,8 @@ if __name__ == '__main__':
         crawler.select_option('#ddlReportType', 'Financial Audit')
         crawler.click('#btnSubmitSearch')
         urls = []
+        print('Page Loaded!')
+        counter = 0
         for row in crawler.get_elements('#dgResults tr'):
             if (row.text != 'Entity Name County Report Type Entity Type Report Period Release Date'):
                 a = row.find_element_by_tag_name('a')
@@ -52,8 +87,22 @@ if __name__ == '__main__':
                 print(attribute)
                 urls.append(attribute)
         for url in urls:
+            path = downloads_path
+            for filename in os.listdir(path):
+                file_path = os.path.join(path, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
             crawler.get(url)
             pdf_url = crawler.get_elements('#hlReport')
+            entity_name = crawler.get_elements('#lblEntityName')[0].text
+            entity_type = crawler.get_elements('#lblEntityType')[0].text
+            year = crawler.get_elements('#lblToDate')[0].text[-4:]
+            new_file_name = '{}|{}|{}.pdf'.format(entity_type, entity_name, year)
             pdf_url[0].click()
             counter = 10000
             finished = False
@@ -66,19 +115,6 @@ if __name__ == '__main__':
                         counter -= 1
                         finished = False
             sleep(3)
-        print("All files downloaded")
-        path = downloads_path
-        file_names = os.listdir(path)
-        for filename in file_names:
-            if not filename.endswith(".pdf"):
-                continue
-            file_id = crawler.db.saveFileStatus(script_name=script_name, file_original_name=filename,
-                                                file_upload_path=path,
-                                                file_status='Downloaded')
-            year = re.findall(r'[0-9]+', filename)
-            real_name = filename.replace('_', '').split(year[0])[0]
-            year = '20' + year[0]
-            new_file_name = '{}@#{}.pdf'.format(real_name, year)
             os.rename(os.path.join(path, filename),
                       os.path.join(path, new_file_name))
             print("Renamed {} to {}".format(filename, new_file_name))

@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
-                    # crawler.upload_to_ftp(new_file_name)
+                    crawler.upload_to_ftp(new_file_name)
                     # ----------------Files deleting
                     if os.path.exists(os.path.join(downloads_path, new_file_name)):
                         os.remove(os.path.join(downloads_path, new_file_name))

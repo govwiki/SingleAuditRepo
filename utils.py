@@ -38,7 +38,7 @@ class Crawler:
                 display = Display(visible=1, size=(1920, 1080))
                 display.start()
             options = webdriver.ChromeOptions()
-            options.add_argument("--no-sandbox")
+            options.add_argument('--no-sandbox')
             prefs = {
                 'download.default_directory': self.downloads_path,
                 'download.prompt_for_download': False,
@@ -50,6 +50,7 @@ class Crawler:
                                             service_args=["--verbose", "--log-path=/tmp/selenium.log"])
             self.browser.implicitly_wait(10)
             self.browser.set_page_load_timeout(1000000000)
+            self.browser.set_script_timeout(1000000000)
             # self.ftp_connect()
             self.file_storage_connect()
         except Exception as e:
