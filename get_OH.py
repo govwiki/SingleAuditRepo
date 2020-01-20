@@ -63,6 +63,7 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'ohio', script_name, error_message)
+    crawler.browser.set_page_load_timeout(1000)
     error_message = crawler.error_message
     try:
         if error_message != "":

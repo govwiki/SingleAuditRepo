@@ -49,8 +49,6 @@ class Crawler:
             self.browser = webdriver.Chrome(chrome_options=options,
                                             service_args=["--verbose", "--log-path=/tmp/selenium.log"])
             self.browser.implicitly_wait(10)
-            self.browser.set_page_load_timeout(1000000000)
-            self.browser.set_script_timeout(1000000000)
             # self.ftp_connect()
             self.file_storage_connect()
         except Exception as e:
