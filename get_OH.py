@@ -86,9 +86,6 @@ if __name__ == '__main__':
                 attribute = a.get_attribute('href')
                 print(attribute)
                 urls.append(attribute)
-                counter += 1
-                if counter > 10:
-                    break
         for url in urls:
             path = downloads_path
             for filename in os.listdir(path):
