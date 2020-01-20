@@ -46,7 +46,7 @@ if __name__ == '__main__':
                     filename = '{}#${}.pdf'.format(year, name)
                     downloaded = crawler.download(url, filename)
                     if downloaded:
-                        # crawler.upload_to_ftp(filename)
+                        crawler.upload_to_ftp(filename)
                         if os.path.exists(os.path.join(downloads_path, filename)):
                             os.remove(os.path.join(downloads_path, filename))
                         if not os.path.exists(os.path.join(downloads_path, filename)):
