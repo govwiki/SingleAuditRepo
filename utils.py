@@ -35,12 +35,10 @@ class Crawler:
                 sys.exit(1)
             self.headless_mode = self.get_property('headless_mode', 'general', 'bool')
             if self.headless_mode:
-                display = Display(visible=1, size=(1920, 1080))
+                display = Display(visible=0, size=(1920, 1080))
                 display.start()
             options = webdriver.ChromeOptions()
             options.add_argument("--no-sandbox")
-            options.add_argument('--headless')
-            options.add_argument('--disable-dev-shm-usage')
             prefs = {
                 'download.default_directory': self.downloads_path,
                 'download.prompt_for_download': False,
@@ -51,6 +49,8 @@ class Crawler:
             self.browser = webdriver.Chrome(chrome_options=options,
                                             service_args=["--verbose", "--log-path=/tmp/selenium.log"])
             self.browser.implicitly_wait(10)
+            self.browser.set_page_load_timeout(10000)
+            self.browser.set_script_timeout(10000)
             # self.ftp_connect()
             self.file_storage_connect()
         except Exception as e:

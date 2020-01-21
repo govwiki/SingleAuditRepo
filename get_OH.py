@@ -63,8 +63,6 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'ohio', script_name, error_message)
-    crawler.browser.set_page_load_timeout(10000)
-    crawler.browser.set_script_timeout(10000)
     error_message = crawler.error_message
     try:
         if error_message != "":
@@ -86,7 +84,6 @@ if __name__ == '__main__':
             if (row.text != 'Entity Name County Report Type Entity Type Report Period Release Date'):
                 a = row.find_element_by_tag_name('a')
                 attribute = a.get_attribute('href')
-                print(attribute)
                 urls.append(attribute)
         for url in urls:
             path = downloads_path
