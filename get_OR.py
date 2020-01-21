@@ -48,21 +48,27 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, abbr, entity_name, year = local_filename[:-4].split('|')
+        if 'RFPD' in entity_name:
+            entity_name = entity_name.replace('RFPD', 'RURAL FIRE PROTECTION DISTRICT')
+        elif 'SWCD' in entity_name:
+            entity_name = entity_name.replace('SWCD', 'Soil & Water Conservation District')
+        elif 'CO' in entity_name:
+            entity_name = entity_name.replace('CO', 'County')
         if entity_type == 'General_Purpose':
-            name = entity_name
+            name = entity_name.title()
             directory = 'General Purpose'
         elif entity_type == 'Special_District':
-            name = entity_name
+            name = entity_name.title()
             directory = 'Special District'
         elif entity_type == 'School_District':
-            name = entity_name
+            name = entity_name.title()
             directory = 'School District'
         elif entity_type == 'Community_College_District':
-            name = entity_name
+            name = entity_name.title()
             directory = 'Community College Districts'
         else:
-            name = entity_name
-            directory = 'NonProfit'
+            name = entity_name.title()
+            directory = 'Non-Profit'
         filename = '{} {} {}.pdf'.format(abbr, name, year)
         return directory, filename, year
 
