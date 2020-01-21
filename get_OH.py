@@ -47,7 +47,7 @@ class Crawler(CoreCrawler):
             directory = 'Community College Districts'
         else:
             name = entity_name
-            directory = 'NonProfit'
+            directory = 'Non-Profit'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename, year
 
@@ -63,7 +63,8 @@ if __name__ == '__main__':
     config.read('conf.ini')
 
     crawler = Crawler(config, 'ohio', script_name, error_message)
-    crawler.browser.set_page_load_timeout(1000)
+    crawler.browser.set_page_load_timeout(10000)
+    crawler.browser.set_script_timeout(10000)
     error_message = crawler.error_message
     try:
         if error_message != "":
