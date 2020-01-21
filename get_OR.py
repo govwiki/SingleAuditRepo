@@ -28,7 +28,7 @@ years = list(years)
 print("testing years...", years)
 
 ### DEFINE DOCUMENT CATEGORIES ###
-schools = ['CHARTER SCHOOLS', ' SCHOOL DISTRICTS + ESD']
+schools = ['CHARTER SCHOOLS', 'SCHOOL DISTRICTS + ESD']
 colleges = ['COMMUNITY COLLEGES']
 special_districts = ['AIR POLLUTION AUTHORITY', 'AIRPORT DISTRICTS', 'CEMETERY DISTRICTS', 'DIKING DISTRICTS',
                      'DRAINAGE DISTRICTS', 'EMERGENCY COMMUNICATION DIST', 'FLOOD CONTROL DISTRICTS',
@@ -48,11 +48,13 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, abbr, entity_name, year = local_filename[:-4].split('|')
+        if '_amp_' in entity_name:
+            entity_name = entity_name.replace('_amp_', '&')
         if 'RFPD' in entity_name:
             entity_name = entity_name.replace('RFPD', 'RURAL FIRE PROTECTION DISTRICT')
-        elif 'SWCD' in entity_name:
+        if 'SWCD' in entity_name:
             entity_name = entity_name.replace('SWCD', 'Soil & Water Conservation District')
-        elif 'CO' in entity_name:
+        if 'CO' in entity_name:
             entity_name = entity_name.replace('CO', 'County')
         if entity_type == 'General_Purpose':
             name = entity_name.title()
