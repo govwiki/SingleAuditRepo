@@ -33,16 +33,16 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, entity_name, year = local_filename[:-4].split('|')
-        if entity_type in general_purpose:
+        if entity_type == 'General Purpose':
             name = entity_name
             directory = 'General Purpose'
-        elif entity_type in special_districts:
+        elif entity_type == 'Special District':
             name = entity_name
             directory = 'Special District'
-        elif entity_type in schools:
+        elif entity_type == 'School District':
             name = entity_name
             directory = 'School District'
-        elif entity_type in colleges:
+        elif entity_type == 'Community College Districts':
             name = entity_name
             directory = 'Community College Districts'
         else:
@@ -85,6 +85,10 @@ if __name__ == '__main__':
                 a = row.find_element_by_tag_name('a')
                 attribute = a.get_attribute('href')
                 urls.append(attribute)
+                print(attribute)
+                counter += 1
+                if counter > 100:
+                    break
         for url in urls:
             path = downloads_path
             for filename in os.listdir(path):
@@ -100,6 +104,16 @@ if __name__ == '__main__':
             pdf_url = crawler.get_elements('#hlReport')
             entity_name = crawler.get_elements('#lblEntityName')[0].text
             entity_type = crawler.get_elements('#lblEntityType')[0].text
+            if entity_type in general_purpose:
+                entity_type = 'General Purpose'
+            elif entity_type in special_districts:
+                entity_type = 'Special District'
+            elif entity_type in schools:
+                entity_type = 'School District'
+            elif entity_type in colleges:
+                entity_type = 'Community College Districts'
+            else:
+                entity_type = 'Non-Profit'
             year = crawler.get_elements('#lblToDate')[0].text[-4:]
             new_file_name = '{}|{}|{}.pdf'.format(entity_type, entity_name, year)
             pdf_url[0].click()
