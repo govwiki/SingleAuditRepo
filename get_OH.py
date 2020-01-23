@@ -79,13 +79,11 @@ if __name__ == '__main__':
         crawler.select_option('#ddlReportType', 'Financial Audit')
         crawler.click('#btnSubmitSearch')
         urls = []
-        counter = 0
         for row in crawler.get_elements('#dgResults tr'):
             if (row.text != 'Entity Name County Report Type Entity Type Report Period Release Date'):
                 a = row.find_element_by_tag_name('a')
                 attribute = a.get_attribute('href')
                 urls.append(attribute)
-                print(attribute)
         for url in urls:
             path = downloads_path
             for filename in os.listdir(path):
@@ -100,6 +98,8 @@ if __name__ == '__main__':
             crawler.get(url)
             pdf_url = crawler.get_elements('#hlReport')
             entity_name = crawler.get_elements('#lblEntityName')[0].text
+            if '/' in entity_name:
+                entity_name = entity_name.replace('/', '-')
             entity_type = crawler.get_elements('#lblEntityType')[0].text
             if entity_type in general_purpose:
                 entity_type = 'General Purpose'
