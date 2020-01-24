@@ -139,14 +139,14 @@ if __name__ == '__main__':
                         counter -= 1
                         finished = False
             sleep(3)
-            # os.rename(os.path.join(path, filename),
-            #           os.path.join(path, new_file_name))
-            # print("Renamed {} to {}".format(filename, new_file_name))
-            # crawler.upload_to_ftp(new_file_name)
-            # if os.path.exists(os.path.join(path, new_file_name)):
-            #     os.remove(os.path.join(path, new_file_name))
-            # if not os.path.exists(os.path.join(path, new_file_name)):
-            #     print('Removed {}'.format(new_file_name))
+            os.rename(os.path.join(path, filename),
+                      os.path.join(path, new_file_name))
+            print("Renamed {} to {}".format(filename, new_file_name))
+            crawler.upload_to_ftp(new_file_name)
+            if os.path.exists(os.path.join(path, new_file_name)):
+                os.remove(os.path.join(path, new_file_name))
+            if not os.path.exists(os.path.join(path, new_file_name)):
+                print('Removed {}'.format(new_file_name))
     except Exception as e:
         result = 0
         error_message = str(e)
