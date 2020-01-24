@@ -14,27 +14,45 @@ from selenium.webdriver.common.keys import Keys
 
 from utils import Crawler as CoreCrawler
 
+schools = ['School Districts', 'Educational Service District (ESD)', 'Public Charter School', 'Tribal Schools']
+colleges = ['Community or Technical College']
+special_districts = ['Agency, Commission, or Board', 'Agency, Commission, or Board', 'Area Agency on Aging',
+                     'Behavioral Health Organization', 'Cemetery District', 'Commodity Commission',
+                     'Conservation District', 'Diking_Drainage District', 'Educational Service District',
+                     'Emergency Management Service', 'Fire Protection District', 'Flood Control District',
+                     'Government Association', 'Health District', 'Hospital District', 'Housing Authority',
+                     'Industrial Development Corporation', 'Irrigation and Reclamation District',
+                     'Irrigation and Reclamation District', 'Local_Regional Trauma Care Council',
+                     'Mosquito_Pest_Weed District', 'Park and Recreation District', 'Port_Airport District',
+                     'Public Development Authority', 'Public Facilities District', 'Public Utility District',
+                     'Regional Planning Council', 'Risk Pool', 'Stadium Authority', 'Transportation Benefit District',
+                     'TV Reception District', 'Water Conservancy Board', 'Water_Sewer District']
+general_purpose = ['City_Town', 'County', 'CITY UTILITY BOARDS', 'COUNCIL OF GOVERNMENTS']
+public_higher_education = ['University or College']
 
 class Crawler(CoreCrawler):
     abbr = 'WA'
 
     def _get_remote_filename(self, local_filename):
         entity_name, entity_type, year = local_filename[:-4].split('|')
-        if entity_type == 'City_Town':
-            name = entity_name.split(' of ')[1]
+        if entity_type in general_purpose:
+            name = entity_name.split('of')[1]
             directory = 'General Purpose'
-        elif entity_type == 'County':
-            name = entity_name
-            directory = 'General Purpose'
-        elif entity_type in ('School Districts', 'Educational Service District (ESD)'):
-            name = entity_name
-            directory = 'School District'
-        elif 'Community' in entity_type and 'College' in entity_type:
-            name = entity_name
-            directory = 'Community College Districts'
-        else:
+        elif entity_type in special_districts:
             name = entity_name
             directory = 'Special District'
+        elif entity_type in schools:
+            name = entity_name
+            directory = 'School District'
+        elif entity_type in colleges:
+            name = entity_name
+            directory = 'Community College Districts'
+        elif entity_type in public_higher_education:
+            name = entity_name
+            directory = 'Public Higher Education'
+        else:
+            name = entity_name
+            directory = 'Non-Profit'
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename, year
 
@@ -52,7 +70,7 @@ if __name__ == '__main__':
 
     config = configparser.ConfigParser()
     config.read('conf.ini')
-    #pdf-miner
+    # pdf-miner
     resource_manager = PDFResourceManager()
     fake_file_handle = io.StringIO()
     converter = TextConverter(resource_manager, fake_file_handle)
