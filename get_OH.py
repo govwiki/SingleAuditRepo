@@ -26,7 +26,6 @@ special_districts = ['Insurance Pool', 'Metropolitan Housing Authority',
                      'Park/Recreation District', 'Political Party', 'Public Assistance',
                      'Regional Planning Commission / Organization', 'Solid Waste District']
 general_purpose = ['Township', 'City', 'County', 'Village']
-public_higher_education = []
 
 
 
@@ -84,15 +83,11 @@ if __name__ == '__main__':
         crawler.select_option('#ddlReportType', 'Financial Audit')
         crawler.click('#btnSubmitSearch')
         urls = []
-        counter = 0
         for row in crawler.get_elements('#dgResults tr'):
             if (row.text != 'Entity Name County Report Type Entity Type Report Period Release Date'):
                 a = row.find_element_by_tag_name('a')
                 attribute = a.get_attribute('href')
                 urls.append(attribute)
-                counter += 1
-                if counter > 1000:
-                    break
         for url in urls:
             path = downloads_path
             for filename in os.listdir(path):
@@ -127,7 +122,7 @@ if __name__ == '__main__':
                 entity_type = 'Non-Profit'
             year = crawler.get_elements('#lblToDate')[0].text[-4:]
             new_file_name = '{}|{}|{}.pdf'.format(entity_type, entity_name, year)
-            # pdf_url[0].click()
+            pdf_url[0].click()
             counter = 10000
             finished = False
             while not finished and counter > 0:
