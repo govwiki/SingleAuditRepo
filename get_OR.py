@@ -203,10 +203,7 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        proxies = {
-            "https": "157.230.244.46:8080",
-        }
-        file = requests.get(pdf, stream=True, proxies=proxies)
+        file = requests.get(pdf, stream=True)
         dump = file.raw
 
     # method for saving and changing name of files
@@ -249,7 +246,7 @@ def scrape(driver, download_path):
                     download_file()
                     save_file()
                     process_files()
-                    sleep(10)
+                    sleep(5)
                     # test and click next page
                 while True:
                     ###TEST FOR NEXT PAGE (II) ###
@@ -257,7 +254,6 @@ def scrape(driver, download_path):
                         next = driver.find_element_by_link_text('>>')
                         next.click()
                         # DOWNLOAD AND RENAME FILES
-                        break
                         extract_data()
 
                         for i, pdf in enumerate(pdfs):
@@ -274,8 +270,6 @@ def scrape(driver, download_path):
                         county_options = county.options
                         options = [e.text for e in county_options if '\n' not in e.text]
                         break
-                break
-        break
 
 
 if __name__ == "__main__":
