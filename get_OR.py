@@ -48,26 +48,25 @@ class Crawler(CoreCrawler):
 
     def _get_remote_filename(self, local_filename):
         entity_type, abbr, entity_name, year = local_filename[:-4].split('|')
-        if '_amp_' in entity_name:
-            entity_name = entity_name.replace('_amp_', '&')
-        if 'RFPD' in entity_name:
-            entity_name = entity_name.replace('RFPD', 'RURAL FIRE PROTECTION DISTRICT')
-        if 'SWCD' in entity_name:
-            entity_name = entity_name.replace('SWCD', 'Soil & Water Conservation District')
-        if 'CO' in entity_name:
-            entity_name = entity_name.replace('CO', 'County')
+        entity_name = re.sub(r'\bCO\b', 'County', entity_name)
         if entity_type == 'General_Purpose':
             name = entity_name.title()
             directory = 'General Purpose'
         elif entity_type == 'Special_District':
+            entity_name = entity_name.replace('_amp_', '&')
+            entity_name = entity_name.replace('RFPD', 'RURAL FIRE PROTECTION DISTRICT')
+            entity_name = entity_name.replace('SWCD', 'Soil & Water Conservation District')
             name = entity_name.title()
             directory = 'Special District'
         elif entity_type == 'School_District':
             name = entity_name.title()
             directory = 'School District'
         elif entity_type == 'Community_College_District':
+            if 'Community' not in entity_name:
+                directory = 'Public Higher Education'
+            else:
+                directory = 'Community College Districts'
             name = entity_name.title()
-            directory = 'Community College Districts'
         else:
             name = entity_name.title()
             directory = 'Non-Profit'
@@ -204,7 +203,10 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        file = requests.get(pdf, stream=True)
+        proxies = {
+            "https": "157.230.244.46:8080",
+        }
+        file = requests.get(pdf, stream=True, proxies=proxies)
         dump = file.raw
 
     # method for saving and changing name of files
@@ -244,11 +246,10 @@ def scrape(driver, download_path):
                 # DOWNLOAD AND RENAME FILES
                 extract_data()
                 for i, pdf in enumerate(pdfs):
-
                     download_file()
                     save_file()
                     process_files()
-                    sleep(5)
+                    sleep(10)
                     # test and click next page
                 while True:
                     ###TEST FOR NEXT PAGE (II) ###
@@ -256,7 +257,9 @@ def scrape(driver, download_path):
                         next = driver.find_element_by_link_text('>>')
                         next.click()
                         # DOWNLOAD AND RENAME FILES
+                        break
                         extract_data()
+
                         for i, pdf in enumerate(pdfs):
                             download_file()
                             save_file()
@@ -271,6 +274,8 @@ def scrape(driver, download_path):
                         county_options = county.options
                         options = [e.text for e in county_options if '\n' not in e.text]
                         break
+                break
+        break
 
 
 if __name__ == "__main__":
