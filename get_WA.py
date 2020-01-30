@@ -87,7 +87,6 @@ if __name__ == '__main__':
             print('ERROR: downloads_path parameter points to file!')
             sys.exit(1)
         crawler.get(config.get('washington', 'url'))
-        crawler.send_keys('#Keyword', 'Grant County')
         crawler.send_keys('#FromDate', '01/01/' + args.start_date + Keys.ESCAPE)
         crawler.send_keys('#ToDate', '12/31/' + args.end_date + Keys.ESCAPE)
         crawler.click('div.radioRowItem:nth-child(3) > label:nth-child(2)')
