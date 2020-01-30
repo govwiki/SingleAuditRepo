@@ -53,7 +53,7 @@ class Crawler(CoreCrawler):
             name = entity_name.title()
             directory = 'General Purpose'
         elif entity_type == 'Special_District':
-            entity_name = entity_name.replace('_amp_', '&')
+            entity_name = entity_name.replace('&amp;', '&')
             entity_name = entity_name.replace('RFPD', 'RURAL FIRE PROTECTION DISTRICT')
             entity_name = entity_name.replace('SWCD', 'Soil & Water Conservation District')
             name = entity_name.title()
@@ -203,7 +203,10 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        file = requests.get(pdf, stream=True)
+        proxies = {
+            "https": "157.230.244.46:8080",
+        }
+        file = requests.get(pdf, stream=True, proxies=proxies)
         dump = file.raw
 
     # method for saving and changing name of files
