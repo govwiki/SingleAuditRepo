@@ -30,13 +30,16 @@ special_districts = ['Agency, Commission, or Board', 'Agency, Commission, or Boa
 general_purpose = ['City_Town', 'County', 'CITY UTILITY BOARDS', 'COUNCIL OF GOVERNMENTS']
 public_higher_education = ['University or College']
 
+
 class Crawler(CoreCrawler):
     abbr = 'WA'
 
     def _get_remote_filename(self, local_filename):
         entity_name, entity_type, year = local_filename[:-4].split('|')
         if entity_type in general_purpose:
-            name = entity_name.split('of')[1]
+            if 'City of' in entity_name:
+                entity_name = entity_name.split(' of ')[1].capitalize()
+            name = entity_name
             directory = 'General Purpose'
         elif entity_type in special_districts:
             name = entity_name
@@ -67,14 +70,11 @@ if __name__ == '__main__':
     argparser.add_argument("start_date")
     argparser.add_argument("end_date")
     args = argparser.parse_args()
+    resource_manager = PDFResourceManager()
 
     config = configparser.ConfigParser()
     config.read('conf.ini')
     # pdf-miner
-    resource_manager = PDFResourceManager()
-    fake_file_handle = io.StringIO()
-    converter = TextConverter(resource_manager, fake_file_handle)
-    page_interpreter = PDFPageInterpreter(resource_manager, converter)
 
     crawler = Crawler(config, 'washington', script_name, error_message)
     try:
@@ -89,6 +89,7 @@ if __name__ == '__main__':
         crawler.get(config.get('washington', 'url'))
         crawler.send_keys('#FromDate', '01/01/' + args.start_date + Keys.ESCAPE)
         crawler.send_keys('#ToDate', '12/31/' + args.end_date + Keys.ESCAPE)
+        crawler.send_keys('#Keyword', 'Aberdeen')
         crawler.click('div.radioRowItem:nth-child(3) > label:nth-child(2)')
         crawler.click('#primarySearchButton')
         crawler.wait_for_displayed('#gridContainer')
@@ -108,6 +109,11 @@ if __name__ == '__main__':
                 file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                 downloaded = crawler.download(url, file_name, year)
                 reader = None
+                text_year = 0
+                text_from_pdf_miner = ''
+                fake_file_handle = io.StringIO()
+                converter = TextConverter(resource_manager, fake_file_handle)
+                page_interpreter = PDFPageInterpreter(resource_manager, converter)
                 if downloaded:
                     with open(downloads_path + file_name, 'rb') as fh:
                         for page in PDFPage.get_pages(fh,
@@ -116,11 +122,13 @@ if __name__ == '__main__':
                             page_interpreter.process_page(page)
                             break
                         text_from_pdf_miner = fake_file_handle.getvalue()
-                    # close open handles
+                        converter.close()
+                        fake_file_handle.close()
+                        # close open handles
                     if text_from_pdf_miner is not None and text_from_pdf_miner != '':
-                        text_year = text_from_pdf_miner.split('December 31, ')[1][:4]
-                        if (args.start_date <= text_year <= args.end_date):
-                            year = text_year
+                        text_year = text_from_pdf_miner.split('31, ')[1][:4]
+                        year = text_year
+                        print(year)
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
@@ -141,9 +149,8 @@ if __name__ == '__main__':
     except Exception as e:
         result = 0
         error_message = str(e)
+        print(e)
     finally:
         end_time = datetime.utcnow()
         crawler.db.log(script_name, start_time, end_time, config_file, result, error_message)
         crawler.close()
-        converter.close()
-        fake_file_handle.close()
