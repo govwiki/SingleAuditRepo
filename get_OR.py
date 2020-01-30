@@ -203,10 +203,7 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        proxies = {
-            "https": "157.230.244.46:8080",
-        }
-        file = requests.get(pdf, stream=True, proxies=proxies)
+        file = requests.get(pdf, stream=True)
         dump = file.raw
 
     # method for saving and changing name of files
