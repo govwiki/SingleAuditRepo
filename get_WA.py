@@ -87,6 +87,7 @@ if __name__ == '__main__':
             print('ERROR: downloads_path parameter points to file!')
             sys.exit(1)
         crawler.get(config.get('washington', 'url'))
+        crawler.send_keys('#Keyword', 'Grant County')
         crawler.send_keys('#FromDate', '01/01/' + args.start_date + Keys.ESCAPE)
         crawler.send_keys('#ToDate', '12/31/' + args.end_date + Keys.ESCAPE)
         crawler.click('div.radioRowItem:nth-child(3) > label:nth-child(2)')
@@ -125,9 +126,12 @@ if __name__ == '__main__':
                         fake_file_handle.close()
                         # close open handles
                     if text_from_pdf_miner is not None and text_from_pdf_miner != '':
-                        text_year = text_from_pdf_miner.split('31, ')[1][:4]
-                        year = text_year
-                        print(year)
+                        try:
+                            text_year = text_from_pdf_miner.split('31, ')[1][:4]
+                            year = text_year
+                            print(year)
+                        except Exception as e:
+                            print(e)
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
