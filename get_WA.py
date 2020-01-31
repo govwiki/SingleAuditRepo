@@ -39,7 +39,10 @@ class Crawler(CoreCrawler):
         entity_name, entity_type, year = local_filename[:-4].split('|')
         if entity_type in general_purpose:
             if 'City of' or 'Town of' in entity_name:
-                entity_name = entity_name.split(' of ')[1].capitalize()
+                try:
+                    entity_name = entity_name.split(' of ')[1].capitalize()
+                except Exception as ex:
+                    print(ex)
             name = entity_name
             directory = 'General Purpose'
         elif entity_type in special_districts:
