@@ -2,6 +2,7 @@ import argparse
 import configparser
 import io
 import os
+import re
 import sys
 from datetime import datetime
 from time import sleep
@@ -37,7 +38,7 @@ class Crawler(CoreCrawler):
     def _get_remote_filename(self, local_filename):
         entity_name, entity_type, year = local_filename[:-4].split('|')
         if entity_type in general_purpose:
-            if 'City of' in entity_name:
+            if 'City of' or 'Town of' in entity_name:
                 entity_name = entity_name.split(' of ')[1].capitalize()
             name = entity_name
             directory = 'General Purpose'
@@ -114,23 +115,34 @@ if __name__ == '__main__':
                 converter = TextConverter(resource_manager, fake_file_handle)
                 page_interpreter = PDFPageInterpreter(resource_manager, converter)
                 if downloaded:
-                    with open(downloads_path + file_name, 'rb') as fh:
-                        for page in PDFPage.get_pages(fh,
-                                                      caching=True,
-                                                      check_extractable=True):
-                            page_interpreter.process_page(page)
-                            break
-                        text_from_pdf_miner = fake_file_handle.getvalue()
-                        converter.close()
-                        fake_file_handle.close()
-                        # close open handles
-                    if text_from_pdf_miner is not None and text_from_pdf_miner != '':
+                    retries = 0
+                    while retries < 3:
                         try:
-                            text_year = text_from_pdf_miner.split('31, ')[1][:4]
-                            year = text_year
-                            print(year)
-                        except Exception as e:
-                            print(e)
+                            with open(downloads_path + file_name, 'rb') as fh:
+                                for page in PDFPage.get_pages(fh,
+                                                              caching=True,
+                                                              check_extractable=True):
+                                    page_interpreter.process_page(page)
+                                    break
+                                text_from_pdf_miner = fake_file_handle.getvalue()
+                                converter.close()
+                                fake_file_handle.close()
+                                retries = 3
+                                # close open handles
+                            if text_from_pdf_miner is not None and text_from_pdf_miner != '':
+                                try:
+                                    dates = re.findall(
+                                        r'(January|February|March|April|May|June|July|August|September|October|November|December)\s?(\d{1,2}),\s?(\d{4})\s?through\s?(January|February|March|April|May|June|July|August|September|October|November|December)\s?(\d{1,2}),\s?(\d{4})\s?',
+                                        text_from_pdf_miner)
+                                    text_year = dates[0][5]
+                                    year = text_year
+                                    print(year)
+                                except Exception as e:
+                                    print(e)
+                        except Exception as exep:
+                            print(exep)
+                            print('Can`t open file ' + file_name)
+                            retries += 1
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
