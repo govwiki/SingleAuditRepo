@@ -28,7 +28,6 @@ special_districts = ['Insurance Pool', 'Metropolitan Housing Authority',
 general_purpose = ['Township', 'City', 'County', 'Village']
 
 
-
 class Crawler(CoreCrawler):
     abbr = 'OH'
 
@@ -90,8 +89,8 @@ if __name__ == '__main__':
                 urls.append(attribute)
         for url in urls:
             path = downloads_path
-            for filename in os.listdir(path):
-                file_path = os.path.join(path, filename)
+            for filename1 in os.listdir(path):
+                file_path = os.path.join(path, filename1)
                 try:
                     if os.path.isfile(file_path) or os.path.islink(file_path):
                         os.unlink(file_path)
@@ -134,9 +133,13 @@ if __name__ == '__main__':
                         counter -= 1
                         finished = False
             sleep(3)
-            os.rename(os.path.join(path, filename),
-                      os.path.join(path, new_file_name))
-            print("Renamed {} to {}".format(filename, new_file_name))
+            try:
+                os.rename(os.path.join(path, filename),
+                          os.path.join(path, new_file_name))
+                print("Renamed {} to {}".format(filename, new_file_name))
+            except Exception as e:
+                print('Failed to rename ' + filename + ' to ' + new_file_name)
+                print(e)
             crawler.upload_to_ftp(new_file_name)
             if os.path.exists(os.path.join(path, new_file_name)):
                 os.remove(os.path.join(path, new_file_name))
