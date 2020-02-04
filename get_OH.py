@@ -51,6 +51,7 @@ class Crawler(CoreCrawler):
         else:
             name = entity_name
             directory = 'Non-Profit'
+        name = name.title()
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename, year
 
