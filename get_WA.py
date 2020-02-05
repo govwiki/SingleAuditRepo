@@ -60,6 +60,7 @@ class Crawler(CoreCrawler):
         else:
             name = entity_name
             directory = 'Non-Profit'
+        name = name.title()
         filename = '{} {} {}.pdf'.format(self.abbr, name, year)
         return directory, filename, year
 
@@ -122,6 +123,8 @@ if __name__ == '__main__':
                     while retries < 3:
                         try:
                             with open(downloads_path + file_name, 'rb') as fh:
+                                if len(list(PDFPage.get_pages(fh,caching=True,check_extractable=True))) < 10:
+                                    downloaded = False
                                 for page in PDFPage.get_pages(fh,
                                                               caching=True,
                                                               check_extractable=True):
@@ -149,7 +152,8 @@ if __name__ == '__main__':
                     new_file_name = '{}|{}|{}.pdf'.format(text, entity_type.replace('/', '_'), year)
                     os.rename(os.path.join(downloads_path, file_name),
                               os.path.join(downloads_path, new_file_name))
-                    crawler.upload_to_ftp(new_file_name)
+                    if downloaded:
+                        crawler.upload_to_ftp(new_file_name)
                     # ----------------Files deleting
                     if os.path.exists(os.path.join(downloads_path, new_file_name)):
                         os.remove(os.path.join(downloads_path, new_file_name))
