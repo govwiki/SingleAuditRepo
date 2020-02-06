@@ -19,7 +19,7 @@ unique_pdfs = []
 startTime = datetime.now()
 
 # year range
-rangeFrom = '2017'
+rangeFrom = '2019'
 rangeTo = str(datetime.utcnow().year)
 
 # generate year range
@@ -95,6 +95,8 @@ def scrape(driver, download_path):
         get_html = [e.get_attribute('innerHTML') for e in get_html]
         split_results = get_html[0].split('<hr>')
         clean = split_results[1:-1]
+        clean = [x for x in clean if 'No audit report filed for fiscal year' not in x]
+
 
         # integrate this into a function
         doc_types = [
@@ -120,6 +122,8 @@ def scrape(driver, download_path):
         pdfs = ['https://secure.sos.state.or.us/muni/report.do?doc_rsn=' + code for code in get_ids]
         print(pdfs)
         # print("get_ids", len(get_ids), get_ids)
+        if(len(doc_types)!=len(doc_types)!=len(doc_links)!=len(pdf)):
+            print("EXCEPTION!")
         return doc_types, doc_titles, get_year, pdfs
 
     ### create function - process pdf file names ###
@@ -203,7 +207,10 @@ def scrape(driver, download_path):
     # method for downloading files
     def download_file():
         global dump
-        file = requests.get(pdf, stream=True)
+        proxies = {
+            "https": "157.230.244.46:8080",
+        }
+        file = requests.get(pdf, stream=True, proxies=proxies)
         dump = file.raw
 
     # method for saving and changing name of files
@@ -243,9 +250,9 @@ def scrape(driver, download_path):
                 # DOWNLOAD AND RENAME FILES
                 extract_data()
                 for i, pdf in enumerate(pdfs):
-                    download_file()
-                    save_file()
-                    process_files()
+                    # download_file()
+                    # save_file()
+                    # process_files()
                     sleep(5)
                     # test and click next page
                 while True:
@@ -257,9 +264,10 @@ def scrape(driver, download_path):
                         extract_data()
 
                         for i, pdf in enumerate(pdfs):
-                            download_file()
-                            save_file()
-                            process_files()
+                            # download_file()
+                            # save_file()
+                            # process_files()
+                            print(i)
                     except:
                         print("No more pages!")
                         new_search = driver.find_element_by_link_text('New Search')

@@ -141,7 +141,8 @@ if __name__ == '__main__':
             except Exception as e:
                 print('Failed to rename ' + filename + ' to ' + new_file_name)
                 print(e)
-            crawler.upload_to_ftp(new_file_name)
+            if os.path.exists(os.path.join(path, new_file_name)):
+                crawler.upload_to_ftp(new_file_name)
             if os.path.exists(os.path.join(path, new_file_name)):
                 os.remove(os.path.join(path, new_file_name))
             if not os.path.exists(os.path.join(path, new_file_name)):
