@@ -122,8 +122,6 @@ def scrape(driver, download_path):
         pdfs = ['https://secure.sos.state.or.us/muni/report.do?doc_rsn=' + code for code in get_ids]
         print(pdfs)
         # print("get_ids", len(get_ids), get_ids)
-        if(len(doc_types)!=len(doc_types)!=len(doc_links)!=len(pdf)):
-            print("EXCEPTION!")
         return doc_types, doc_titles, get_year, pdfs
 
     ### create function - process pdf file names ###
@@ -250,9 +248,9 @@ def scrape(driver, download_path):
                 # DOWNLOAD AND RENAME FILES
                 extract_data()
                 for i, pdf in enumerate(pdfs):
-                    # download_file()
-                    # save_file()
-                    # process_files()
+                    download_file()
+                    save_file()
+                    process_files()
                     sleep(5)
                     # test and click next page
                 while True:
@@ -264,10 +262,9 @@ def scrape(driver, download_path):
                         extract_data()
 
                         for i, pdf in enumerate(pdfs):
-                            # download_file()
-                            # save_file()
-                            # process_files()
-                            print(i)
+                            download_file()
+                            save_file()
+                            process_files()
                     except:
                         print("No more pages!")
                         new_search = driver.find_element_by_link_text('New Search')
