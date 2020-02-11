@@ -42,9 +42,9 @@ class Crawler(CoreCrawler):
         elif entity_type == 'School District':
             name = entity_name
             directory = 'School District'
-        elif entity_type == 'Community College Districts':
+        elif entity_type == 'Community College District':
             name = entity_name
-            directory = 'Community College Districts'
+            directory = 'Community College District'
         elif entity_type == 'Public Higher Education':
             name = entity_name
             directory = 'Public Higher Education'
