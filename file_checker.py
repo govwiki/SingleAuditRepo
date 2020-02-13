@@ -81,7 +81,7 @@ if __name__ == '__main__':
     file_service = file_storage_connect()
     dirs = file_service.list_directories_and_files(file_storage_share)
     for dir in dirs:
-        if dir not in directories:
+        if dir.name not in directories:
             continue
         print('Directory: ' + dir.name)
         file_check(dir.name)
