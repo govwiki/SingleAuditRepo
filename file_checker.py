@@ -1,6 +1,7 @@
 import csv
 import io
 import os
+from time import sleep
 
 from PyPDF4 import PdfFileReader
 from azure.storage.file import FileService, Directory, File
@@ -69,8 +70,12 @@ def file_check(dir):
                         with open('CorruptedFiles.csv', 'a', newline='') as fi:
                             writer = csv.writer(fi)
                             writer.writerow([file.name])
+            sleep(0.5)
             if os.path.exists(os.path.join(downloads_path + file.name)):
-                os.remove(os.path.join(downloads_path, file.name))
+                try:
+                    os.remove(os.path.join(downloads_path, file.name))
+                except Exception as e:
+                    print(e)
             if not os.path.exists(os.path.join(downloads_path + file.name)):
                 print('Removed {}'.format(downloads_path + file.name))
 
