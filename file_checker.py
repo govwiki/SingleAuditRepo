@@ -16,6 +16,9 @@ file_storage_user = 'cafr'
 file_storage_pwd = 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw=='
 file_storage_share = 'cafr'
 resource_manager = PDFResourceManager()
+directories = ['Community College District', 'General Purpose', 'Non-Profit', 'Public Higher Education',
+               'School District',
+               'Special District']
 
 
 def file_storage_connect():
@@ -78,5 +81,7 @@ if __name__ == '__main__':
     file_service = file_storage_connect()
     dirs = file_service.list_directories_and_files(file_storage_share)
     for dir in dirs:
+        if dir not in directories:
+            continue
         print('Directory: ' + dir.name)
         file_check(dir.name)
