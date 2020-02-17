@@ -43,7 +43,7 @@ def file_check(dir):
         elif isinstance(file, File):
             print('File: ' + file.name)
             downloaded = file_service.get_file_to_path(file_storage_share, dir, file.name,
-                                                       downloads_path + file.name)
+                                                       downloads_path + file.name, timeout=60)
             if downloaded:
                 try:
                     with open(downloads_path + file.name, 'rb') as f:
@@ -67,7 +67,7 @@ def file_check(dir):
                             fake_file_handle.close()
                     except Exception as exx:
                         print(exx)
-                        with open('CorruptedFiles.csv', 'a', newline='') as fi:
+                        with open('corrupted_files/corrupted_files_communtiry_colledge.csv', 'a', newline='') as fi:
                             writer = csv.writer(fi)
                             writer.writerow([file.name])
             sleep(0.5)
