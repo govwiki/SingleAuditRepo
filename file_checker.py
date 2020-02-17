@@ -23,7 +23,7 @@ directories = ['Community College District', 'General Purpose', 'Non-Profit', 'P
 
 
 def file_storage_connect():
-    file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd)
+    file_service = FileService(account_name=file_storage_user, account_key=file_storage_pwd, socket_timeout=15)
     try:
         if file_service.exists(file_storage_share):
             print('Connection to Azure file storage successfully established...')
@@ -43,7 +43,7 @@ def file_check(dir):
         elif isinstance(file, File):
             print('File: ' + file.name)
             downloaded = file_service.get_file_to_path(file_storage_share, dir, file.name,
-                                                       downloads_path + file.name, timeout=60)
+                                                       downloads_path + file.name, timeout=5)
             if downloaded:
                 try:
                     with open(downloads_path + file.name, 'rb') as f:
