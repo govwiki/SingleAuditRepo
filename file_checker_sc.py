@@ -17,8 +17,8 @@ file_storage_user = 'cafr'
 file_storage_pwd = 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw=='
 file_storage_share = 'cafr'
 resource_manager = PDFResourceManager()
-folders = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019']
-directories = ['General Purpose']
+folders = ['2015', '2016', '2017', '2018', '2019']
+directories = ['School District']
 
 
 def file_storage_connect():
@@ -68,7 +68,7 @@ def file_check(dir):
                             fake_file_handle.close()
                     except Exception as exx:
                         print(exx)
-                        with open('corrupted_files/corrupted_files_general_purpose.csv', 'a', newline='') as fi:
+                        with open('corrupted_files/corrupted_files_school_district.csv', 'a', newline='') as fi:
                             writer = csv.writer(fi)
                             writer.writerow([file.name])
             if os.path.exists(os.path.join(downloads_path + file.name)):

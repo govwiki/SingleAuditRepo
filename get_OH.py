@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from time import sleep
 
-from utils import Crawler as CoreCrawler
+from utils2 import Crawler as CoreCrawler
 
 schools = ['STEM School District', 'School', 'Community School District']
 colleges = ['Universities, Colleges, Tech Schools']

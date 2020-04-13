@@ -1,7 +1,7 @@
 set -x
 set -v
 #get current date
-TODAY=`date +%Y`
+TODAY=`date +%Y -d "1 year ago"`
 
 #change working folder
 cd /home/sibers/python_scripts/SingleAuditRepo

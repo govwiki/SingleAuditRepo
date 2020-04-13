@@ -1,8 +1,7 @@
-set -x
-set -v
-#define dates
-YESTERDAY=`date +%Y -d "1 year ago"`
-TODAY=`date +%Y`
+#get current date
+TODAY=`date +%m/%d/%Y`
+#TODAY="04/11/2019"
+YESTERDAY="05/23/2019"
 
 #change working folder
 cd /home/sibers/python_scripts/SingleAuditRepo
@@ -13,11 +12,9 @@ source ./demoenv/bin/activate
 echo virtualenv activated
 
 # run the script
-echo running get_FL.py $YESTERDAY $TODAY
-python get_FL.py $YESTERDAY $TODAY
+echo running get_FAC_SA.py $YESTERDAY $TODAY
+python get_FAC_SA.py $YESTERDAY $TODAY
 
 #deactivate virtualenv
 deactivate
 echo virtualenv deactivated
-set +x
-set +v

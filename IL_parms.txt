@@ -7,8 +7,8 @@
 
     "comment1_directories"         : "make sure that all directories are previosly created",
     "comment2_dir_in"              : "dir_in is place where script resides, also Illinois",
-    "dir_in"                       : "",
-    "dir_pdfs"                     : "",
+    "dir_in"                       : "/home/sibers/python_scripts/SingleAuditRepo/",
+    "dir_pdfs"                     : "/tmp/downloads/IL/",
 
     "illinois_enttities_comment"   : "make sure that file with entities is placed in dir_in directory",
     "illinois_entities_xlsx_file"  : "Illinois Entities.xlsx",

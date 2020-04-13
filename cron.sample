@@ -1,0 +1,41 @@
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+FL_CONSOLE=/var/www/html/file-library/bin/console
+SHELL=/bin/bash
+
+16 15 19 3 * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/file_checker_gp.sh >> /home/sibers/out_f.txt
+0 0 5 3 * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/file_checker_np.sh >> /home/sibers/out_np.txt
+5 0 5 3 * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/file_checker_sd.sh >> /home/sibers/out_sd.txt
+7 0 5 3 * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/file_checker_sc.sh >> /home/sibers/out_sc.txt
+5 1 1 * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_WA.sh >> /home/sibers/out_wa.txt
+0 1 1 * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_OR.sh >> /home/sibers/out_or.txt
+5 10 17 * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_OH.sh >> /home/sibers/out_oh.txt
+0 3 1 * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_NC.sh >> /home/sibers/out_nc.txt
+0 4 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_FAC_auto.sh  >> /home/sibers/out.txt
+0 5 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_CT.sh  >> /home/sibers/out_ct.txt
+0 6 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_VA.sh  >> /home/sibers/out_va.txt
+0 7 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_IL.sh  >> /home/sibers/out_il.txt
+0 8 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_FL.sh  >> /home/sibers/out_fl.txt
+0 8 * * * TZ="America/Los_Angeles" bash -x -v /home/sibers/python_scripts/SingleAuditRepo/get_MI.sh  >> /home/sibers/out_mi.txt
+0 6 * * 6 $FL_CONSOLE document:index:update >> /var/www/html/file-library/cron-document-index-update.log 2>&1
+0 6 * * 6 find /var/www/html/file-library/*.log -mtime +7 -exec rm -f {} \; 

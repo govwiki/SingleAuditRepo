@@ -1,4 +1,6 @@
 #change working folder
+set -x
+set -v
 cd /home/sibers/python_scripts/SingleAuditRepo
 echo changed workdir
 
@@ -13,3 +15,5 @@ python get_OR.py
 #deactivate virtualenv
 deactivate
 echo virtualenv deactivated
+set +x
+set +v

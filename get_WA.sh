@@ -12,8 +12,8 @@ source ./demoenv/bin/activate
 echo virtualenv activated
 
 # run the script
-echo running get_WA.py --year $TODAY
-python get_WA.py --year $TODAY
+echo running get_WA.py $YESTERDAY $TODAY
+python get_WA.py $YESTERDAY $TODAY
 
 #deactivate virtualenv
 deactivate

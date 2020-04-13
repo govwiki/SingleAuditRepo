@@ -19,7 +19,7 @@ jdcal==1.4.1
 mysql-connector-python==8.0.11
 openpyxl==2.5.3
 pdfkit==0.6.1
-pdfminer==20191125
+pdfminer==20191016
 pdfminer3==2018.12.3.0
 Pillow==5.1.0
 protobuf==3.11.1
@@ -40,3 +40,4 @@ sortedcontainers==2.1.0
 urllib3==1.22
 webdriver-manager==2.3.0
 wget==3.2
+

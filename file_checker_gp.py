@@ -17,7 +17,7 @@ file_storage_user = 'cafr'
 file_storage_pwd = 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw=='
 file_storage_share = 'cafr'
 resource_manager = PDFResourceManager()
-folders = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019']
+folders = ['2014', '2015', '2016', '2017', '2018', '2019']
 directories = ['General Purpose']
 
 

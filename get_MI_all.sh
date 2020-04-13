@@ -1,7 +1,4 @@
-set -x
-set -v
-#define dates
-YESTERDAY=`date +%Y -d "1 year ago"`
+#get current date
 TODAY=`date +%Y`
 
 #change working folder
@@ -13,11 +10,9 @@ source ./demoenv/bin/activate
 echo virtualenv activated
 
 # run the script
-echo running get_FL.py $YESTERDAY $TODAY
-python get_FL.py $YESTERDAY $TODAY
+echo running get_MI.py
+python get_MI.py
 
 #deactivate virtualenv
 deactivate
 echo virtualenv deactivated
-set +x
-set +v

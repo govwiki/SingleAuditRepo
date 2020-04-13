@@ -19,7 +19,7 @@ unique_pdfs = []
 startTime = datetime.now()
 
 # year range
-rangeFrom = '2017'
+rangeFrom = str(datetime.utcnow().year - 3)
 rangeTo = str(datetime.utcnow().year)
 
 # generate year range
