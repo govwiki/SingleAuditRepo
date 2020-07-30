@@ -14,8 +14,8 @@ INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'usemarionette', '0', 'integer 0 will use default firefox, 1 will use geckodriver if properly installed');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'todownload', '1', 'in case for 0, it will process zip files stored in dir_downloads');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'sleeptime', '30', 'integer, this will be used while donwloading files (in cycles) also giving time for os.rename to be executed');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_server', 'https://cafr.file.core.windows.net', 'File Storage URL');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_username', 'cafr', 'File Storage username');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_share', 'cafr', 'File Storage share name');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_directory_prefix', 'test_fac', 'File Storage base folder for uploads (leave blank to upload to general storage)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_server', '', 'File Storage URL');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_username', '', 'File Storage username');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_password', '', 'File Storage password');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_share', '', 'File Storage share name');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('fac', 'fs_directory_prefix', '', 'File Storage base folder for uploads (leave blank to upload to general storage)');

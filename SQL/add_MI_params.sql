@@ -2,11 +2,11 @@ INSERT INTO script_mapping (name,executable,param_categories) VALUES ('get_MI.py
 
 -- general
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'headless_mode', 'True', 'for invisible (True) or visible (False) firefox');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_server', 'https://cafr.file.core.windows.net', 'File Storage URL');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_username', 'cafr', 'File Storage username');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_share', 'cafr', 'File Storage share name');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_directory_prefix', 'Unclassified/test_mi', 'File Storage base folder for uploads (leave blank to upload to general storage)');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_server', '', 'File Storage URL');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_username', '', 'File Storage username');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_password', '', 'File Storage password');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_share', '', 'File Storage share name');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'fs_directory_prefix', '', 'File Storage base folder for uploads (leave blank to upload to general storage)');
 
 -- michigan
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('michigan', 'url', 'https://treas-secure.state.mi.us/lafdocsearch/TL41W76.aspx', 'target url');

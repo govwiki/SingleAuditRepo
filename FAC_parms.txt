@@ -1,5 +1,5 @@
 {
-    
+
     "comment1_operating_system"  : "please enter one of the following keywords - windows, mac or linux",
     "operating_system"      : "linux",
     "path_to_chromedriver"  : "chromedriver",
@@ -7,10 +7,10 @@
     "url"                   : "https://harvester.census.gov/facdissem/SearchA133.aspx",
     "comment_headless"      : "integer headlessMode can be 1 or 0, for invisible or visible firefox unquoted",
     "headlessMode"          : 0,
-    
+
     "rangefrom"             : "05/18/2018",
     "rangeto"               : "05/20/2018",
-    
+
     "comment1_directories"  : "make sure that all directories are previosly created",
     "comment2_directories"  : "example for linux and macos /home/someuser/somedirectory/",
     "comment3_directories"  : "example for windows D:\\data\\somedirectory\\",
@@ -18,33 +18,33 @@
     "dir_downloads"         : "D:\\tmp\\fac\\Downloads\\",
     "dir_pdfs"              : "D:\\tmp\\fac\\PDFS\\",
     "dir_upload"            : "D:\\tmp\\fac\\upload\\",
-    
+
     "usemarionette_comment" : "integer 0 will use default firefox, 1 will use geckodriver if properly installed",
     "usemarionette"         : 0,
-    
+
     "todownload_comment1"   : "can be integer 0 to skip download or 1 to process download in get_FAC.py",
     "todownload_comment2"   : "in case for 0, it will process zip files stored in dir_downloads",
     "todownload"            : 1,
-    
+
     "comment_xlsx_short"    : "place file for shortening names in dir_in directory",
     "fileshortnames"        : "SingleAuditees.xlsx",
     "sheetShortName"        : "Entity List",
-    
+
     "comment1_sleeptime"    : "integer, this will be used while donwloading files (in cycles)",
     "comment2_sleeptime"    : "also giving time for os.rename to be executed integer unquoted",
 
     "sleeptime"             : 30,
-    
-    "server"                : "ftp.govwiki.info",
+
+    "server"                : "",
     "port_comment"          : "port in next line should be integer value, not string, default is 21",
-    "port"                  : 21,
+    "port"                  : ,
     "username_comment"      : "example: someuser@govwiki.info",
-    "username"              : "staging@govwiki.info",
+    "username"              : "",
     "password"              : "",
-    
-    "fs_server"             : "https://cafr.file.core.windows.net",
-    "fs_username"           : "cafr",
-    "fs_password"           : "OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==",
-    "fs_share"              : "cafr",
-    "fs_directory_prefix"   : "test_fac_2"
+
+    "fs_server"             : "",
+    "fs_username"           : "",
+    "fs_password"           : "",
+    "fs_share"              : "",
+    "fs_directory_prefix"   : ""
 }

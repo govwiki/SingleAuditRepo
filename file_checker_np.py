@@ -13,9 +13,9 @@ from pdfminer3.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer3.pdfpage import PDFPage
 
 downloads_path = '/tmp/downloads/FromAzure/'
-file_storage_user = 'cafr'
-file_storage_pwd = 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw=='
-file_storage_share = 'cafr'
+file_storage_user = ''
+file_storage_pwd = ''
+file_storage_share = ''
 resource_manager = PDFResourceManager()
 folders = ['2015', '2016', '2017', '2018', '2019']
 directories = ['Non-Profit']

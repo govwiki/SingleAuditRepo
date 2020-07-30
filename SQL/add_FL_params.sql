@@ -2,10 +2,10 @@ INSERT INTO script_mapping (name,executable,param_categories) VALUES ('get_FL.py
 
 -- general
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'headless_mode', 'True', 'for invisible (True) or visible (False) firefox');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_server', 'https://cafr.file.core.windows.net', 'File Storage URL');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_username', 'cafr', 'File Storage username');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_password', 'OsA9Q0AHx1dNG2CZEyRxRyUL3XL7DMpChsNBYW8yzmSJOXIZNL2gDtELb/q72PZ4wODl5WITaCxqL6iI+tv0pw==', 'File Storage password');
-INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_share', 'cafr', 'File Storage share name');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_server', '', 'File Storage URL');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_username', '', 'File Storage username');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_password', '', 'File Storage password');
+INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_share', '', 'File Storage share name');
 INSERT INTO script_parameters (category, `key`, value, description) VALUES ('florida', 'fs_directory_prefix', '', 'File Storage base folder for uploads (leave blank to upload to general storage)');
 
 -- florida
